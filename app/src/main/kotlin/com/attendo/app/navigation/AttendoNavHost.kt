@@ -16,6 +16,10 @@ import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.feature.home.HomeRoute
 import com.attendo.feature.onboarding.OnboardingRoute
 import com.attendo.feature.stats.StatsRoute
+import com.attendo.feature.settings.SettingsRoute
+import com.attendo.app.BuildConfig
+import com.attendo.app.CsvExporter
+import androidx.compose.ui.platform.LocalContext
 import com.attendo.feature.subjects.AddSubjectRoute
 import com.attendo.feature.subjects.SubjectDetailRoute
 
@@ -63,7 +67,7 @@ fun AttendoNavHost(container: AppContainer) {
                 onAddSubject = { navController.navigate(Routes.ADD_SUBJECT) },
                 onOpenSubject = { id -> navController.navigate(Routes.subjectDetail(id)) },
                 onOpenStats = { navController.navigate(Routes.STATS) },
-                onOpenSettings = { /* feature/settings */ },
+                onOpenSettings = { navController.navigate(Routes.SETTINGS) },
             )
         }
         composable(Routes.ADD_SUBJECT) {
@@ -71,6 +75,15 @@ fun AttendoNavHost(container: AppContainer) {
         }
         composable(Routes.STATS) {
             StatsRoute(subjects = data.subjects, attendance = data.attendance, onClose = { navController.popBackStack() })
+        }
+        composable(Routes.SETTINGS) {
+            val context = LocalContext.current
+            SettingsRoute(
+                settings = data.settings,
+                appVersion = BuildConfig.VERSION_NAME,
+                onExportCsv = { CsvExporter.share(context, data) },
+                onClose = { navController.popBackStack() },
+            )
         }
         composable(Routes.SUBJECT_DETAIL) { entry ->
             SubjectDetailRoute(
