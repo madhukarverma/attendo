@@ -5,6 +5,8 @@ data class CatalogSubject(
     val code: String,
     val name: String,
     val isLab: Boolean = false,
+    /** Short everyday name, e.g. "DSA". */
+    val short: String = "",
 )
 
 /**
@@ -13,18 +15,36 @@ data class CatalogSubject(
  */
 object CourseCatalog {
     val CURRENT_SEMESTER: List<CatalogSubject> = listOf(
-        CatalogSubject("CA711", "Problem Solving and Programming"),
-        CatalogSubject("CA713", "Mathematical Foundations of Computer Applications"),
-        CatalogSubject("CA715", "Digital Logic and Computer Organization"),
-        CatalogSubject("CA717", "Data Structures and Applications"),
-        CatalogSubject("CA719", "Operating Systems"),
-        CatalogSubject("CA701", "Problem Solving Lab using Python", isLab = true),
-        CatalogSubject("CA703", "Data Structures Lab using C", isLab = true),
+        CatalogSubject("CA711", "Problem Solving and Programming", short = "Python"),
+        CatalogSubject("CA713", "Mathematical Foundations of Computer Applications", short = "Maths"),
+        CatalogSubject("CA715", "Digital Logic and Computer Organization", short = "DLCO"),
+        CatalogSubject("CA717", "Data Structures and Applications", short = "DSA"),
+        CatalogSubject("CA719", "Operating Systems", short = "OS"),
+        CatalogSubject("CA701", "Problem Solving Lab using Python", isLab = true, short = "Python Lab"),
+        CatalogSubject("CA703", "Data Structures Lab using C", isLab = true, short = "DS Lab"),
     )
+
+    private val byCode = CURRENT_SEMESTER.associateBy { it.code.uppercase() }
+    private val stopWords = setOf("and", "of", "using", "for", "the", "in", "to", "with")
 
     /** Catalog entries whose code is not already used by an existing subject. */
     fun missing(existing: List<Subject>, catalog: List<CatalogSubject> = CURRENT_SEMESTER): List<CatalogSubject> {
         val codes = existing.mapTo(HashSet()) { it.code.trim().uppercase() }
         return catalog.filterNot { it.code.uppercase() in codes }
     }
+
+    /** Short name: the catalog's abbreviation, otherwise the initials of the significant words. */
+    fun shortName(subject: Subject): String {
+        byCode[subject.code.trim().uppercase()]?.short?.takeIf { it.isNotBlank() }?.let { return it }
+        val words = subject.name.split(" ", "-").filter { it.isNotBlank() }
+        if (words.size == 1) return words.first().take(8)
+        val lab = isLab(subject)
+        val initials = words.filterNot { it.lowercase() in stopWords || it.equals("lab", true) }
+            .joinToString("") { it.first().uppercase() }
+            .take(5)
+        return if (lab) "$initials Lab" else initials
+    }
+
+    fun isLab(subject: Subject): Boolean =
+        byCode[subject.code.trim().uppercase()]?.isLab ?: subject.name.split(" ").any { it.equals("lab", true) }
 }

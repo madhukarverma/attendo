@@ -53,7 +53,9 @@ import com.attendo.core.designsystem.motion.PressStyle
 import com.attendo.core.designsystem.motion.iosPress
 import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.core.model.AttendanceStatus
-import com.attendo.core.model.Subject
+import com.attendo.core.model.CourseCatalog
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.text.style.TextAlign
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -69,6 +71,7 @@ internal fun SwipeDeck(
     canUndo: Boolean,
     onSwipe: (subjectId: String, status: AttendanceStatus) -> Unit,
     onUndo: () -> Unit,
+    colorFor: (subjectId: String) -> Color,
     modifier: Modifier = Modifier,
 ) {
     val haptics = LocalHapticFeedback.current
@@ -112,6 +115,7 @@ internal fun SwipeDeck(
                     cards.getOrNull(1)?.let { next ->
                         SubjectProfileCard(
                             next,
+                            colorFor(next.summary.subject.id),
                             Modifier.graphicsLayer {
                                 val s = 0.92f + 0.08f * progress
                                 scaleX = s
@@ -122,6 +126,7 @@ internal fun SwipeDeck(
                     }
                     SubjectProfileCard(
                         top,
+                        colorFor(top.summary.subject.id),
                         Modifier
                             .graphicsLayer {
                                 translationX = x.value
@@ -193,39 +198,46 @@ internal fun SwipeDeck(
 @Composable
 private fun SubjectProfileCard(
     item: SubjectDayItem,
+    color: Color,
     modifier: Modifier = Modifier,
     stamps: @Composable androidx.compose.foundation.layout.BoxScope.() -> Unit = {},
 ) {
     val subject = item.summary.subject
     val summary = item.summary
+    val onCard = contentColorFor(color)
     Box(
         modifier
             .fillMaxWidth(0.88f)
             .height(410.dp)
             .shadow(14.dp, RoundedCornerShape(28.dp))
             .clip(RoundedCornerShape(28.dp))
-            .background(AttendoColors.Ink),
+            .background(color),
     ) {
-        SubjectPosterArt(subject, Modifier.fillMaxSize())
-        // Bottom scrim for legible text, like a profile photo caption.
-        Box(
-            Modifier
-                .fillMaxSize()
-                .background(Brush.verticalGradient(0.45f to Color.Transparent, 1f to Color(0xE6151515))),
+        // Big abbreviation as the card's "face".
+        Text(
+            CourseCatalog.shortName(subject),
+            fontSize = 64.sp,
+            lineHeight = 66.sp,
+            fontWeight = FontWeight.Black,
+            color = onCard,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.align(Alignment.Center).padding(horizontal = 20.dp).padding(bottom = 90.dp),
         )
         Column(Modifier.align(Alignment.BottomStart).padding(22.dp)) {
             Text(
                 subject.name,
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = AttendoColors.Cream,
+                color = onCard,
             )
-            val isLab = subject.name.contains("lab", ignoreCase = true)
             Text(
-                listOfNotNull(subject.code.ifBlank { null }, if (isLab) "Lab" else null, "Target ${subject.targetPercent}%")
-                    .joinToString("  ·  "),
+                listOfNotNull(
+                    subject.code.ifBlank { null },
+                    if (CourseCatalog.isLab(subject)) "Lab" else null,
+                    "Target ${subject.targetPercent}%",
+                ).joinToString("  ·  "),
                 style = MaterialTheme.typography.labelLarge,
-                color = AttendoColors.Green,
+                color = onCard.copy(alpha = 0.8f),
             )
             Spacer(Modifier.height(6.dp))
             Text(
@@ -237,51 +249,26 @@ private fun SubjectProfileCard(
                         "${summary.percent.roundToInt()}% · ${summary.present}/${summary.held} attended · needs ${summary.classesNeeded()} in a row"
                 },
                 style = MaterialTheme.typography.bodyMedium,
-                color = AttendoColors.Cream.copy(alpha = 0.85f),
+                color = onCard.copy(alpha = 0.85f),
             )
         }
         stamps()
     }
 }
 
-/** Generated flat-polygon poster used as the card's "profile photo" (unique per subject code). */
-@Composable
-private fun SubjectPosterArt(subject: Subject, modifier: Modifier) {
-    val palettes = listOf(
-        listOf(Color(0xFFF2542D), Color(0xFFF28AC9), Color(0xFF2E9C9A), Color(0xFFF2C84B)),
-        listOf(Color(0xFF2B5CE6), Color(0xFFE63946), Color(0xFFF1FAEE), Color(0xFFFFB703)),
-        listOf(Color(0xFF50A65C), Color(0xFF232323), Color(0xFFF8FAED), Color(0xFFE0399A)),
-        listOf(Color(0xFFE76F51), Color(0xFF264653), Color(0xFFE9C46A), Color(0xFF2A9D8F)),
-        listOf(Color(0xFF7B2CBF), Color(0xFFFF9E00), Color(0xFF3A86FF), Color(0xFFFFD6E0)),
-    )
-    val seed = (subject.code.ifBlank { subject.name }).hashCode()
-    val p = palettes[Math.floorMod(seed, palettes.size)]
-    val initials = subject.name.split(" ").filter { it.isNotBlank() && it.first().isUpperCase() }
-        .take(2).joinToString("") { it.first().toString() }.ifBlank { subject.name.take(2).uppercase() }
+/** Ink text on light cards, cream text on dark ones. */
+private fun contentColorFor(background: Color): Color =
+    if (background.luminance() > 0.45f) AttendoColors.Ink else AttendoColors.Cream
 
-    Box(modifier) {
-        Canvas(Modifier.fillMaxSize()) {
-            val w = size.width
-            val h = size.height
-            val r = java.util.Random(seed.toLong())
-            drawRect(p[0])
-            drawRect(p[1], Offset(0f, 0f), Size(w * (0.3f + r.nextFloat() * 0.25f), h * 0.32f))
-            drawRect(p[2], Offset(w * (0.7f + r.nextFloat() * 0.1f), 0f), Size(w * 0.3f, h * 0.6f))
-            drawRect(p[3], Offset(0f, h * 0.62f), Size(w * 0.35f, h * 0.2f))
-            repeat(5) { i -> // thin poster stripes
-                drawRect(p[(i + 1) % 4].copy(alpha = 0.8f), Offset(w * (0.05f + i * 0.045f), h * 0.36f), Size(w * 0.02f, h * 0.2f))
-            }
-            drawCircle(AttendoColors.Cream, radius = w * 0.3f, center = Offset(w * 0.55f, h * 0.36f))
-        }
-        Text(
-            initials,
-            fontSize = 92.sp,
-            fontWeight = FontWeight.Black,
-            color = AttendoColors.Ink,
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = 92.dp).graphicsLayer { translationX = 18.dp.toPx() },
-        )
-    }
-}
+/** Ten clearly different colours; shuffled once with a fixed seed so they look random but stay stable. */
+private val CardPalette: List<Color> = listOf(
+    Color(0xFFF2542D), Color(0xFF2B5CE6), Color(0xFF50A65C), Color(0xFFE0399A), Color(0xFFF2C84B),
+    Color(0xFF7B2CBF), Color(0xFF2A9D8F), Color(0xFF00B4D8), Color(0xFF8C5E3C), Color(0xFF3D405B),
+).shuffled(kotlin.random.Random(2026))
+
+/** Colour for the subject at [index] in the subject list: distinct for the first ten subjects. */
+internal fun cardColor(index: Int): Color = CardPalette[Math.floorMod(index, CardPalette.size)]
+
 
 @Composable
 private fun androidx.compose.foundation.layout.BoxScope.Stamp(
