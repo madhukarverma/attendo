@@ -175,7 +175,7 @@ fun TodoScreen(
             .background(AttendoColors.Cream)
             .safeDrawingPadding(),
     ) {
-        CollapsingTopBar(title = "To-do", collapseFraction = { collapse }, onBack = onBack, backLabel = "Home")
+        CollapsingTopBar(title = "To-do", collapseFraction = { collapse }, onBack = onBack, backLabel = "Back")
         BounceContainer(Modifier.fillMaxSize()) {
             LazyColumn(
                 Modifier.fillMaxSize().padding(horizontal = 20.dp),

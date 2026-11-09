@@ -1,5 +1,6 @@
 package com.attendo.feature.pomodoro
 
+import com.attendo.core.designsystem.component.TabBarClearance
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
@@ -88,7 +89,7 @@ fun PomodoroRoute(
     pomodoro: PomodoroRepository,
     subjects: SubjectRepository,
     onExportCsv: () -> Unit,
-    onClose: () -> Unit,
+    onClose: (() -> Unit)?,
 ) {
     val vm: PomodoroViewModel = viewModel { PomodoroViewModel(timer, pomodoro, subjects) }
     val state by vm.timerState.collectAsStateWithLifecycle()
@@ -130,7 +131,7 @@ fun PomodoroScreen(
     onSelectSubject: (String?) -> Unit,
     onFocusMinutes: (Int) -> Unit,
     onExportCsv: () -> Unit,
-    onClose: () -> Unit,
+    onClose: (() -> Unit)?,
 ) {
     var tab by rememberSaveable { mutableIntStateOf(0) }
     val scroll = rememberScrollState()
@@ -167,7 +168,7 @@ fun PomodoroScreen(
                         StatsTab(stats, onExportCsv)
                     }
                 }
-                Spacer(Modifier.height(32.dp))
+                Spacer(Modifier.height(TabBarClearance))
             }
         }
     }

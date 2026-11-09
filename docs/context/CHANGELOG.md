@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-11-09 — v0.19.0 Home summary + tab bar
+- New `:feature:dashboard` = Home tab and start screen: greeting with the nickname, attendance card
+  (overall %, subjects below target, today's marking, lectures left, Penta's mood), Pomodoro card
+  (live countdown with start/pause, or today's focus and streak), today's to-dos (tick off in
+  place, overdue count), upcoming reminders, upcoming exams from the academic calendar. Settings
+  moved to the gear on Home.
+- One app-wide tab bar (`AttendoTabBar`): Home · Classes · To-do · Timer · Stats. The selected tab
+  is the green pill with its label; the bar hides on pushed screens. Standard bottom-nav back stack
+  (one copy of each tab, state saved, Back returns to Home). Tab switches: instant in iOS mode,
+  cross-fade in Smooth, fade-through in Android, none in None.
+- `:feature:home` renamed to `:feature:attendance` (AttendanceRoute/Screen/ViewModel); its header
+  reads "Classes" and the old pill bar component was removed. Pomodoro, Stats and To-do no longer
+  show a back button (they are tabs). Picking a day on the calendar from Home opens Classes on it.
+
 ## 2026-11-09 — v0.18.0 to-do list and reminders
 - New `:feature:todo` module: to-dos belong to a day; adding a time makes it a reminder. Sections
   Overdue / Today / Upcoming / Done (clearable). Stored in `todos.csv`

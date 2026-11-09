@@ -152,7 +152,7 @@ fun SubjectDetailScreen(
             .background(AttendoColors.Cream)
             .safeDrawingPadding(),
     ) {
-    CollapsingTopBar(title = subject.name, collapseFraction = { collapse }, onBack = onClose, backLabel = "Home")
+    CollapsingTopBar(title = subject.name, collapseFraction = { collapse }, onBack = onClose, backLabel = "Back")
     BounceContainer(Modifier.fillMaxSize()) {
     Column(
         Modifier

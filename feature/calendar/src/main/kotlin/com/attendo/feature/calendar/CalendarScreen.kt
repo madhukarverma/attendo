@@ -77,7 +77,7 @@ private fun DayKind.label(): String = when (this) {
 /**
  * The academic calendar as month cards: colour-coded days (holidays, weekends, assessments, events,
  * deadlines), a semester summary, what's coming up next, and every entry listed per month.
- * Tapping a day selects it on Home.
+ * Tapping a day opens it on the Classes tab.
  */
 @Composable
 fun CalendarScreen(
@@ -105,7 +105,7 @@ fun CalendarScreen(
             .background(AttendoColors.Cream)
             .safeDrawingPadding(),
     ) {
-        CollapsingTopBar(title = "Academic Calendar", collapseFraction = { collapse }, onBack = onClose, backLabel = "Home")
+        CollapsingTopBar(title = "Academic Calendar", collapseFraction = { collapse }, onBack = onClose, backLabel = "Back")
         BounceContainer(Modifier.fillMaxSize()) {
             LazyColumn(
                 Modifier.fillMaxSize().padding(horizontal = 20.dp),

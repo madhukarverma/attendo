@@ -1,4 +1,4 @@
-package com.attendo.feature.home
+package com.attendo.feature.attendance
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,7 +26,7 @@ data class SubjectDayItem(
     val statusOnDay: AttendanceStatus?,
 )
 
-data class HomeUiState(
+data class AttendanceUiState(
     val userName: String = "",
     val today: LocalDate = LocalDate.now(),
     val selectedDate: LocalDate = LocalDate.now(),
@@ -63,7 +63,7 @@ data class HomeUiState(
     val subjectsBelowTarget: Int get() = items.count { !it.summary.isOnTrack }
 }
 
-class HomeViewModel(
+class AttendanceViewModel(
     private val settings: SettingsRepository,
     private val subjects: SubjectRepository,
     private val attendance: AttendanceRepository,
@@ -97,7 +97,7 @@ class HomeViewModel(
 
     private val selectedDate = MutableStateFlow(LocalDate.now())
 
-    val uiState: StateFlow<HomeUiState> = combine(
+    val uiState: StateFlow<AttendanceUiState> = combine(
         settings.settings.filterNotNull(),
         subjects.subjects,
         attendance.records,
@@ -105,7 +105,7 @@ class HomeViewModel(
         swipeHistory,
     ) { s, subjectList, records, date, history ->
         val onDay = records.filter { it.date == date }.associateBy { it.subjectId }
-        HomeUiState(
+        AttendanceUiState(
             userName = s.nickname,
             selectedDate = date,
             items = subjectList.map { subject ->
@@ -116,7 +116,7 @@ class HomeViewModel(
             canUndoSwipe = history.isNotEmpty(),
             calendar = calendar,
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AttendanceUiState())
 
     fun selectDate(date: LocalDate) {
         selectedDate.value = date

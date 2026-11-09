@@ -21,7 +21,8 @@ designs (dark onboarding, cream home, green geometric mascots, handwritten speec
 - Multi-module: `:app`, `:core:model`, `:core:data`, `:core:designsystem`, `:feature:*`.
 
 ## Constraints
-- **All app data stored as CSV** in `filesDir/data/` (`settings.csv`, `subjects.csv`, `attendance.csv`).
+- **All app data stored as CSV** in `filesDir/data/` (`settings.csv`, `subjects.csv`, `attendance.csv`,
+  `pomodoro.csv`, `todos.csv`).
 - Feature modules must not depend on each other; they talk to `:core:data` interfaces only.
 - Keep features minimal; refinement comes later.
 
