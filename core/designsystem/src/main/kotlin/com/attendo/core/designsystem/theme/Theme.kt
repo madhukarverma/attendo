@@ -1,12 +1,14 @@
 package com.attendo.core.designsystem.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -199,23 +201,30 @@ private val AttendoShapes = Shapes(
 @Composable
 fun AttendoTheme(content: @Composable () -> Unit) {
     val p = AttendoColors.palette
-    val scheme = if (p.isDark) {
-        darkColorScheme(
-            primary = p.accent, onPrimary = p.background, secondary = p.text, onSecondary = p.background,
-            background = p.background, onBackground = p.text, surface = p.background, onSurface = p.text,
-            surfaceVariant = p.card, onSurfaceVariant = p.muted, outline = p.cardDeep, error = p.pink,
-        )
-    } else {
-        lightColorScheme(
-            primary = p.accent, onPrimary = p.background, secondary = p.text, onSecondary = p.background,
-            background = p.background, onBackground = p.text, surface = p.background, onSurface = p.text,
-            surfaceVariant = p.card, onSurfaceVariant = p.muted, outline = p.cardDeep, error = p.pink,
-        )
-    }
-    MaterialTheme(
-        colorScheme = scheme,
-        typography = AttendoTypography,
-        shapes = AttendoShapes,
-        content = content,
+    val base = if (p.isDark) darkColorScheme() else lightColorScheme()
+    // Every Material slot comes from the palette, so dialogs, pickers and menus never fall back to
+    // Material's default purple-tinted surfaces.
+    val scheme = base.copy(
+        primary = p.accent, onPrimary = p.background,
+        primaryContainer = p.cardDeep, onPrimaryContainer = p.text,
+        secondary = p.text, onSecondary = p.background,
+        secondaryContainer = p.cardDeep, onSecondaryContainer = p.text,
+        tertiary = p.accent, onTertiary = p.background,
+        tertiaryContainer = p.cardDeep, onTertiaryContainer = p.text,
+        background = p.background, onBackground = p.text,
+        surface = p.background, onSurface = p.text,
+        surfaceVariant = p.card, onSurfaceVariant = p.muted,
+        surfaceTint = Color.Transparent,
+        surfaceBright = p.card, surfaceDim = p.background,
+        surfaceContainerLowest = p.background, surfaceContainerLow = p.card,
+        surfaceContainer = p.card, surfaceContainerHigh = p.card, surfaceContainerHighest = p.cardDeep,
+        inverseSurface = p.hero, inverseOnSurface = p.onHero, inversePrimary = p.accent,
+        outline = p.cardDeep, outlineVariant = p.cardDeep,
+        error = p.pink, onError = p.background,
     )
+    MaterialTheme(colorScheme = scheme, typography = AttendoTypography, shapes = AttendoShapes) {
+        // Material 3 only sets the content colour inside a Surface; without this, every Text and
+        // Icon that doesn't pass a colour falls back to black, which vanished on the dark theme.
+        CompositionLocalProvider(LocalContentColor provides p.text, content = content)
+    }
 }

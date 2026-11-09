@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-09 — v0.15.0 dark theme legibility
+- Text and icons that didn't pass a colour fell back to black (Material 3 only sets
+  `LocalContentColor` inside a Surface), so they vanished on the dark theme. `AttendoTheme` now
+  provides the palette's text colour, and every Material colour slot (dialogs, pickers, menus)
+  comes from the palette.
+- Swipe-card text and the mascot face use fixed colours, since what they sit on doesn't change
+  with the theme.
+
 ## 2026-11-09 — v0.14.0 launch screen, rotation lock, header, Penta
 - Generated launch art removed; launch screen shows "MCA 2026-29", an optional user-picked image
   (Settings › Launch screen, system photo picker) on a background sampled from the image's edges,
