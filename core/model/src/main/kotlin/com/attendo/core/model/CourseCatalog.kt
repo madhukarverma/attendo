@@ -7,6 +7,8 @@ data class CatalogSubject(
     val isLab: Boolean = false,
     /** Short everyday name, e.g. "DSA". */
     val short: String = "",
+    /** Total lecture hours, when known (pre-fills [Subject.lectureHours]). */
+    val lectureHours: Int? = null,
 )
 
 /**

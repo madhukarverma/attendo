@@ -459,6 +459,10 @@ private fun PercentColumn(summary: AttendanceSummary) {
             style = MaterialTheme.typography.labelSmall,
             color = AttendoColors.Muted,
         )
+        // Lectures left in the course, once its lecture hours are set (1 lecture = 1 hour).
+        summary.lecturesLeft?.let { left ->
+            Text("$left left", style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
+        }
     }
 }
 

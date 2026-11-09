@@ -26,13 +26,14 @@ class RepositoryTest {
         val data = AttendoData(dir, TestScope(dispatcher), dispatcher) { 1L }
         advanceUntilIdle()
 
-        val maths = data.subjects.add("Maths", "MA101", 75)
+        val maths = data.subjects.add("Maths", "MA101", 75, lectureHours = 45)
         data.attendance.mark(maths.id, LocalDate.of(2026, 11, 9), AttendanceStatus.PRESENT)
         data.settings.setUserName("Madhukar")
 
         val reloaded = AttendoData(dir, TestScope(dispatcher), dispatcher) { 2L }
         advanceUntilIdle()
         assertEquals(listOf(maths), reloaded.subjects.subjects.first())
+        assertEquals(45, reloaded.subjects.subjects.first().single().lectureHours)
         assertEquals(AttendanceStatus.PRESENT, reloaded.attendance.records.first().single().status)
         assertEquals("Madhukar", reloaded.settings.settings.first()?.userName)
         assertEquals(AnimationMode.IOS, reloaded.settings.settings.first()?.animationMode)

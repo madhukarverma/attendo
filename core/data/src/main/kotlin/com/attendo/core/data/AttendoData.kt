@@ -10,7 +10,7 @@ import java.io.File
  * Entry point of the data layer. All app data lives as plain CSV files in [dir]:
  *
  * - `settings.csv`   key,value
- * - `subjects.csv`   id,name,code,target_percent,created_at
+ * - `subjects.csv`   id,name,code,target_percent,created_at,lecture_hours
  * - `attendance.csv` subject_id,date,status,updated_at
  * - `pomodoro.csv`   id,date,started_at,kind,subject_id,planned_seconds,actual_seconds,completed
  */

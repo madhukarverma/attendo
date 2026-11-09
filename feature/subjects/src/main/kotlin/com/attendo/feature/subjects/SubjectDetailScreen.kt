@@ -1,5 +1,14 @@
 package com.attendo.feature.subjects
 
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.background
 import com.attendo.core.designsystem.motion.BounceContainer
 import com.attendo.core.designsystem.motion.CollapsingTopBar
@@ -84,6 +93,12 @@ class SubjectDetailViewModel(
             )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SubjectDetailUiState())
 
+    /** Sets the course's total lecture hours (1 lecture = 1 hour); `null` clears it. */
+    fun setLectureHours(hours: Int?) {
+        val subject = uiState.value.summary?.subject ?: return
+        viewModelScope.launch { subjects.update(subject.copy(lectureHours = hours?.takeIf { it > 0 })) }
+    }
+
     fun delete(onDeleted: () -> Unit) {
         viewModelScope.launch {
             attendance.deleteForSubject(subjectId)
@@ -104,18 +119,29 @@ fun SubjectDetailRoute(
         SubjectDetailViewModel(subjectId, subjects, attendance)
     }
     val state by vm.uiState.collectAsStateWithLifecycle()
-    SubjectDetailScreen(state = state, onClose = onClose, onDelete = { vm.delete(onClose) })
+    SubjectDetailScreen(
+        state = state,
+        onClose = onClose,
+        onDelete = { vm.delete(onClose) },
+        onSetLectureHours = vm::setLectureHours,
+    )
 }
 
 private val DateFormat = DateTimeFormatter.ofPattern("EEE, d MMM")
 
 @Composable
-fun SubjectDetailScreen(state: SubjectDetailUiState, onClose: () -> Unit, onDelete: () -> Unit) {
+fun SubjectDetailScreen(
+    state: SubjectDetailUiState,
+    onClose: () -> Unit,
+    onDelete: () -> Unit,
+    onSetLectureHours: (Int?) -> Unit = {},
+) {
     val summary = state.summary ?: run {
         Box(Modifier.fillMaxSize().background(AttendoColors.Cream))
         return
     }
     var confirmDelete by remember { mutableStateOf(false) }
+    var editHours by remember { mutableStateOf(false) }
     val subject = summary.subject
 
     val scroll = rememberScrollState()
@@ -172,6 +198,9 @@ fun SubjectDetailScreen(state: SubjectDetailUiState, onClose: () -> Unit, onDele
             },
         )
 
+        Text("Course hours", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 24.dp, bottom = 10.dp))
+        CourseHours(summary, onEdit = { editHours = true })
+
         if (state.history.isNotEmpty()) {
             Text("History", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 24.dp, bottom = 10.dp))
             state.history.take(30).forEach { record ->
@@ -197,6 +226,14 @@ fun SubjectDetailScreen(state: SubjectDetailUiState, onClose: () -> Unit, onDele
     }
     }
 
+    if (editHours) {
+        LectureHoursDialog(
+            current = subject.lectureHours,
+            onDismiss = { editHours = false },
+            onSave = { hours -> editHours = false; onSetLectureHours(hours) },
+        )
+    }
+
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
@@ -218,4 +255,123 @@ private fun TipRow(icon: ImageVector, text: String) {
         Spacer(Modifier.width(14.dp))
         Text(text, style = MaterialTheme.typography.bodyMedium)
     }
+}
+
+/**
+ * Lectures left in the course (1 lecture = 1 hour, so lecture hours = lectures) and what that
+ * means for the target. Prompts for the hours when they aren't set.
+ */
+@Composable
+private fun CourseHours(summary: AttendanceSummary, onEdit: () -> Unit) {
+    val hours = summary.subject.lectureHours
+    val left = summary.lecturesLeft
+    if (hours == null || left == null) {
+        AttendoCard(onClick = onEdit) {
+            Icon(Icons.Filled.DateRange, contentDescription = null, tint = AttendoColors.Ink, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(14.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Set the course's lecture hours", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    "1 lecture = 1 hour. Shows how many lectures are left.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = AttendoColors.Muted,
+                )
+            }
+            Text("Set", color = AttendoColors.Green, style = MaterialTheme.typography.labelLarge)
+        }
+        return
+    }
+    val total = (summary.held + left).coerceAtLeast(1)
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(AttendoColors.CreamCard)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+    ) {
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text("$left", style = MaterialTheme.typography.displayLarge.copy(fontSize = 40.sp, lineHeight = 40.sp))
+            Spacer(Modifier.width(8.dp))
+            Text(
+                if (left == 1) "lecture left" else "lectures left",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 4.dp).weight(1f),
+            )
+            TextButton(onClick = onEdit) { Text("Edit", color = AttendoColors.Green) }
+        }
+        Text(
+            "$hours lecture hours · ${summary.held} held so far",
+            style = MaterialTheme.typography.labelSmall,
+            color = AttendoColors.Muted,
+        )
+        Spacer(Modifier.height(10.dp))
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .clip(CircleShape)
+                .background(AttendoColors.CreamDeep),
+        ) {
+            Box(
+                Modifier
+                    .fillMaxWidth(summary.held.toFloat() / total)
+                    .height(8.dp)
+                    .clip(CircleShape)
+                    .background(AttendoColors.Green),
+            )
+        }
+    }
+    Spacer(Modifier.height(8.dp))
+    val target = summary.subject.targetPercent
+    val skips = summary.courseSkipsLeft() ?: 0
+    TipRow(
+        if (skips >= 0) Icons.Filled.Star else Icons.Filled.Info,
+        when {
+            left == 0 -> "Course finished at ${summary.percent.roundToInt()}%"
+            skips > 0 -> "You can miss $skips of the $left left and still finish at $target%"
+            skips == 0 -> "Attend all $left remaining lectures to finish at $target%"
+            else -> "Even attending all $left left, you'd finish at ${summary.bestFinalPercent()?.roundToInt() ?: 0}%"
+        },
+    )
+}
+
+@Composable
+private fun LectureHoursDialog(current: Int?, onDismiss: () -> Unit, onSave: (Int?) -> Unit) {
+    var text by remember { mutableStateOf(current?.toString().orEmpty()) }
+    val value = text.toIntOrNull()?.takeIf { it in 1..999 }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Lecture hours") },
+        text = {
+            Column {
+                Text(
+                    "Total lecture hours for this course. One lecture is one hour.",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Spacer(Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { new -> text = new.filter(Char::isDigit).take(3) },
+                    singleLine = true,
+                    placeholder = { Text("e.g. 45") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = AttendoColors.Green,
+                        cursorColor = AttendoColors.Green,
+                    ),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onSave(value) }, enabled = value != null) { Text("Save", color = AttendoColors.Green) }
+        },
+        dismissButton = {
+            Row {
+                if (current != null) TextButton(onClick = { onSave(null) }) { Text("Clear", color = AttendoColors.Pink) }
+                TextButton(onClick = onDismiss) { Text("Cancel") }
+            }
+        },
+        containerColor = AttendoColors.Cream,
+    )
 }

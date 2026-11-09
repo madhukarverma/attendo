@@ -25,6 +25,33 @@ data class AttendanceSummary(
         return ceil((t * held - present) / (1 - t) - EPSILON).toInt().coerceAtLeast(0)
     }
 
+    /**
+     * Lectures still to come in the course (1 lecture = 1 hour): lecture hours minus classes held.
+     * Cancelled classes don't count as held. `null` when the course hours aren't set.
+     */
+    val lecturesLeft: Int?
+        get() = subject.lectureHours?.let { (it - held).coerceAtLeast(0) }
+
+    /**
+     * Course outlook once the total is known: how many of the remaining lectures can still be
+     * missed while finishing the course at or above the target. Negative means the target can no
+     * longer be reached even by attending everything; `null` when the course hours aren't set.
+     */
+    fun courseSkipsLeft(): Int? {
+        val left = lecturesLeft ?: return null
+        val total = held + left
+        val mustAttendInTotal = ceil(subject.targetPercent / 100.0 * total - EPSILON).toInt()
+        val stillToAttend = (mustAttendInTotal - present).coerceAtLeast(0)
+        return left - stillToAttend
+    }
+
+    /** Final percentage if every remaining lecture is attended; `null` when the course hours aren't set. */
+    fun bestFinalPercent(): Double? {
+        val left = lecturesLeft ?: return null
+        val total = held + left
+        return if (total == 0) null else (present + left) * 100.0 / total
+    }
+
     /** Classes that can be missed while staying at or above the target. */
     fun classesCanSkip(): Int {
         val t = subject.targetPercent / 100.0
