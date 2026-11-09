@@ -5,6 +5,8 @@ import com.attendo.core.data.csv.CsvTable
 import com.attendo.core.model.AppSettings
 import com.attendo.core.model.AttendanceRecord
 import com.attendo.core.model.AttendanceStatus
+import com.attendo.core.model.CatalogSubject
+import com.attendo.core.model.CourseCatalog
 import com.attendo.core.model.Subject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -106,6 +108,24 @@ internal class CsvSubjectRepository(
         )
         store.update { it + subject }
         return subject
+    }
+
+    override suspend fun addFromCatalog(items: List<CatalogSubject>, targetPercent: Int): Int {
+        var added = 0
+        store.update { list ->
+            val toAdd = CourseCatalog.missing(list, items).mapIndexed { i, c ->
+                Subject(
+                    id = UUID.randomUUID().toString(),
+                    name = c.name,
+                    code = c.code,
+                    targetPercent = targetPercent.coerceIn(0, 100),
+                    createdAt = clock() + i, // keeps catalog order stable
+                )
+            }
+            added = toAdd.size
+            list + toAdd
+        }
+        return added
     }
 
     override suspend fun update(subject: Subject) =

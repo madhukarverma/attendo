@@ -7,6 +7,7 @@ import com.attendo.core.data.SettingsRepository
 import com.attendo.core.data.SubjectRepository
 import com.attendo.core.model.AttendanceStatus
 import com.attendo.core.model.AttendanceSummary
+import com.attendo.core.model.CourseCatalog
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -44,9 +45,13 @@ data class HomeUiState(
 
 class HomeViewModel(
     settings: SettingsRepository,
-    subjects: SubjectRepository,
+    private val subjects: SubjectRepository,
     private val attendance: AttendanceRepository,
 ) : ViewModel() {
+
+    fun addCourseSubjects() {
+        viewModelScope.launch { subjects.addFromCatalog(CourseCatalog.CURRENT_SEMESTER) }
+    }
 
     private val selectedDate = MutableStateFlow(LocalDate.now())
 

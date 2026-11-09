@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-09 — v0.4.0 course catalog
+- `CourseCatalog` with the semester's 7 subjects (CA711, CA713, CA715, CA717, CA719, CA701 lab, CA703 lab).
+- Onboarding checkbox (on by default) adds them; empty Home shows a one-tap "Add my semester subjects".
+- Add Subject screen offers not-yet-added course subjects as tap-to-fill suggestions.
+- `SubjectRepository.addFromCatalog` skips codes that already exist (single CSV write).
+
+## 2026-11-09 — v0.3.0 logo splash
+- Original flat-polygon brand logo (`AttendoLogo`) and a ~1.5 s launch splash (`:feature:splash`).
+
 ## 2026-11-09 — v0.2.0 iOS-style motion
 - Push/pop transitions with 30% parallax and dimming; swipe-back via Android predictive back.
 - Add Subject presented as a sheet: slides up, screen behind scales back.

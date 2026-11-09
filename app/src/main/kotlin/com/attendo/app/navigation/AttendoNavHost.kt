@@ -80,6 +80,7 @@ fun AttendoNavHost(container: AppContainer) {
             composable(Routes.ONBOARDING) {
                 OnboardingRoute(
                     settings = data.settings,
+                    subjects = data.subjects,
                     onFinished = {
                         navController.navigate(Routes.HOME) {
                             popUpTo(Routes.ONBOARDING) { inclusive = true }
