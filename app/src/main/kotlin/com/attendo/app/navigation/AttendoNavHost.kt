@@ -15,6 +15,7 @@ import com.attendo.app.AppContainer
 import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.feature.home.HomeRoute
 import com.attendo.feature.onboarding.OnboardingRoute
+import com.attendo.feature.stats.StatsRoute
 import com.attendo.feature.subjects.AddSubjectRoute
 import com.attendo.feature.subjects.SubjectDetailRoute
 
@@ -25,6 +26,8 @@ object Routes {
     const val ADD_SUBJECT = "subject/add"
     const val SUBJECT_DETAIL = "subject/{id}"
     fun subjectDetail(id: String) = "subject/$id"
+    const val STATS = "stats"
+    const val SETTINGS = "settings"
 }
 
 @Composable
@@ -59,12 +62,15 @@ fun AttendoNavHost(container: AppContainer) {
                 attendance = data.attendance,
                 onAddSubject = { navController.navigate(Routes.ADD_SUBJECT) },
                 onOpenSubject = { id -> navController.navigate(Routes.subjectDetail(id)) },
-                onOpenStats = { /* feature/stats */ },
+                onOpenStats = { navController.navigate(Routes.STATS) },
                 onOpenSettings = { /* feature/settings */ },
             )
         }
         composable(Routes.ADD_SUBJECT) {
             AddSubjectRoute(subjects = data.subjects, onClose = { navController.popBackStack() })
+        }
+        composable(Routes.STATS) {
+            StatsRoute(subjects = data.subjects, attendance = data.attendance, onClose = { navController.popBackStack() })
         }
         composable(Routes.SUBJECT_DETAIL) { entry ->
             SubjectDetailRoute(
