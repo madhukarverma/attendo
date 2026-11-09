@@ -3,7 +3,6 @@ package com.attendo.app.navigation
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -27,11 +26,10 @@ internal class NavTransitions(private val ios: Boolean, private val modalRoutes:
 
     private val NavBackStackEntry.isModal get() = destination.route in modalRoutes
 
-    private val fade = tween<Float>(220)
-
+    // Animations off: screens swap instantly.
     val enter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
         when {
-            !ios -> fadeIn(fade)
+            !ios -> EnterTransition.None
             initialState.destination.route == Routes.ONBOARDING ->
                 fadeIn(IosMotion.push()) + scaleIn(IosMotion.push(), initialScale = 0.92f)
             targetState.isModal -> slideInVertically(IosMotion.sheet()) { it }
@@ -41,7 +39,7 @@ internal class NavTransitions(private val ios: Boolean, private val modalRoutes:
 
     val exit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
         when {
-            !ios -> fadeOut(fade)
+            !ios -> ExitTransition.None
             initialState.destination.route == Routes.ONBOARDING -> fadeOut(IosMotion.push())
             targetState.isModal ->
                 scaleOut(IosMotion.sheet(), targetScale = IosMotion.SHEET_BACKGROUND_SCALE) +
@@ -54,7 +52,7 @@ internal class NavTransitions(private val ios: Boolean, private val modalRoutes:
 
     val popEnter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
         when {
-            !ios -> fadeIn(fade)
+            !ios -> EnterTransition.None
             initialState.isModal ->
                 scaleIn(IosMotion.sheet(), initialScale = IosMotion.SHEET_BACKGROUND_SCALE) +
                     fadeIn(IosMotion.sheet(), initialAlpha = IosMotion.COVERED_ALPHA)
@@ -66,7 +64,7 @@ internal class NavTransitions(private val ios: Boolean, private val modalRoutes:
 
     val popExit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
         when {
-            !ios -> fadeOut(fade)
+            !ios -> ExitTransition.None
             initialState.isModal -> slideOutVertically(IosMotion.sheet()) { it }
             else -> slideOutHorizontally(IosMotion.push()) { it }
         }

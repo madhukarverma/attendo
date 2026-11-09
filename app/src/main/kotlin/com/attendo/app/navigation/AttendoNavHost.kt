@@ -20,6 +20,10 @@ import com.attendo.app.AppContainer
 import com.attendo.app.BuildConfig
 import com.attendo.app.CsvExporter
 import com.attendo.core.designsystem.motion.LocalIosMotion
+import com.attendo.core.designsystem.motion.AppMotionScale
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalOverscrollConfiguration
+import androidx.compose.runtime.SideEffect
 import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.feature.home.HomeRoute
 import com.attendo.feature.onboarding.OnboardingRoute
@@ -68,8 +72,15 @@ fun AttendoNavHost(container: AppContainer) {
     val navController = rememberNavController()
     val start = remember { if (loaded.onboarded) Routes.HOME else Routes.ONBOARDING }
     val transitions = remember(loaded.iosMotion) { NavTransitions(loaded.iosMotion, Routes.MODAL) }
+    // The Animations switch: off makes every Compose animation in the app complete instantly.
+    SideEffect { AppMotionScale.enabled = loaded.iosMotion }
 
-    CompositionLocalProvider(LocalIosMotion provides loaded.iosMotion) {
+    @OptIn(ExperimentalFoundationApi::class)
+    CompositionLocalProvider(
+        LocalIosMotion provides loaded.iosMotion,
+        // No Android stretch overscroll anywhere: iOS mode uses the rubber band, off mode nothing.
+        LocalOverscrollConfiguration provides null,
+    ) {
         NavHost(
             navController = navController,
             startDestination = start,

@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import com.attendo.core.designsystem.theme.AttendoColors
+import com.attendo.core.designsystem.motion.LocalIosMotion
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -105,6 +106,32 @@ fun moodColor(mood: Mood): Color = when (mood) {
  */
 @Composable
 fun PentagonMascot(modifier: Modifier = Modifier, mood: Mood = Mood.Happy, color: Color? = null) {
+    if (!LocalIosMotion.current) {
+        // Animations off: a still pentagon in the mood colour, no idle loop running.
+        StaticPentagon(modifier, mood, color ?: moodColor(mood))
+        return
+    }
+    AnimatedPentagon(modifier, mood, color)
+}
+
+@Composable
+private fun StaticPentagon(modifier: Modifier, mood: Mood, color: Color) {
+    Canvas(modifier) {
+        val s = size.minDimension
+        val c = Offset(size.width / 2, size.height * 0.44f)
+        val r = s * 0.38f
+        drawShadow(c.x, size.height * 0.86f, s * 0.75f)
+        val pts = (0 until 5).map { i ->
+            val a = Math.toRadians(-90.0 + 72.0 * i)
+            Offset(c.x + r * cos(a).toFloat(), c.y + r * sin(a).toFloat())
+        }
+        drawRoundedPolygon(pts, color, s * 0.1f)
+        drawMascotFace(Offset(c.x, c.y + s * 0.06f), s * 0.42f, mood)
+    }
+}
+
+@Composable
+private fun AnimatedPentagon(modifier: Modifier, mood: Mood, color: Color?) {
     val bodyColor by animateColorAsState(color ?: moodColor(mood), tween(600), label = "mascotColor")
     val loop = rememberInfiniteTransition(label = "mascot")
     // 0..1 phase; each mood maps it differently.

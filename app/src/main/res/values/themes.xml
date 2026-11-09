@@ -3,6 +3,7 @@
     <color name="cream">#F8FAED</color>
     <color name="green">#50A65C</color>
     <color name="ink">#232323</color>
+    <color name="launch_bg">#1A1D1A</color>
 
     <style name="Theme.Attendo" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/cream</item>
