@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Green pentagon mascot with a smile, inside the 72dp adaptive-icon safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#50A65C"
+        android:strokeColor="#50A65C"
+        android:strokeWidth="8"
+        android:strokeLineJoin="round"
+        android:pathData="M54,28 L78,45.5 L69,74 L39,74 L30,45.5 Z" />
+    <path
+        android:strokeColor="#232323"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M47,47 L47,52 M61,47 L61,52" />
+    <path
+        android:strokeColor="#232323"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M46,58 Q54,67 62,58" />
+</vector>
