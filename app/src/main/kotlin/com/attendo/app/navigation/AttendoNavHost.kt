@@ -15,11 +15,13 @@ import com.attendo.app.AppContainer
 import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.feature.home.HomeRoute
 import com.attendo.feature.onboarding.OnboardingRoute
+import com.attendo.feature.subjects.AddSubjectRoute
 
 /** All destinations in one place. Feature modules never know about each other. */
 object Routes {
     const val ONBOARDING = "onboarding"
     const val HOME = "home"
+    const val ADD_SUBJECT = "subject/add"
 }
 
 @Composable
@@ -50,10 +52,14 @@ fun AttendoNavHost(container: AppContainer) {
         composable(Routes.HOME) {
             HomeRoute(
                 settings = data.settings,
-                onAddSubject = { /* feature/subjects */ },
+                subjects = data.subjects,
+                onAddSubject = { navController.navigate(Routes.ADD_SUBJECT) },
                 onOpenStats = { /* feature/stats */ },
                 onOpenSettings = { /* feature/settings */ },
             )
+        }
+        composable(Routes.ADD_SUBJECT) {
+            AddSubjectRoute(subjects = data.subjects, onClose = { navController.popBackStack() })
         }
     }
 }
