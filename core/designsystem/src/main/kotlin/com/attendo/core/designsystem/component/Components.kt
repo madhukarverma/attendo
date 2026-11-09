@@ -152,53 +152,6 @@ fun AnimatedNumber(value: Int, suffix: String = "", style: TextStyle, color: Col
     Text("$shown$suffix", style = style, color = color, fontWeight = fontWeight)
 }
 
-/** Dark pill bottom bar: green primary action on the left, icon actions on the right. */
-@Composable
-fun PillBottomBar(
-    primaryLabel: String,
-    onPrimary: () -> Unit,
-    modifier: Modifier = Modifier,
-    primaryIcon: ImageVector? = null,
-    actions: @Composable RowScope.() -> Unit,
-) {
-    Row(
-        modifier
-            .fillMaxWidth()
-            .clip(CircleShape)
-            .background(AttendoColors.Hero)
-            .padding(6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Row(
-            Modifier
-                .iosPress(PressStyle.Scale, onClickLabel = primaryLabel, onClick = onPrimary)
-                .clip(CircleShape)
-                .background(AttendoColors.Green)
-                .padding(horizontal = 20.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (primaryIcon != null) {
-                Icon(primaryIcon, contentDescription = null, tint = AttendoColors.Cream, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-            }
-            Text(primaryLabel, color = AttendoColors.Cream, style = MaterialTheme.typography.labelLarge)
-        }
-        Row(Modifier.weight(1f), horizontalArrangement = Arrangement.SpaceEvenly, content = actions)
-    }
-}
-
-/** Small round icon button for [PillBottomBar]. */
-@Composable
-fun BarIconButton(onClick: () -> Unit, contentDescription: String, content: @Composable () -> Unit) {
-    Box(
-        Modifier
-            .size(44.dp)
-            .clip(CircleShape)
-            .iosPress(PressStyle.Dim, onClickLabel = contentDescription, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) { content() }
-}
-
 /** Three-bar "stats" glyph drawn in code (the icon isn't in material-icons-core). */
 @Composable
 fun StatsGlyph(color: Color = AttendoColors.OnHero, size: Dp = 22.dp) {

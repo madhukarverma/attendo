@@ -23,20 +23,31 @@ flowchart TD
     R --> N[Future: timetable, reminders,<br/>multiple lectures/day, widgets, sync]
 ```
 
-## 2. App navigation
+## 2. App navigation (v0.19)
 
 ```mermaid
 flowchart TD
-    Launch([App launch]) --> Load{settings.csv<br/>onboarded?}
-    Load -- no --> Onb[Onboarding<br/>enter name]
-    Onb --> Home
-    Load -- yes --> Home[Home<br/>greeting · day strip · mascot tip<br/>subjects for selected day]
-    Home -- tap Present / Absent / Cancel --> Mark[Write attendance.csv] --> Home
-    Home -- + New subject --> Add[Add subject<br/>name · code · target %] --> Home
-    Home -- tap subject --> Detail[Subject detail<br/>% · can skip / must attend · history]
-    Detail -- delete --> Home
-    Home -- stats icon --> Stats[Statistics]
-    Home -- settings icon --> Settings[Settings<br/>name · export CSV]
+    Launch([App launch]) --> Splash[Launch screen<br/>skipped in None mode]
+    Splash --> Load{settings.csv<br/>onboarded?}
+    Load -- no --> Onb[Onboarding<br/>name · nickname hint] --> Home
+    Load -- yes --> Home
+    Notif([Reminder notification]) --> Todo
+
+    subgraph Tabs["Tab bar: Home · Classes · To-do · Timer · Stats"]
+        Home[Home summary<br/>attendance · focus · today's to-dos<br/>reminders · exams]
+        Classes[Classes<br/>day strip · Penta · mark subjects · Tinder mode]
+        Todo[To-do & reminders<br/>overdue · today · upcoming · done]
+        Timer[Pomodoro<br/>timer · stats · export]
+        Stats[Statistics]
+    end
+
+    Home -- gear --> Settings[Settings<br/>profile · theme · animations · launch image · export]
+    Home -- exams card --> Cal[Academic calendar<br/>events + your to-dos]
+    Classes -- calendar button --> Cal
+    Cal -- pick a day --> Classes
+    Classes -- Add a subject --> Add[Add subject<br/>name · code · target · lecture hours]
+    Classes -- tap subject --> Detail[Subject detail<br/>% · tips · lectures left · history]
+    Todo -- reminder time --> Alarm[(AlarmManager)] --> Notif
 ```
 
 ## 3. Architecture / data flow
@@ -44,25 +55,32 @@ flowchart TD
 ```mermaid
 flowchart LR
     subgraph app[":app"]
-        Nav[NavHost + AppContainer]
+        Nav[NavHost + tab bar + AppContainer]
+        Rem[reminders<br/>scheduler · receiver · notifications]
     end
     subgraph features["feature modules"]
         O[":feature:onboarding"]
-        H[":feature:home"]
-        S[":feature:subjects"]
+        Db[":feature:dashboard (Home)"]
+        At[":feature:attendance (Classes)"]
+        T[":feature:todo"]
+        P[":feature:pomodoro"]
         St[":feature:stats"]
+        S[":feature:subjects"]
+        C[":feature:calendar"]
         Se[":feature:settings"]
+        Sp[":feature:splash"]
     end
     subgraph core["core modules"]
-        DS[":core:designsystem<br/>theme · mascots · components"]
-        D[":core:data<br/>repository interfaces<br/>CSV implementation"]
-        M[":core:model<br/>Subject · AttendanceRecord<br/>AttendanceSummary maths"]
+        DS[":core:designsystem<br/>theme · motion · mascots · tab bar"]
+        D[":core:data<br/>repository interfaces<br/>CSV implementation · timer"]
+        M[":core:model<br/>Subject · Attendance · Todo · Pomodoro<br/>calendar · nickname"]
     end
     Nav --> features
     features --> DS
     features --> D
+    Rem --> D
     D --> M
-    D <--> CSV[("filesDir/data/<br/>subjects.csv<br/>attendance.csv<br/>settings.csv")]
+    D <--> CSV[("filesDir/data/<br/>settings · subjects · attendance<br/>pomodoro · todos (.csv)")]
 ```
 
 Screens follow **Route → ViewModel → StateFlow&lt;UiState&gt; → stateless Screen**. Features only see repository

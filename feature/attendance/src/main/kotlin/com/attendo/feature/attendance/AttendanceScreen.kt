@@ -1,7 +1,7 @@
-package com.attendo.feature.home
+package com.attendo.feature.attendance
 
+import com.attendo.core.designsystem.component.TabBarClearance
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -29,7 +29,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.animation.AnimatedContent
@@ -51,11 +50,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -63,14 +59,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.attendo.core.data.AttendanceRepository
 import com.attendo.core.data.SettingsRepository
 import com.attendo.core.data.SubjectRepository
-import com.attendo.core.designsystem.component.BarIconButton
 import com.attendo.core.designsystem.component.DayStrip
 import com.attendo.core.designsystem.component.Mood
 import com.attendo.core.designsystem.component.PentagonMascot
-import com.attendo.core.designsystem.component.PillBottomBar
 import com.attendo.core.designsystem.component.SpeechBubble
-import com.attendo.core.designsystem.component.StatsGlyph
-import com.attendo.core.designsystem.component.TimerGlyph
 import com.attendo.core.designsystem.component.StatusLabel
 import com.attendo.core.designsystem.component.TailSide
 import com.attendo.core.designsystem.theme.AttendoColors
@@ -86,23 +78,19 @@ import java.time.LocalDate
 import kotlin.math.roundToInt
 
 @Composable
-fun HomeRoute(
+fun AttendanceRoute(
     settings: SettingsRepository,
     subjects: SubjectRepository,
     attendance: AttendanceRepository,
     onAddSubject: () -> Unit,
     onOpenSubject: (String) -> Unit,
-    onOpenStats: () -> Unit,
-    onOpenSettings: () -> Unit,
-    onOpenPomodoro: () -> Unit,
-    onOpenTodo: () -> Unit = {},
     calendar: AcademicCalendar = AcademicCalendar.EMPTY,
     onOpenCalendar: (LocalDate) -> Unit = {},
     /** A date picked on the calendar screen; selected once, then [onRequestedDateHandled] clears it. */
     requestedDate: LocalDate? = null,
     onRequestedDateHandled: () -> Unit = {},
 ) {
-    val vm: HomeViewModel = viewModel { HomeViewModel(settings, subjects, attendance, calendar) }
+    val vm: AttendanceViewModel = viewModel { AttendanceViewModel(settings, subjects, attendance, calendar) }
     val state by vm.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(requestedDate) {
         if (requestedDate != null) {
@@ -110,40 +98,32 @@ fun HomeRoute(
             onRequestedDateHandled()
         }
     }
-    HomeScreen(
+    AttendanceScreen(
         state = state,
         onSelectDate = vm::selectDate,
         onMark = vm::mark,
         onAddCourseSubjects = vm::addCourseSubjects,
-        onOpenPomodoro = onOpenPomodoro,
         onTinderModeChange = vm::setTinderMode,
         onSwipe = vm::swipe,
         onUndoSwipe = vm::undoSwipe,
         onOpenCalendar = onOpenCalendar,
         onAddSubject = onAddSubject,
         onOpenSubject = onOpenSubject,
-        onOpenStats = onOpenStats,
-        onOpenSettings = onOpenSettings,
-        onOpenTodo = onOpenTodo,
     )
 }
 
 @Composable
-fun HomeScreen(
-    state: HomeUiState,
+fun AttendanceScreen(
+    state: AttendanceUiState,
     onSelectDate: (LocalDate) -> Unit,
     onMark: (subjectId: String, status: AttendanceStatus) -> Unit,
     onAddSubject: () -> Unit,
     onOpenSubject: (String) -> Unit,
-    onOpenStats: () -> Unit,
-    onOpenSettings: () -> Unit,
     onAddCourseSubjects: () -> Unit = {},
-    onOpenPomodoro: () -> Unit = {},
     onTinderModeChange: (Boolean) -> Unit = {},
     onSwipe: (subjectId: String, status: AttendanceStatus) -> Unit = { _, _ -> },
     onUndoSwipe: () -> Unit = {},
     onOpenCalendar: (LocalDate) -> Unit = {},
-    onOpenTodo: () -> Unit = {},
 ) {
     Box(
         Modifier
@@ -156,7 +136,7 @@ fun HomeScreen(
             Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            item { Greeting(state.userName, state.selectedDate) { onOpenCalendar(state.selectedDate) } }
+            item { Header(state.selectedDate) { onOpenCalendar(state.selectedDate) } }
             item {
                 DayStrip(
                     days = state.days,
@@ -230,23 +210,9 @@ fun HomeScreen(
                     }
                 }
             }
-            item { Spacer(Modifier.height(96.dp)) }
+            // Room for the app's tab bar, which floats over the bottom of every tab.
+            item { Spacer(Modifier.height(TabBarClearance)) }
         }
-        }
-
-        PillBottomBar(
-            primaryLabel = "To-do",
-            primaryIcon = Icons.Filled.CheckCircle,
-            onPrimary = onOpenTodo,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(horizontal = 20.dp, vertical = 12.dp),
-        ) {
-            BarIconButton(onClick = onOpenPomodoro, contentDescription = "Pomodoro timer") { TimerGlyph() }
-            BarIconButton(onClick = onOpenStats, contentDescription = "Statistics") { StatsGlyph() }
-            BarIconButton(onClick = onOpenSettings, contentDescription = "Settings") {
-                Icon(Icons.Filled.Settings, contentDescription = null, tint = AttendoColors.OnHero)
-            }
         }
     }
 }
@@ -260,7 +226,7 @@ fun HomeScreen(
  * Bubble: in the clear it shows one steady line (the day's significance, else a friendly default).
  * Not in the clear, it alternates between the day's significance and the attendance warning.
  */
-private fun pentaSays(state: HomeUiState): Pair<List<String>, Mood> {
+private fun pentaSays(state: AttendanceUiState): Pair<List<String>, Mood> {
     val dayLine = state.calendar.mascotLine(state.selectedDate)
     val inClear = state.subjectsBelowTarget == 0
     if (!inClear) {
@@ -279,24 +245,22 @@ private fun pentaSays(state: HomeUiState): Pair<List<String>, Mood> {
 /** Seconds each bubble line stays up when Penta alternates between messages. */
 private const val BUBBLE_PHASE_MILLIS = 4_000L
 
-/** Home header top padding; tightened slightly in v0.14 (was 24.dp: change back here if preferred). */
+/** Header top padding; tightened slightly in v0.14 (was 24.dp: change back here if preferred). */
 private val HeaderTopPadding = 14.dp
 
 private val HeaderDate = java.time.format.DateTimeFormatter.ofPattern("EEE, d MMM")
 
+/** "Classes" title (the greeting moved to Home in v0.19), the calendar button and the selected date. */
 @Composable
-internal fun Greeting(name: String, selectedDate: LocalDate, onOpenCalendar: () -> Unit = {}) {
+internal fun Header(selectedDate: LocalDate, onOpenCalendar: () -> Unit = {}) {
     Row(
         Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = HeaderTopPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            buildAnnotatedString {
-                append("Hey, ")
-                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(name.ifBlank { "there" }) }
-                append("!")
-            },
+            "Classes",
             style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
             maxLines = 1,
             modifier = Modifier.weight(1f),
         )
@@ -510,15 +474,15 @@ private fun MarkChip(text: String, color: Color, selected: Boolean, modifier: Mo
 
 @Preview
 @Composable
-private fun HomePreview() {
+private fun AttendancePreview() {
     val subject = Subject("1", "Data Structures", "CS201")
     AttendoTheme {
-        HomeScreen(
-            HomeUiState(
+        AttendanceScreen(
+            AttendanceUiState(
                 userName = "Madhukar",
                 items = listOf(SubjectDayItem(AttendanceSummary(subject, 8, 2), AttendanceStatus.PRESENT)),
             ),
-            {}, { _, _ -> }, {}, {}, {}, {},
+            {}, { _, _ -> }, {}, {},
         )
     }
 }

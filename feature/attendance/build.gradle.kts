@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.attendo.feature.home"
+    namespace = "com.attendo.feature.attendance"
     compileSdk = 34
 
     defaultConfig {

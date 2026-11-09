@@ -1,5 +1,6 @@
 package com.attendo.feature.stats
 
+import com.attendo.core.designsystem.component.TabBarClearance
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -78,14 +79,14 @@ class StatsViewModel(subjects: SubjectRepository, attendance: AttendanceReposito
 }
 
 @Composable
-fun StatsRoute(subjects: SubjectRepository, attendance: AttendanceRepository, onClose: () -> Unit) {
+fun StatsRoute(subjects: SubjectRepository, attendance: AttendanceRepository, onClose: (() -> Unit)?) {
     val vm: StatsViewModel = viewModel { StatsViewModel(subjects, attendance) }
     val state by vm.uiState.collectAsStateWithLifecycle()
     StatsScreen(state, onClose)
 }
 
 @Composable
-fun StatsScreen(state: StatsUiState, onClose: () -> Unit) {
+fun StatsScreen(state: StatsUiState, onClose: (() -> Unit)?) {
     val listState = rememberLazyListState()
     val collapse by rememberCollapseFraction(listState)
     Column(
@@ -110,7 +111,7 @@ fun StatsScreen(state: StatsUiState, onClose: () -> Unit) {
             item { Text("Add a subject to see statistics.", color = AttendoColors.Muted) }
         }
         items(state.summaries, key = { it.subject.id }) { SubjectBar(it, Modifier.animateItem()) }
-        item { Spacer(Modifier.height(24.dp)) }
+        item { Spacer(Modifier.height(TabBarClearance)) }
     }
     }
     }

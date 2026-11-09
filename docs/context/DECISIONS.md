@@ -43,3 +43,33 @@
 ## DEC-005 — Release APK signed with debug key
 - Date: 2026-11-09 · Status: Active (testing only)
 - Rationale: no release keystore yet; lets the user install and test. Replace before any store upload.
+
+## DEC-008 — Bottom tab navigation with a Home summary
+- Date: 2026-11-09 · Status: Active
+- Decision: tabs Home · Classes · To-do · Timer · Stats in one `AttendoTabBar` drawn above the
+  NavHost (hidden on pushed screens). Tab switches use `popUpTo(HOME){saveState}` +
+  `restoreState` + `launchSingleTop`. Settings lives behind the gear on Home.
+- Rationale: the user asked for a Home button and a summary page; five sections no longer fit as
+  pushed screens from one main page. Five tabs fit a 360 dp wide phone; a sixth (Settings) didn't.
+- Consequence: `:feature:home` was renamed `:feature:attendance`; the summary is `:feature:dashboard`.
+
+## DEC-009 — Reminders via AlarmManager mirrored from todos.csv
+- Date: 2026-11-09 · Status: Active
+- Decision: the app module's `ReminderScheduler` re-syncs one exact alarm per pending reminder every
+  time todos.csv changes, at start-up, and after boot / app update / clock change. The receiver
+  re-reads the file before notifying. Exact alarms use `USE_EXACT_ALARM` (API 33+) and
+  `SCHEDULE_EXACT_ALARM` (API 31-32), falling back to inexact alarms if not allowed.
+- Rationale: no WorkManager dependency; the CSV stays the single source of truth.
+- Note: `USE_EXACT_ALARM` is restricted on Google Play to alarm/calendar apps; revisit before any
+  store upload (switch to SCHEDULE_EXACT_ALARM + a settings prompt).
+
+## DEC-010 — Lecture hours: one hour = one lecture = one mark
+- Date: 2026-11-09 · Status: Active
+- Decision: `Subject.lectureHours` (optional) is the course's total lectures; lectures left = hours -
+  held (present + absent). Cancelled classes don't count. Course outlook uses the same target maths.
+- Consequence: depends on DEC-004 (one mark per day); a double lecture still counts once (ISSUE-001).
+
+## DEC-011 — Nickname is derived, not stored
+- Date: 2026-11-09 · Status: Active
+- Decision: `Nickname.of(name)`: names longer than 10 characters show as their first 4 letters.
+  Only the full name is stored, so the rule can change without migrating settings.csv.

@@ -24,15 +24,38 @@ import com.attendo.core.model.AnimationMode
  *   Nothing moves far or fast, so there are no abrupt cuts.
  * - ANDROID: Navigation Compose's stock 700 ms cross-fade.
  * - NONE: instant swaps.
+ *
+ * Switching between bottom-bar tabs is not a push: iOS swaps instantly (like UITabBarController),
+ * Smooth cross-fades, Android uses Material's fade-through, None is instant.
  */
-internal class NavTransitions(private val mode: AnimationMode, private val modalRoutes: Set<String>) {
+internal class NavTransitions(
+    private val mode: AnimationMode,
+    private val modalRoutes: Set<String>,
+    private val tabRoutes: Set<String> = emptySet(),
+) {
 
     private val NavBackStackEntry.isModal get() = destination.route in modalRoutes
 
+    private val AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch: Boolean
+        get() = initialState.destination.route in tabRoutes && targetState.destination.route in tabRoutes
+
     private val androidFade = tween<Float>(700)
 
+    private fun tabEnter(): EnterTransition = when (mode) {
+        AnimationMode.NONE, AnimationMode.IOS -> EnterTransition.None
+        AnimationMode.SMOOTH -> fadeIn(tween(320, easing = Motion.Easing))
+        AnimationMode.ANDROID ->
+            fadeIn(tween(210, delayMillis = 90)) + scaleIn(tween(210, delayMillis = 90), initialScale = 0.92f)
+    }
+
+    private fun tabExit(): ExitTransition = when (mode) {
+        AnimationMode.NONE, AnimationMode.IOS -> ExitTransition.None
+        AnimationMode.SMOOTH -> fadeOut(tween(320, easing = Motion.Easing))
+        AnimationMode.ANDROID -> fadeOut(tween(90))
+    }
+
     val enter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
-        when (mode) {
+        if (isTabSwitch) tabEnter() else when (mode) {
             AnimationMode.NONE -> EnterTransition.None
             AnimationMode.ANDROID -> fadeIn(androidFade)
             AnimationMode.SMOOTH ->
@@ -48,7 +71,7 @@ internal class NavTransitions(private val mode: AnimationMode, private val modal
     }
 
     val exit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
-        when (mode) {
+        if (isTabSwitch) tabExit() else when (mode) {
             AnimationMode.NONE -> ExitTransition.None
             AnimationMode.ANDROID -> fadeOut(androidFade)
             AnimationMode.SMOOTH -> fadeOut(Motion.push())
@@ -65,7 +88,7 @@ internal class NavTransitions(private val mode: AnimationMode, private val modal
     }
 
     val popEnter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
-        when (mode) {
+        if (isTabSwitch) tabEnter() else when (mode) {
             AnimationMode.NONE -> EnterTransition.None
             AnimationMode.ANDROID -> fadeIn(androidFade)
             AnimationMode.SMOOTH -> fadeIn(Motion.push()) + slideInHorizontally(Motion.push()) { -it / 8 }
@@ -81,7 +104,7 @@ internal class NavTransitions(private val mode: AnimationMode, private val modal
     }
 
     val popExit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
-        when (mode) {
+        if (isTabSwitch) tabExit() else when (mode) {
             AnimationMode.NONE -> ExitTransition.None
             AnimationMode.ANDROID -> fadeOut(androidFade)
             AnimationMode.SMOOTH ->

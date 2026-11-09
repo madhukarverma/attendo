@@ -1,4 +1,4 @@
-package com.attendo.feature.home
+package com.attendo.feature.attendance
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
