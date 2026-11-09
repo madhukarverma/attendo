@@ -39,6 +39,7 @@ import com.attendo.core.data.SubjectRepository
 import com.attendo.core.designsystem.motion.PressStyle
 import com.attendo.core.designsystem.motion.iosPress
 import com.attendo.core.model.CourseCatalog
+import com.attendo.core.model.Nickname
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -132,6 +133,14 @@ fun OnboardingScreen(onContinue: (name: String, addCourseSubjects: Boolean) -> U
                     cursorColor = AttendoColors.Green,
                 ),
             )
+            if (Nickname.isShortened(name)) {
+                Text(
+                    "We'll call you “${Nickname.of(name)}” for short.",
+                    color = AttendoColors.OnHero.copy(alpha = 0.7f),
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(start = 20.dp, top = 6.dp),
+                )
+            }
             Row(
                 Modifier
                     .fillMaxWidth()

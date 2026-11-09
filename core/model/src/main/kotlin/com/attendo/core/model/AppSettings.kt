@@ -31,4 +31,7 @@ data class AppSettings(
     val launchImage: Boolean = false,
     /** Launch-screen background "#RRGGBB", sampled from the picked image's edges. */
     val launchBackground: String? = null,
-)
+) {
+    /** What the app calls the user: the name, or its first 4 letters when longer than 10 characters. */
+    val nickname: String get() = Nickname.of(userName)
+}

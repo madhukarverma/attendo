@@ -106,7 +106,7 @@ class HomeViewModel(
     ) { s, subjectList, records, date, history ->
         val onDay = records.filter { it.date == date }.associateBy { it.subjectId }
         HomeUiState(
-            userName = s.userName,
+            userName = s.nickname,
             selectedDate = date,
             items = subjectList.map { subject ->
                 SubjectDayItem(AttendanceSummary.from(subject, records), onDay[subject.id]?.status)

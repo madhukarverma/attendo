@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-09 — v0.16.0 nickname
+- Names longer than 10 characters are shown as their first 4 letters ("Prabhanshu Kumar" ->
+  "Prab") via `Nickname.of` / `AppSettings.nickname`. The full name stays in settings.csv;
+  onboarding and Settings show the nickname that will be used.
+
 ## 2026-11-09 — v0.15.0 dark theme legibility
 - Text and icons that didn't pass a colour fell back to black (Material 3 only sets
   `LocalContentColor` inside a Surface), so they vanished on the dark theme. `AttendoTheme` now
