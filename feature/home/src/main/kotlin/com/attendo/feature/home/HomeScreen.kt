@@ -6,7 +6,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import com.attendo.core.designsystem.component.AnimatedNumber
 import com.attendo.core.designsystem.motion.BounceContainer
-import com.attendo.core.designsystem.motion.IosMotion
+import com.attendo.core.designsystem.motion.Motion
 import com.attendo.core.designsystem.motion.PressStyle
 import com.attendo.core.designsystem.motion.iosPress
 import androidx.compose.foundation.layout.Arrangement
@@ -438,7 +438,7 @@ private fun MarkChip(text: String, color: Color, selected: Boolean, modifier: Mo
     val haptics = LocalHapticFeedback.current
     val background by animateColorAsState(
         if (selected) color else AttendoColors.Cream,
-        animationSpec = IosMotion.bouncy(),
+        animationSpec = Motion.bouncy(),
         label = "chipBg",
     )
     val content by animateColorAsState(if (selected) AttendoColors.Cream else color, label = "chipFg")

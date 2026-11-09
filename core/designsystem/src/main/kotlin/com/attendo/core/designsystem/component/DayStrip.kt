@@ -4,7 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
-import com.attendo.core.designsystem.motion.IosMotion
+import com.attendo.core.designsystem.motion.Motion
 import com.attendo.core.designsystem.motion.PressStyle
 import com.attendo.core.designsystem.motion.iosPress
 import androidx.compose.foundation.layout.Arrangement
@@ -90,7 +90,7 @@ fun DayStrip(
             val isSelected = day == selected
             val pill by animateColorAsState(
                 if (isSelected) AttendoColors.Ink else AttendoColors.Cream,
-                animationSpec = IosMotion.bouncy(),
+                animationSpec = Motion.bouncy(),
                 label = "dayPill",
             )
             Column(

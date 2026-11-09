@@ -24,7 +24,9 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import com.attendo.core.designsystem.theme.AttendoColors
-import com.attendo.core.designsystem.motion.LocalIosMotion
+import com.attendo.core.designsystem.motion.LocalAnimationMode
+import com.attendo.core.designsystem.motion.Motion
+import com.attendo.core.model.AnimationMode
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -106,7 +108,7 @@ fun moodColor(mood: Mood): Color = when (mood) {
  */
 @Composable
 fun PentagonMascot(modifier: Modifier = Modifier, mood: Mood = Mood.Happy, color: Color? = null) {
-    if (!LocalIosMotion.current) {
+    if (LocalAnimationMode.current == AnimationMode.NONE) {
         // Animations off: a still pentagon in the mood colour, no idle loop running.
         StaticPentagon(modifier, mood, color ?: moodColor(mood))
         return
@@ -134,17 +136,20 @@ private fun StaticPentagon(modifier: Modifier, mood: Mood, color: Color) {
 private fun AnimatedPentagon(modifier: Modifier, mood: Mood, color: Color?) {
     val bodyColor by animateColorAsState(color ?: moodColor(mood), tween(600), label = "mascotColor")
     val loop = rememberInfiniteTransition(label = "mascot")
+    // Smooth mode slows the idle loops and uses a symmetric ease so there's no visible "kick".
+    val slow = Motion.idleSlowdown
+    val easing = if (slow > 1f) Motion.Easing else FastOutSlowInEasing
     // 0..1 phase; each mood maps it differently.
     val bounce by loop.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(900, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        animationSpec = infiniteRepeatable(tween((900 * slow).toInt(), easing = easing), RepeatMode.Reverse),
         label = "bounce",
     )
     val sway by loop.animateFloat(
         initialValue = -1f,
         targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(1600, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        animationSpec = infiniteRepeatable(tween((1600 * slow).toInt(), easing = easing), RepeatMode.Reverse),
         label = "sway",
     )
     // Smoothly blend the motion amount when the mood changes instead of jumping.

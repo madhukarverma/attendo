@@ -1,5 +1,6 @@
 package com.attendo.core.data
 
+import com.attendo.core.model.AnimationMode
 import com.attendo.core.model.AttendanceStatus
 import com.attendo.core.model.CourseCatalog
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,9 +34,9 @@ class RepositoryTest {
         assertEquals(listOf(maths), reloaded.subjects.subjects.first())
         assertEquals(AttendanceStatus.PRESENT, reloaded.attendance.records.first().single().status)
         assertEquals("Madhukar", reloaded.settings.settings.first()?.userName)
-        assertEquals(true, reloaded.settings.settings.first()?.iosMotion)
-        reloaded.settings.setIosMotion(false)
-        assertEquals(false, reloaded.settings.settings.first()?.iosMotion)
+        assertEquals(AnimationMode.IOS, reloaded.settings.settings.first()?.animationMode)
+        reloaded.settings.setAnimationMode(AnimationMode.SMOOTH)
+        assertEquals(AnimationMode.SMOOTH, reloaded.settings.settings.first()?.animationMode)
         assertEquals(setOf("subjects.csv", "attendance.csv", "settings.csv"), dir.list()!!.toSet())
 
         dir.deleteRecursively()

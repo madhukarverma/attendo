@@ -2,6 +2,7 @@ package com.attendo.core.data
 
 import com.attendo.core.data.csv.CsvStore
 import com.attendo.core.data.csv.CsvTable
+import com.attendo.core.model.AnimationMode
 import com.attendo.core.model.AppSettings
 import com.attendo.core.model.AttendanceRecord
 import com.attendo.core.model.AttendanceStatus
@@ -36,7 +37,10 @@ internal class CsvSettingsRepository(
             AppSettings(
                 userName = m[KEY_NAME].orEmpty(),
                 onboarded = m[KEY_ONBOARDED] == "true",
-                iosMotion = m[KEY_IOS_MOTION] != "false",
+                animationMode = m[KEY_ANIMATION_MODE]
+                    ?.let { runCatching { AnimationMode.valueOf(it) }.getOrNull() }
+                    // Migrate the v0.10 on/off switch.
+                    ?: if (m[KEY_IOS_MOTION] == "false") AnimationMode.NONE else AnimationMode.IOS,
                 tinderMode = m[KEY_TINDER_MODE] == "true",
             )
         }
@@ -44,7 +48,7 @@ internal class CsvSettingsRepository(
 
     override suspend fun setTinderMode(enabled: Boolean) = put(KEY_TINDER_MODE, enabled.toString())
 
-    override suspend fun setIosMotion(enabled: Boolean) = put(KEY_IOS_MOTION, enabled.toString())
+    override suspend fun setAnimationMode(mode: AnimationMode) = put(KEY_ANIMATION_MODE, mode.name)
 
     override suspend fun setUserName(name: String) = put(KEY_NAME, name.trim())
 
@@ -56,7 +60,8 @@ internal class CsvSettingsRepository(
     private companion object {
         const val KEY_NAME = "user_name"
         const val KEY_ONBOARDED = "onboarded"
-        const val KEY_IOS_MOTION = "ios_motion"
+        const val KEY_IOS_MOTION = "ios_motion" // legacy (v0.5 – v0.11)
+        const val KEY_ANIMATION_MODE = "animation_mode"
         const val KEY_TINDER_MODE = "tinder_mode"
     }
 }

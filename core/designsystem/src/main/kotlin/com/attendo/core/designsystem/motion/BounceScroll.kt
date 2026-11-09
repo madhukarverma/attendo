@@ -17,6 +17,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Velocity
+import com.attendo.core.model.AnimationMode
 import kotlin.math.abs
 
 /**
@@ -28,7 +29,9 @@ import kotlin.math.abs
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BounceContainer(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    if (!LocalIosMotion.current) {
+    // Rubber band only in the iOS and Smooth modes (Smooth settles more slowly via Motion.settle()).
+    val mode = LocalAnimationMode.current
+    if (mode == AnimationMode.ANDROID || mode == AnimationMode.NONE) {
         Box(modifier) { content() }
         return
     }
@@ -83,7 +86,7 @@ private class RubberBandConnection(private val offset: MutableFloatState) : Nest
             initialValue = offset.floatValue,
             targetValue = 0f,
             initialVelocity = velocity,
-            animationSpec = IosMotion.settle(),
+            animationSpec = Motion.settle(),
         ) { value, _ -> offset.floatValue = value }
     }
 

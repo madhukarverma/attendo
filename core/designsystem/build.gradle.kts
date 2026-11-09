@@ -24,6 +24,8 @@ android {
 }
 
 dependencies {
+    api(project(":core:model"))
+
     // Exposed as `api` so feature modules get Compose + Material 3 by depending on the design system.
     api(platform(libs.androidx.compose.bom))
     api(libs.androidx.compose.ui)
