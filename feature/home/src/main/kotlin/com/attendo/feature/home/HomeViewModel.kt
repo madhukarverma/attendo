@@ -5,7 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.attendo.core.data.AttendanceRepository
 import com.attendo.core.data.SettingsRepository
 import com.attendo.core.data.SubjectRepository
+import com.attendo.core.model.AcademicCalendar
 import com.attendo.core.model.AttendanceStatus
+import com.attendo.core.model.CalendarEvent
+import com.attendo.core.model.DayKind
 import com.attendo.core.model.AttendanceSummary
 import com.attendo.core.model.CourseCatalog
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,12 +34,24 @@ data class HomeUiState(
     val markedDays: Set<LocalDate> = emptySet(),
     val tinderMode: Boolean = false,
     val canUndoSwipe: Boolean = false,
+    val calendar: AcademicCalendar = AcademicCalendar.EMPTY,
 ) {
     /** Cards still to swipe for the selected day. */
     val unmarked: List<SubjectDayItem> get() = items.filter { it.statusOnDay == null }
 
-    /** Two weeks back and one week ahead of today. */
-    val days: List<LocalDate> get() = (-14L..7L).map { today.plusDays(it) }
+    /** The whole semester from the academic calendar (falls back to ±2 weeks around today). */
+    val days: List<LocalDate>
+        get() = if (calendar.events.isEmpty()) (-14L..7L).map { today.plusDays(it) } else calendar.stripDays(today)
+
+    /** Most important calendar entry kind per day, for the coloured dots in the day strip. */
+    val dayKinds: Map<LocalDate, DayKind>
+        get() = days.mapNotNull { d ->
+            calendar.eventsOn(d).minByOrNull { it.kind.ordinal.let { o -> if (it.kind == DayKind.HOLIDAY) -1 else o } }
+                ?.let { d to it.kind }
+        }.toMap()
+
+    /** Calendar entries on the selected day. */
+    val selectedDayEvents: List<CalendarEvent> get() = calendar.eventsOn(selectedDate)
 
     /** Overall percentage across all subjects, or null when nothing has been held yet. */
     val overallPercent: Double?
@@ -52,6 +67,7 @@ class HomeViewModel(
     private val settings: SettingsRepository,
     private val subjects: SubjectRepository,
     private val attendance: AttendanceRepository,
+    private val calendar: AcademicCalendar = AcademicCalendar.EMPTY,
 ) : ViewModel() {
 
     /** Swipes made in this session, newest last, for the Tinder-style undo button. */
@@ -98,6 +114,7 @@ class HomeViewModel(
             markedDays = records.mapTo(HashSet()) { it.date },
             tinderMode = s.tinderMode,
             canUndoSwipe = history.isNotEmpty(),
+            calendar = calendar,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
