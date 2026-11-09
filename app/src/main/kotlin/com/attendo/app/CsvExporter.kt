@@ -12,8 +12,8 @@ import java.io.File
 /** Copies the CSV files to a shareable cache folder and opens the Android share sheet. */
 object CsvExporter {
 
-    fun share(context: Context, data: AttendoData) {
-        val files = data.csvFiles()
+    fun share(context: Context, data: AttendoData, only: List<String> = AttendoData.ALL_FILES) {
+        val files = data.csvFiles(only)
         if (files.isEmpty()) {
             Toast.makeText(context, "Nothing to export yet", Toast.LENGTH_SHORT).show()
             return

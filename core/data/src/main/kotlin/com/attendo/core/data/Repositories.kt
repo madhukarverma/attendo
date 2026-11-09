@@ -4,6 +4,7 @@ import com.attendo.core.model.AppSettings
 import com.attendo.core.model.AttendanceRecord
 import com.attendo.core.model.AttendanceStatus
 import com.attendo.core.model.CatalogSubject
+import com.attendo.core.model.PomodoroSession
 import com.attendo.core.model.Subject
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
@@ -29,6 +30,11 @@ interface SubjectRepository {
     suspend fun addFromCatalog(items: List<CatalogSubject>, targetPercent: Int = Subject.DEFAULT_TARGET_PERCENT): Int
     suspend fun update(subject: Subject)
     suspend fun delete(subjectId: String)
+}
+
+interface PomodoroRepository {
+    val sessions: Flow<List<PomodoroSession>>
+    suspend fun add(session: PomodoroSession)
 }
 
 interface AttendanceRepository {

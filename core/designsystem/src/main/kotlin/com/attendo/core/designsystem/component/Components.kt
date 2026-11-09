@@ -207,6 +207,21 @@ fun StatsGlyph(color: Color = AttendoColors.Cream, size: Dp = 22.dp) {
     }
 }
 
+/** Stopwatch glyph for the Pomodoro button (not in material-icons-core). */
+@Composable
+fun TimerGlyph(color: Color = AttendoColors.Cream, size: Dp = 22.dp) {
+    Canvas(Modifier.size(size)) {
+        val s = this.size.minDimension
+        val stroke = s * 0.11f
+        val c = Offset(this.size.width / 2, this.size.height * 0.56f)
+        val r = s * 0.36f
+        drawCircle(color, r, c, style = Stroke(stroke))
+        drawLine(color, Offset(c.x - s * 0.12f, s * 0.07f), Offset(c.x + s * 0.12f, s * 0.07f), stroke, StrokeCap.Round)
+        drawLine(color, c, Offset(c.x, c.y - r * 0.6f), stroke, StrokeCap.Round)
+        drawLine(color, c, Offset(c.x + r * 0.45f, c.y), stroke, StrokeCap.Round)
+    }
+}
+
 /** Big percentage label in a pill, e.g. "82%". */
 @Composable
 fun PercentPill(text: String, modifier: Modifier = Modifier, color: Color = AttendoColors.CreamDeep) {
