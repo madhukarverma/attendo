@@ -1,8 +1,18 @@
 package com.attendo.core.designsystem.component
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.ui.Modifier
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -78,20 +88,67 @@ private fun DrawScope.drawShadow(centerX: Float, y: Float, width: Float) {
     )
 }
 
-/** Green rounded pentagon (home screen mascot). */
+/** Body colour per mood: brand green when happy, olive when neutral, slate blue when sad. */
+fun moodColor(mood: Mood): Color = when (mood) {
+    Mood.Happy -> AttendoColors.Green
+    Mood.Neutral -> Color(0xFF9DB35A)
+    Mood.Sad -> Color(0xFF6F86A6)
+}
+
+/**
+ * Rounded pentagon home mascot, animated by mood:
+ * - Happy: small bounce with a little squash on landing; the shadow shrinks as it rises.
+ * - Sad: slow left-right sway from the base, like a sigh.
+ * - Neutral: gentle "breathing" scale.
+ * Colour cross-fades between moods. Animated values are read only in the draw phase, so the
+ * animation never triggers recomposition.
+ */
 @Composable
-fun PentagonMascot(modifier: Modifier = Modifier, mood: Mood = Mood.Happy, color: Color = AttendoColors.Green) {
+fun PentagonMascot(modifier: Modifier = Modifier, mood: Mood = Mood.Happy, color: Color? = null) {
+    val bodyColor by animateColorAsState(color ?: moodColor(mood), tween(600), label = "mascotColor")
+    val loop = rememberInfiniteTransition(label = "mascot")
+    // 0..1 phase; each mood maps it differently.
+    val bounce by loop.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(900, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        label = "bounce",
+    )
+    val sway by loop.animateFloat(
+        initialValue = -1f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(1600, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        label = "sway",
+    )
+    // Smoothly blend the motion amount when the mood changes instead of jumping.
+    val happyAmount by animateFloatAsState(if (mood == Mood.Happy) 1f else 0f, tween(500), label = "happy")
+    val sadAmount by animateFloatAsState(if (mood == Mood.Sad) 1f else 0f, tween(500), label = "sad")
+    val neutralAmount by animateFloatAsState(if (mood == Mood.Neutral) 1f else 0f, tween(500), label = "neutral")
+
     Canvas(modifier) {
         val s = size.minDimension
         val c = Offset(size.width / 2, size.height * 0.44f)
         val r = s * 0.38f
-        drawShadow(c.x, size.height * 0.86f, s * 0.75f)
-        val pts = (0 until 5).map { i ->
-            val a = Math.toRadians(-90.0 + 72.0 * i)
-            Offset(c.x + r * cos(a).toFloat(), c.y + r * sin(a).toFloat())
+        val baseY = c.y + r * 0.85f
+
+        val lift = bounce * s * 0.035f * happyAmount // ~6dp at 170dp: "a very small amount"
+        val squash = (1f - bounce) * 0.03f * happyAmount // slight squash at the bottom of the bounce
+        val angle = sway * 6f * sadAmount
+        val breathe = 1f + (bounce - 0.5f) * 0.02f * neutralAmount
+
+        drawShadow(c.x, size.height * 0.86f, s * 0.75f * (1f - lift / (s * 0.2f)))
+        withTransform({
+            translate(top = -lift)
+            rotate(angle, pivot = Offset(c.x, baseY))
+            scale(scaleX = (1f + squash) * breathe, scaleY = (1f - squash) * breathe, pivot = Offset(c.x, baseY))
+        }) {
+            val pts = (0 until 5).map { i ->
+                val a = Math.toRadians(-90.0 + 72.0 * i)
+                Offset(c.x + r * cos(a).toFloat(), c.y + r * sin(a).toFloat())
+            }
+            drawRoundedPolygon(pts, bodyColor, s * 0.1f)
+            drawMascotFace(Offset(c.x, c.y + s * 0.06f), s * 0.42f, mood)
         }
-        drawRoundedPolygon(pts, color, s * 0.1f)
-        drawMascotFace(Offset(c.x, c.y + s * 0.06f), s * 0.42f, mood)
     }
 }
 
