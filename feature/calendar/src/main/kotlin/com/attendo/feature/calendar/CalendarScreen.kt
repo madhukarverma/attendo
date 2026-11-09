@@ -1,5 +1,8 @@
 package com.attendo.feature.calendar
 
+import com.attendo.core.model.Todo
+import com.attendo.core.model.TodoAgenda
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -83,8 +86,11 @@ fun CalendarScreen(
     onPickDate: (LocalDate) -> Unit,
     onClose: () -> Unit,
     today: LocalDate = LocalDate.now(),
+    /** The user's to-dos and reminders, marked on their days and listed per month. */
+    todos: List<Todo> = emptyList(),
 ) {
     val months = remember(calendar) { monthsOf(calendar, today) }
+    val todoDays = remember(todos) { TodoAgenda.openDays(todos) }
     val listState = rememberLazyListState()
     val collapse by rememberCollapseFraction(listState)
     // Open on the month of the selected day (header items come first).
@@ -110,8 +116,9 @@ fun CalendarScreen(
                 item { SemesterCard(calendar, today) }
                 item { Legend() }
                 item { ComingUp(calendar, today) }
+                item { YourTodos(todos, today) }
                 items(months, key = { it.toString() }) { month ->
-                    MonthCard(month, calendar, today, selected, onPickDate)
+                    MonthCard(month, calendar, today, selected, onPickDate, todos, todoDays)
                 }
                 item {
                     Text(
@@ -126,7 +133,7 @@ fun CalendarScreen(
     }
 }
 
-private const val HEADER_ITEMS = 4
+private const val HEADER_ITEMS = 5
 
 private fun monthsOf(calendar: AcademicCalendar, today: LocalDate): List<YearMonth> {
     val first = calendar.events.minOfOrNull { it.start } ?: today
@@ -208,6 +215,7 @@ private fun Legend() {
         LegendChip("Assessment", AttendoColors.Blue, filled = true)
         LegendChip("Event", AttendoColors.Green, filled = true)
         LegendChip("Deadline", AttendoColors.Yellow, filled = true)
+        LegendChip("To-do", AttendoColors.Ink, filled = false)
     }
 }
 
@@ -258,6 +266,55 @@ private fun ComingUp(calendar: AcademicCalendar, today: LocalDate) {
     }
 }
 
+private val TimeFormat = DateTimeFormatter.ofPattern("h:mm a")
+
+/** The next open to-dos and reminders, under the academic "Coming up" card. */
+@Composable
+private fun YourTodos(todos: List<Todo>, today: LocalDate) {
+    val next = todos.filter { !it.done && !it.date.isBefore(today) }
+        .sortedWith(compareBy<Todo>({ it.date }, { it.remindAt ?: java.time.LocalTime.MAX }))
+        .take(4)
+    if (next.isEmpty()) return
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(AttendoColors.CreamCard)
+            .padding(18.dp),
+    ) {
+        Text("Your to-dos", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(8.dp))
+        next.forEach { TodoRow(it) }
+    }
+}
+
+@Composable
+private fun TodoRow(todo: Todo) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(10.dp).border(2.dp, AttendoColors.Ink, CircleShape))
+        Spacer(Modifier.width(10.dp))
+        Text(
+            todo.date.format(Short),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.width(78.dp),
+        )
+        Column(Modifier.weight(1f)) {
+            Text(
+                todo.title,
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (todo.done) AttendoColors.Muted else AttendoColors.Ink,
+                textDecoration = if (todo.done) TextDecoration.LineThrough else null,
+            )
+            Text(
+                todo.remindAt?.let { "Reminder · " + it.format(TimeFormat) } ?: "To-do",
+                style = MaterialTheme.typography.labelSmall,
+                color = AttendoColors.Muted,
+            )
+        }
+    }
+}
+
 @Composable
 private fun EventRow(e: CalendarEvent, trailing: String? = null) {
     Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -286,6 +343,8 @@ private fun MonthCard(
     today: LocalDate,
     selected: LocalDate,
     onPickDate: (LocalDate) -> Unit,
+    todos: List<Todo>,
+    todoDays: Set<LocalDate>,
 ) {
     Column(
         Modifier
@@ -323,7 +382,7 @@ private fun MonthCard(
             Row(Modifier.fillMaxWidth()) {
                 week.forEach { day ->
                     Box(Modifier.weight(1f).aspectRatio(1f), contentAlignment = Alignment.Center) {
-                        if (day != null) DayCell(day, calendar, today, selected, onPickDate)
+                        if (day != null) DayCell(day, calendar, today, selected, onPickDate, hasTodo = day in todoDays)
                     }
                 }
                 repeat(7 - week.size) { Spacer(Modifier.weight(1f)) }
@@ -332,11 +391,14 @@ private fun MonthCard(
         val monthEvents = calendar.events.filter {
             YearMonth.from(it.start) == month || (YearMonth.from(it.end) == month && YearMonth.from(it.start) != month)
         }
-        if (monthEvents.isNotEmpty()) {
+        val monthTodos = todos.filter { YearMonth.from(it.date) == month }
+            .sortedWith(compareBy<Todo>({ it.date }, { it.remindAt ?: java.time.LocalTime.MAX }))
+        if (monthEvents.isNotEmpty() || monthTodos.isNotEmpty()) {
             Spacer(Modifier.height(8.dp))
             Box(Modifier.fillMaxWidth().height(1.dp).background(AttendoColors.CreamDeep))
             Spacer(Modifier.height(6.dp))
             monthEvents.forEach { EventRow(it) }
+            monthTodos.forEach { TodoRow(it) }
         }
     }
 }
@@ -348,6 +410,7 @@ private fun DayCell(
     today: LocalDate,
     selected: LocalDate,
     onPickDate: (LocalDate) -> Unit,
+    hasTodo: Boolean = false,
 ) {
     val events = calendar.eventsOn(day)
     val main = events.firstOrNull { it.kind != DayKind.DEADLINE }
@@ -381,11 +444,17 @@ private fun DayCell(
             fontWeight = if (main != null || day == today) FontWeight.Bold else FontWeight.Medium,
             color = textColor,
         )
-        Box(
-            Modifier
-                .size(4.dp)
-                .clip(CircleShape)
-                .background(if (hasDeadline) AttendoColors.Yellow else Color.Transparent),
-        )
+        // Markers under the number: yellow = deadline, ring = your to-do.
+        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            if (hasDeadline || !hasTodo) {
+                Box(
+                    Modifier
+                        .size(4.dp)
+                        .clip(CircleShape)
+                        .background(if (hasDeadline) AttendoColors.Yellow else Color.Transparent),
+                )
+            }
+            if (hasTodo) Box(Modifier.size(5.dp).border(1.5.dp, textColor, CircleShape))
+        }
     }
 }

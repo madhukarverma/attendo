@@ -203,7 +203,7 @@ fun SettingsScreen(
                     Spacer(Modifier.width(14.dp))
                     Text(
                         "Everything is stored on this phone as CSV files: subjects.csv, attendance.csv, " +
-                            "pomodoro.csv and settings.csv. Export them to open in Excel or Google Sheets.",
+                            "pomodoro.csv, todos.csv and settings.csv. Export them to open in Excel or Google Sheets.",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }

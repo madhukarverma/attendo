@@ -1,5 +1,6 @@
 package com.attendo.app.navigation
 
+import com.attendo.feature.todo.TodoRoute
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -54,6 +55,7 @@ object Routes {
     const val STATS = "stats"
     const val SETTINGS = "settings"
     const val POMODORO = "pomodoro"
+    const val TODO = "todo"
     const val CALENDAR = "calendar/{date}"
     fun calendar(date: LocalDate) = "calendar/$date"
 
@@ -73,8 +75,12 @@ private fun NavHostController.back() {
     if (currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) popBackStack()
 }
 
+/**
+ * @param openRequest a screen to open on top of Home, e.g. "todo" when a reminder notification is
+ * tapped; [onOpenHandled] clears it once navigated.
+ */
 @Composable
-fun AttendoNavHost(container: AppContainer) {
+fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenHandled: () -> Unit = {}) {
     val data = container.data
     val settings by data.settings.settings.collectAsStateWithLifecycle(initialValue = null)
 
@@ -97,6 +103,12 @@ fun AttendoNavHost(container: AppContainer) {
     }
     LaunchedEffect(mode) {
         activity?.preferHighRefreshRate(mode == AnimationMode.SMOOTH || mode == AnimationMode.IOS)
+    }
+    LaunchedEffect(openRequest) {
+        if (openRequest == Routes.TODO && loaded.onboarded) {
+            navController.navigate(Routes.TODO) { launchSingleTop = true }
+        }
+        if (openRequest != null) onOpenHandled()
     }
 
     @OptIn(ExperimentalFoundationApi::class)
@@ -143,17 +155,23 @@ fun AttendoNavHost(container: AppContainer) {
                     onOpenStats = { navController.push(Routes.STATS) },
                     onOpenSettings = { navController.push(Routes.SETTINGS) },
                     onOpenPomodoro = { navController.push(Routes.POMODORO) },
+                    onOpenTodo = { navController.push(Routes.TODO) },
                     calendar = container.academicCalendar,
                     onOpenCalendar = { date -> navController.push(Routes.calendar(date)) },
                     requestedDate = requested?.let(LocalDate::parse),
                     onRequestedDateHandled = { entry.savedStateHandle[KEY_PICKED_DATE] = null },
                 )
             }
+            composable(Routes.TODO) {
+                TodoRoute(todos = data.todos, onBack = { navController.back() })
+            }
             composable(Routes.CALENDAR) { entry ->
                 val selected = entry.arguments?.getString("date")?.let(LocalDate::parse) ?: LocalDate.now()
+                val todos by data.todos.todos.collectAsStateWithLifecycle(initialValue = emptyList())
                 CalendarScreen(
                     calendar = container.academicCalendar,
                     selected = selected,
+                    todos = todos,
                     onPickDate = { date ->
                         // Hand the date back to Home, then return there.
                         navController.previousBackStackEntry?.savedStateHandle?.set(KEY_PICKED_DATE, date.toString())

@@ -8,8 +8,10 @@ import com.attendo.core.model.AttendanceStatus
 import com.attendo.core.model.CatalogSubject
 import com.attendo.core.model.PomodoroSession
 import com.attendo.core.model.Subject
+import com.attendo.core.model.Todo
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
+import java.time.LocalTime
 
 /*
  * Repository contracts. Features depend only on these interfaces, so the CSV implementation can
@@ -53,4 +55,17 @@ interface AttendanceRepository {
     /** Sets the status for a subject on a date; `null` clears the mark. */
     suspend fun mark(subjectId: String, date: LocalDate, status: AttendanceStatus?)
     suspend fun deleteForSubject(subjectId: String)
+}
+
+interface TodoRepository {
+    val todos: Flow<List<Todo>>
+
+    /** Adds a to-do on [date]; with [remindAt] it is also a reminder at that time. */
+    suspend fun add(title: String, date: LocalDate, remindAt: LocalTime? = null): Todo
+    suspend fun update(todo: Todo)
+    suspend fun setDone(id: String, done: Boolean)
+    suspend fun delete(id: String)
+
+    /** Removes every completed to-do. */
+    suspend fun clearDone()
 }

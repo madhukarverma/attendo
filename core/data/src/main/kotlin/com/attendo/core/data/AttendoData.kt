@@ -1,6 +1,7 @@
 package com.attendo.core.data
 
 import com.attendo.core.data.pomodoro.CsvPomodoroRepository
+import com.attendo.core.data.todo.CsvTodoRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +14,7 @@ import java.io.File
  * - `subjects.csv`   id,name,code,target_percent,created_at,lecture_hours
  * - `attendance.csv` subject_id,date,status,updated_at
  * - `pomodoro.csv`   id,date,started_at,kind,subject_id,planned_seconds,actual_seconds,completed
+ * - `todos.csv`      id,title,date,remind_at,done,created_at
  */
 class AttendoData(
     val dir: File,
@@ -24,6 +26,7 @@ class AttendoData(
     val subjects: SubjectRepository = CsvSubjectRepository(dir, scope, io, clock)
     val attendance: AttendanceRepository = CsvAttendanceRepository(dir, scope, io, clock)
     val pomodoro: PomodoroRepository = CsvPomodoroRepository(dir, scope, io)
+    val todos: TodoRepository = CsvTodoRepository(dir, scope, io, clock)
 
     /** The CSV files that currently exist, e.g. for export/sharing. */
     fun csvFiles(names: List<String> = ALL_FILES): List<File> =
@@ -31,7 +34,8 @@ class AttendoData(
 
     companion object {
         const val POMODORO_FILE = "pomodoro.csv"
-        val ALL_FILES get() = listOf(SUBJECTS_FILE, ATTENDANCE_FILE, POMODORO_FILE, SETTINGS_FILE)
+        const val TODOS_FILE = "todos.csv"
+        val ALL_FILES get() = listOf(SUBJECTS_FILE, ATTENDANCE_FILE, POMODORO_FILE, TODOS_FILE, SETTINGS_FILE)
         const val SETTINGS_FILE = "settings.csv"
         const val SUBJECTS_FILE = "subjects.csv"
         const val ATTENDANCE_FILE = "attendance.csv"

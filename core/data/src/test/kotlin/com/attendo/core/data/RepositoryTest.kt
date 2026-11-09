@@ -1,5 +1,6 @@
 package com.attendo.core.data
 
+import java.time.LocalTime
 import com.attendo.core.model.AnimationMode
 import com.attendo.core.model.ThemeMode
 import com.attendo.core.model.AttendanceStatus
@@ -47,6 +48,27 @@ class RepositoryTest {
         assertEquals(mapOf("background" to "#101010", "accent" to "#00AAFF"), s.customColors)
         assertEquals(setOf("subjects.csv", "attendance.csv", "settings.csv"), dir.list()!!.toSet())
 
+        dir.deleteRecursively()
+    }
+
+    @Test
+    fun todosSurviveReload() = runTest {
+        val dir = Files.createTempDirectory("attendo").toFile()
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val data = AttendoData(dir, TestScope(dispatcher), dispatcher) { 5L }
+        advanceUntilIdle()
+        val day = LocalDate.of(2026, 11, 18)
+        val reminder = data.todos.add("Revise OS, chapter 4", day, LocalTime.of(19, 30, 12))
+        val plain = data.todos.add("Buy lab record", day)
+        data.todos.setDone(plain.id, true)
+
+        val reloaded = AttendoData(dir, TestScope(dispatcher), dispatcher)
+        advanceUntilIdle()
+        val todos = reloaded.todos.todos.first()
+        assertEquals(LocalTime.of(19, 30), todos.single { it.id == reminder.id }.remindAt)
+        assertEquals(true, todos.single { it.id == plain.id }.done)
+        reloaded.todos.clearDone()
+        assertEquals(listOf(reminder.id), reloaded.todos.todos.first().map { it.id })
         dir.deleteRecursively()
     }
 

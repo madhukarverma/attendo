@@ -1,5 +1,7 @@
 package com.attendo.feature.home
 
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -93,6 +95,7 @@ fun HomeRoute(
     onOpenStats: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenPomodoro: () -> Unit,
+    onOpenTodo: () -> Unit = {},
     calendar: AcademicCalendar = AcademicCalendar.EMPTY,
     onOpenCalendar: (LocalDate) -> Unit = {},
     /** A date picked on the calendar screen; selected once, then [onRequestedDateHandled] clears it. */
@@ -121,6 +124,7 @@ fun HomeRoute(
         onOpenSubject = onOpenSubject,
         onOpenStats = onOpenStats,
         onOpenSettings = onOpenSettings,
+        onOpenTodo = onOpenTodo,
     )
 }
 
@@ -139,6 +143,7 @@ fun HomeScreen(
     onSwipe: (subjectId: String, status: AttendanceStatus) -> Unit = { _, _ -> },
     onUndoSwipe: () -> Unit = {},
     onOpenCalendar: (LocalDate) -> Unit = {},
+    onOpenTodo: () -> Unit = {},
 ) {
     Box(
         Modifier
@@ -213,14 +218,26 @@ fun HomeScreen(
                         modifier = Modifier.animateItem().padding(horizontal = 20.dp),
                     )
                 }
+                // "New subject" used to be the bar's main button; it now lives under the list.
+                item(key = "addSubject") {
+                    AttendoCard(
+                        modifier = Modifier.animateItem().padding(horizontal = 20.dp),
+                        onClick = onAddSubject,
+                    ) {
+                        Icon(Icons.Filled.Add, contentDescription = null, tint = AttendoColors.Green, modifier = Modifier.size(20.dp))
+                        Spacer(Modifier.width(12.dp))
+                        Text("Add a subject", style = MaterialTheme.typography.titleMedium, color = AttendoColors.Green)
+                    }
+                }
             }
             item { Spacer(Modifier.height(96.dp)) }
         }
         }
 
         PillBottomBar(
-            primaryLabel = "New subject",
-            onPrimary = onAddSubject,
+            primaryLabel = "To-do",
+            primaryIcon = Icons.Filled.CheckCircle,
+            onPrimary = onOpenTodo,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(horizontal = 20.dp, vertical = 12.dp),
