@@ -1,5 +1,6 @@
 package com.attendo.feature.subjects
 
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,10 +71,10 @@ class AddSubjectViewModel(private val subjects: SubjectRepository) : ViewModel()
         .map { CourseCatalog.missing(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    fun save(name: String, code: String, target: Int, onSaved: () -> Unit) {
+    fun save(name: String, code: String, target: Int, lectureHours: Int?, onSaved: () -> Unit) {
         if (name.isBlank()) return
         viewModelScope.launch {
-            subjects.add(name, code, target)
+            subjects.add(name, code, target, lectureHours)
             onSaved()
         }
     }
@@ -86,18 +87,19 @@ fun AddSubjectRoute(subjects: SubjectRepository, onClose: () -> Unit) {
     AddSubjectScreen(
         suggestions = suggestions,
         onClose = onClose,
-        onSave = { name, code, target -> vm.save(name, code, target, onClose) },
+        onSave = { name, code, target, hours -> vm.save(name, code, target, hours, onClose) },
     )
 }
 
 @Composable
 fun AddSubjectScreen(
     onClose: () -> Unit,
-    onSave: (name: String, code: String, target: Int) -> Unit,
+    onSave: (name: String, code: String, target: Int, lectureHours: Int?) -> Unit,
     suggestions: List<CatalogSubject> = emptyList(),
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     var code by rememberSaveable { mutableStateOf("") }
+    var hours by rememberSaveable { mutableStateOf("") }
     var target by rememberSaveable { mutableFloatStateOf(Subject.DEFAULT_TARGET_PERCENT.toFloat()) }
 
     Column(
@@ -136,6 +138,7 @@ fun AddSubjectScreen(
                             .iosPress(PressStyle.Scale, onClickLabel = "Use ${s.name}") {
                                 name = s.name
                                 code = s.code
+                                s.lectureHours?.let { hours = it.toString() }
                             }
                             .clip(RoundedCornerShape(16.dp))
                             .background(if (selected) AttendoColors.Ink else AttendoColors.CreamCard)
@@ -163,6 +166,15 @@ fun AddSubjectScreen(
         Spacer(Modifier.height(14.dp))
         FieldLabel("Code (optional)")
         RoundedField(code, { code = it.take(12) }, "e.g. CS201", KeyboardCapitalization.Characters)
+        Spacer(Modifier.height(14.dp))
+        FieldLabel("Lecture hours (optional, 1 lecture = 1 hour)")
+        RoundedField(
+            hours,
+            { hours = it.filter(Char::isDigit).take(3) },
+            "e.g. 45",
+            KeyboardCapitalization.None,
+            KeyboardType.Number,
+        )
         Spacer(Modifier.height(20.dp))
         FieldLabel("Minimum attendance: ${target.roundToInt()}%")
         Slider(
@@ -179,7 +191,7 @@ fun AddSubjectScreen(
         Spacer(Modifier.height(24.dp))
         PrimaryButton(
             text = "Save subject",
-            onClick = { onSave(name, code, target.roundToInt()) },
+            onClick = { onSave(name, code, target.roundToInt(), hours.toIntOrNull()?.takeIf { it > 0 }) },
             enabled = name.isNotBlank(),
         )
         Spacer(Modifier.height(24.dp))
@@ -197,6 +209,7 @@ private fun RoundedField(
     onChange: (String) -> Unit,
     placeholder: String,
     capitalization: KeyboardCapitalization,
+    keyboardType: KeyboardType = KeyboardType.Text,
 ) {
     OutlinedTextField(
         value = value,
@@ -205,7 +218,7 @@ private fun RoundedField(
         singleLine = true,
         shape = RoundedCornerShape(20.dp),
         placeholder = { Text(placeholder) },
-        keyboardOptions = KeyboardOptions(capitalization = capitalization),
+        keyboardOptions = KeyboardOptions(capitalization = capitalization, keyboardType = keyboardType),
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = AttendoColors.CreamCard,
             unfocusedContainerColor = AttendoColors.CreamCard,
@@ -219,5 +232,5 @@ private fun RoundedField(
 @Preview
 @Composable
 private fun AddSubjectPreview() {
-    AttendoTheme { AddSubjectScreen(onClose = {}, onSave = { _, _, _ -> }) }
+    AttendoTheme { AddSubjectScreen(onClose = {}, onSave = { _, _, _, _ -> }) }
 }

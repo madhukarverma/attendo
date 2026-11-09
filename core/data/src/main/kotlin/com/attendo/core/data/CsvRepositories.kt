@@ -100,7 +100,7 @@ internal class CsvSubjectRepository(
     private val store = CsvStore(
         table = CsvTable(
             File(dir, AttendoData.SUBJECTS_FILE),
-            listOf("id", "name", "code", "target_percent", "created_at"),
+            listOf("id", "name", "code", "target_percent", "created_at", "lecture_hours"),
         ),
         scope = scope,
         io = io,
@@ -115,6 +115,7 @@ internal class CsvSubjectRepository(
                     code = r["code"].orEmpty(),
                     targetPercent = r["target_percent"]?.toIntOrNull() ?: Subject.DEFAULT_TARGET_PERCENT,
                     createdAt = r["created_at"]?.toLongOrNull() ?: 0L,
+                    lectureHours = r["lecture_hours"]?.toIntOrNull()?.takeIf { it > 0 },
                 )
             }
         },
@@ -125,19 +126,21 @@ internal class CsvSubjectRepository(
                 "code" to s.code,
                 "target_percent" to s.targetPercent.toString(),
                 "created_at" to s.createdAt.toString(),
+                "lecture_hours" to (s.lectureHours?.toString() ?: ""),
             )
         },
     )
 
     override val subjects: Flow<List<Subject>> = store.items.filterNotNull()
 
-    override suspend fun add(name: String, code: String, targetPercent: Int): Subject {
+    override suspend fun add(name: String, code: String, targetPercent: Int, lectureHours: Int?): Subject {
         val subject = Subject(
             id = UUID.randomUUID().toString(),
             name = name.trim(),
             code = code.trim(),
             targetPercent = targetPercent.coerceIn(0, 100),
             createdAt = clock(),
+            lectureHours = lectureHours?.takeIf { it > 0 },
         )
         store.update { it + subject }
         return subject
@@ -153,6 +156,7 @@ internal class CsvSubjectRepository(
                     code = c.code,
                     targetPercent = targetPercent.coerceIn(0, 100),
                     createdAt = clock() + i, // keeps catalog order stable
+                    lectureHours = c.lectureHours,
                 )
             }
             added = toAdd.size

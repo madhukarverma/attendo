@@ -34,7 +34,7 @@ interface SettingsRepository {
 
 interface SubjectRepository {
     val subjects: Flow<List<Subject>>
-    suspend fun add(name: String, code: String, targetPercent: Int): Subject
+    suspend fun add(name: String, code: String, targetPercent: Int, lectureHours: Int? = null): Subject
 
     /** Adds catalog subjects whose code isn't present yet, in one write. Returns how many were added. */
     suspend fun addFromCatalog(items: List<CatalogSubject>, targetPercent: Int = Subject.DEFAULT_TARGET_PERCENT): Int

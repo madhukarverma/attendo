@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-09 — v0.17.0 lecture hours
+- Subjects have optional total lecture hours (`lecture_hours` column in subjects.csv; 1 lecture =
+  1 hour). Lectures left = hours - classes held (cancelled classes don't count).
+- Subject detail: "Course hours" card (lectures left, progress, edit dialog) and an outlook line
+  (how many of the remaining lectures can be missed and still finish at the target, or the best
+  final percentage when the target is out of reach). Add-subject form takes the hours too; Home
+  rows show "N left".
+
 ## 2026-11-09 — v0.16.0 nickname
 - Names longer than 10 characters are shown as their first 4 letters ("Prabhanshu Kumar" ->
   "Prab") via `Nickname.of` / `AppSettings.nickname`. The full name stays in settings.csv;
