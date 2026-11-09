@@ -22,7 +22,7 @@ internal class CsvTodoRepository(
     private val clock: () -> Long,
 ) : TodoRepository {
 
-    private val store = CsvStore(
+    internal val store = CsvStore(
         table = CsvTable(
             File(dir, AttendoData.TODOS_FILE),
             listOf("id", "title", "date", "remind_at", "done", "created_at"),

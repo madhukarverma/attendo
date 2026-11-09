@@ -1,5 +1,6 @@
 package com.attendo.feature.settings
 
+import com.attendo.core.data.backup.CsvImportPlan
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,10 +17,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -42,7 +39,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.attendo.core.data.SettingsRepository
-import com.attendo.core.designsystem.component.AttendoCard
 import com.attendo.core.designsystem.component.DeveloperCredit
 import com.attendo.core.designsystem.component.PrimaryButton
 import com.attendo.core.designsystem.motion.BounceContainer
@@ -94,6 +90,10 @@ fun SettingsRoute(
     onClose: () -> Unit,
     onPickLaunchImage: (Uri) -> Unit = {},
     onRemoveLaunchImage: () -> Unit = {},
+    onPlanCsvImport: suspend (List<Uri>) -> CsvImportPlan = { CsvImportPlan(emptyList(), emptyList()) },
+    onApplyCsvImport: suspend (CsvImportPlan) -> Map<String, Int> = { emptyMap() },
+    /** Backup › Google account card, provided by the app module (it owns the Google sign-in). */
+    accountSection: @Composable () -> Unit = {},
 ) {
     val vm: SettingsViewModel = viewModel { SettingsViewModel(settings) }
     val state by vm.state.collectAsStateWithLifecycle()
@@ -117,6 +117,11 @@ fun SettingsRoute(
                 onRemove = onRemoveLaunchImage,
             )
         },
+        backupSection = {
+            accountSection()
+            Spacer(Modifier.height(12.dp))
+            CsvBackupSection(onExport = onExportCsv, onPlanImport = onPlanCsvImport, onApplyImport = onApplyCsvImport)
+        },
     )
 }
 
@@ -134,6 +139,7 @@ fun SettingsScreen(
     onThemeChange: (ThemeMode) -> Unit = {},
     onCustomColorsChange: (Map<String, String>) -> Unit = {},
     launchSection: @Composable () -> Unit = {},
+    backupSection: @Composable () -> Unit = { PrimaryButton("Export CSV files", onClick = onExportCsv) },
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     LaunchedEffect(savedName) { if (savedName != null && name.isEmpty()) name = savedName }
@@ -197,28 +203,8 @@ fun SettingsScreen(
                 SectionTitle("Launch screen")
                 launchSection()
 
-                SectionTitle("Your data")
-                AttendoCard {
-                    Icon(Icons.Filled.Info, contentDescription = null, modifier = Modifier.size(20.dp))
-                    Spacer(Modifier.width(14.dp))
-                    Text(
-                        "Everything is stored on this phone as CSV files: subjects.csv, attendance.csv, " +
-                            "pomodoro.csv, todos.csv and settings.csv. Export them to open in Excel or Google Sheets.",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-                Spacer(Modifier.height(14.dp))
-                PrimaryButton("Export CSV files", onClick = onExportCsv)
-                Spacer(Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Share, contentDescription = null, tint = AttendoColors.Muted, modifier = Modifier.size(14.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        "Opens the share sheet: save to Drive, email, or Files.",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = AttendoColors.Muted,
-                    )
-                }
+                SectionTitle("Backup")
+                backupSection()
 
                 SectionTitle("About")
                 Text("Attendo $appVersion", style = MaterialTheme.typography.bodyMedium, color = AttendoColors.Muted)

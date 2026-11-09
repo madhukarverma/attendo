@@ -36,6 +36,16 @@ internal class CsvStore<T>(
         }
     }
 
+    /**
+     * Replaces the whole table with [rows] (header-keyed, e.g. from an imported CSV). Rows that don't
+     * decode are dropped. Returns how many were kept.
+     */
+    suspend fun replaceRows(rows: List<Map<String, String>>): Int {
+        val decoded = rows.mapNotNull { runCatching { decode(it) }.getOrNull() }
+        update { decoded }
+        return decoded.size
+    }
+
     suspend fun update(transform: (List<T>) -> List<T>) {
         mutex.withLock {
             val current = _items.value ?: withContext(io) { table.read().mapNotNull(decode) }

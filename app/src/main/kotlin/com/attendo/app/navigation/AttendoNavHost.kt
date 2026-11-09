@@ -1,5 +1,6 @@
 package com.attendo.app.navigation
 
+import com.attendo.app.CsvImporter
 import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -295,6 +296,8 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                                 data.settings.setLaunchImage(enabled = false, backgroundHex = null)
                             }
                         },
+                        onPlanCsvImport = { uris -> data.planCsvImport(CsvImporter.read(context, uris)) },
+                        onApplyCsvImport = { plan -> data.applyCsvImport(plan) },
                     )
                 }
                 composable(Routes.SUBJECT_DETAIL) { entry ->

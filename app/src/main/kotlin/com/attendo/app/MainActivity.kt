@@ -47,6 +47,8 @@ import com.attendo.feature.splash.LogoSplash
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 
+private data class LaunchImageResult(val forImage: Boolean, val image: ImageBitmap?)
+
 class MainActivity : ComponentActivity() {
 
     private lateinit var recomposer: Recomposer
@@ -100,10 +102,16 @@ class MainActivity : ComponentActivity() {
                     if (mode == AnimationMode.NONE) showSplash = false
                     // The user's launch image (picked in Settings), decoded off the main thread.
                     val wantsImage = settings?.launchImage == true
-                    val image by produceState<ImageBitmap?>(null, wantsImage) {
-                        value = if (wantsImage) LaunchImageStore.load(this@MainActivity) else null
+                    // `forImage` says which request the value answers, so a missing or unreadable
+                    // file (e.g. after a restore) shows the launch screen without it instead of hanging.
+                    val launchImage by produceState(LaunchImageResult(forImage = false, image = null), wantsImage) {
+                        value = LaunchImageResult(
+                            forImage = wantsImage,
+                            image = if (wantsImage) runCatching { LaunchImageStore.load(this@MainActivity) }.getOrNull() else null,
+                        )
                     }
-                    val ready = settings != null && (!wantsImage || image != null)
+                    val image = launchImage.image
+                    val ready = settings != null && (!wantsImage || launchImage.forImage)
                     val launchBg = settings?.launchBackground?.let(::parseHexColor) ?: LaunchBackground
                     Box(Modifier.fillMaxSize()) {
                         val open by openRequest.collectAsStateWithLifecycle()
