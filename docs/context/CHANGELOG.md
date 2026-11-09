@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-09 — v0.20.0 restore from CSV
+- Settings › Backup › CSV files: Export (as before) and Restore. Restore opens the system file
+  picker (several files at once), matches each file to a table by its header row (renamed files,
+  Excel's BOM/CRLF and reordered columns are fine), shows what will be replaced and how many rows,
+  then replaces only those tables. Rows that don't decode are skipped.
+- Data layer: `AttendoData.planCsvImport` / `applyCsvImport`, plus `snapshot` / `restoreSnapshot`
+  (full replace) for the coming account backup; `CsvStore.replaceRows`.
+- Launch screen no longer waits forever if settings say there's a launch image but the file is gone.
+
 ## 2026-11-09 — v0.19.0 Home summary + tab bar
 - New `:feature:dashboard` = Home tab and start screen: greeting with the nickname, attendance card
   (overall %, subjects below target, today's marking, lectures left, Penta's mood), Pomodoro card

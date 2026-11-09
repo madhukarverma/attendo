@@ -20,7 +20,7 @@ internal class CsvPomodoroRepository(
     io: CoroutineDispatcher,
 ) : PomodoroRepository {
 
-    private val store = CsvStore(
+    internal val store = CsvStore(
         table = CsvTable(
             File(dir, AttendoData.POMODORO_FILE),
             listOf("id", "date", "started_at", "kind", "subject_id", "planned_seconds", "actual_seconds", "completed"),

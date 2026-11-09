@@ -73,6 +73,39 @@ class RepositoryTest {
     }
 
     @Test
+    fun csvImportMatchesTablesByHeaderAndReplaces() = runTest {
+        val dir = Files.createTempDirectory("attendo").toFile()
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val data = AttendoData(dir, TestScope(dispatcher), dispatcher)
+        advanceUntilIdle()
+        data.subjects.add("Old subject", "X1", 75)
+
+        val plan = data.planCsvImport(
+            listOf(
+                // Renamed file, BOM and reordered columns (as Excel might save it); one bad row.
+                "subjects (1).csv" to "\uFEFFname,id,target_percent,code\r\nDSA,s1,75,CA717\r\nOS,s2,80,CA719\r\n,,,\r\n",
+                "marks.csv" to "subject_id,date,status,updated_at\ns1,2026-11-09,PRESENT,0\n",
+                "notes.csv" to "foo,bar\n1,2\n",
+            ),
+        )
+        assertEquals(listOf("subjects.csv", "attendance.csv"), plan.tables.map { it.file })
+        assertEquals(listOf("notes.csv"), plan.unrecognised)
+
+        val kept = data.applyCsvImport(plan)
+        assertEquals(mapOf("subjects.csv" to 2, "attendance.csv" to 1), kept)
+        assertEquals(listOf("DSA", "OS"), data.subjects.subjects.first().map { it.name })
+        assertEquals(80, data.subjects.subjects.first().last().targetPercent)
+
+        // A full snapshot restore empties tables that aren't in the backup.
+        val snapshot = data.snapshot()
+        data.todos.add("Temp", LocalDate.of(2026, 11, 10))
+        data.restoreSnapshot(snapshot)
+        assertEquals(emptyList<Any>(), data.todos.todos.first())
+        assertEquals(2, data.subjects.subjects.first().size)
+        dir.deleteRecursively()
+    }
+
+    @Test
     fun addFromCatalogSkipsExistingCodes() = runTest {
         val dir = Files.createTempDirectory("attendo").toFile()
         val dispatcher = StandardTestDispatcher(testScheduler)

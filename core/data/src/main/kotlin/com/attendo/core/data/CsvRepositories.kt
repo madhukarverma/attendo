@@ -25,7 +25,7 @@ internal class CsvSettingsRepository(
     io: CoroutineDispatcher,
 ) : SettingsRepository {
 
-    private val store = CsvStore(
+    internal val store = CsvStore(
         table = CsvTable(File(dir, AttendoData.SETTINGS_FILE), listOf("key", "value")),
         scope = scope,
         io = io,
@@ -97,7 +97,7 @@ internal class CsvSubjectRepository(
     private val clock: () -> Long,
 ) : SubjectRepository {
 
-    private val store = CsvStore(
+    internal val store = CsvStore(
         table = CsvTable(
             File(dir, AttendoData.SUBJECTS_FILE),
             listOf("id", "name", "code", "target_percent", "created_at", "lecture_hours"),
@@ -179,7 +179,7 @@ internal class CsvAttendanceRepository(
     private val clock: () -> Long,
 ) : AttendanceRepository {
 
-    private val store = CsvStore(
+    internal val store = CsvStore(
         table = CsvTable(
             File(dir, AttendoData.ATTENDANCE_FILE),
             listOf("subject_id", "date", "status", "updated_at"),
