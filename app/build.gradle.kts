@@ -46,6 +46,7 @@ dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":feature:onboarding"))
     implementation(project(":feature:home"))
+    implementation(project(":feature:subjects"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

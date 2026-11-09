@@ -14,6 +14,13 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import com.attendo.core.data.SubjectRepository
+import com.attendo.core.designsystem.component.AttendoCard
+import com.attendo.core.designsystem.component.StatusLabel
+import com.attendo.core.model.Subject
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
@@ -46,11 +53,12 @@ import java.time.LocalDate
 @Composable
 fun HomeRoute(
     settings: SettingsRepository,
+    subjects: SubjectRepository,
     onAddSubject: () -> Unit,
     onOpenStats: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
-    val vm: HomeViewModel = viewModel { HomeViewModel(settings) }
+    val vm: HomeViewModel = viewModel { HomeViewModel(settings, subjects) }
     val state by vm.uiState.collectAsStateWithLifecycle()
     HomeScreen(
         state = state,
@@ -90,8 +98,15 @@ fun HomeScreen(
             }
             item {
                 MascotHeader(
-                    message = "Add your subjects and start tracking your attendance!",
+                    message = if (state.subjects.isEmpty()) {
+                        "Add your subjects and start tracking your attendance!"
+                    } else {
+                        "Showing up is half the battle. Let's go!"
+                    },
                 )
+            }
+            items(state.subjects, key = { it.id }) { subject ->
+                SubjectRow(subject, Modifier.padding(horizontal = 20.dp))
             }
             item { Spacer(Modifier.height(96.dp)) }
         }
@@ -134,10 +149,47 @@ internal fun MascotHeader(message: String, modifier: Modifier = Modifier) {
     }
 }
 
+/** Rounded square with the subject's initials, standing in for the row icon in the design. */
+@Composable
+internal fun SubjectBadge(subject: Subject) {
+    Box(
+        Modifier
+            .size(36.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(AttendoColors.CreamDeep),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            subject.name.split(" ").filter { it.isNotBlank() }.take(2).joinToString("") { it.first().uppercase() },
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+        )
+    }
+}
+
+@Composable
+internal fun SubjectRow(subject: Subject, modifier: Modifier = Modifier) {
+    AttendoCard(modifier) {
+        SubjectBadge(subject)
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(subject.name, style = MaterialTheme.typography.titleMedium)
+            StatusLabel(text = subject.code.ifBlank { "New" }, color = AttendoColors.Pink, symbol = "✱")
+        }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("${subject.targetPercent}%", style = MaterialTheme.typography.titleMedium)
+            Text("target", style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
+        }
+    }
+}
+
 @Preview
 @Composable
 private fun HomePreview() {
     AttendoTheme {
-        HomeScreen(HomeUiState(userName = "Madhukar"), {}, {}, {}, {})
+        HomeScreen(
+            HomeUiState(userName = "Madhukar", subjects = listOf(Subject("1", "Data Structures", "CS201"))),
+            {}, {}, {}, {},
+        )
     }
 }
