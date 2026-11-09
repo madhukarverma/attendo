@@ -220,7 +220,7 @@ fun HomeScreen(
             BarIconButton(onClick = onOpenPomodoro, contentDescription = "Pomodoro timer") { TimerGlyph() }
             BarIconButton(onClick = onOpenStats, contentDescription = "Statistics") { StatsGlyph() }
             BarIconButton(onClick = onOpenSettings, contentDescription = "Settings") {
-                Icon(Icons.Filled.Settings, contentDescription = null, tint = AttendoColors.Cream)
+                Icon(Icons.Filled.Settings, contentDescription = null, tint = AttendoColors.OnHero)
             }
         }
     }

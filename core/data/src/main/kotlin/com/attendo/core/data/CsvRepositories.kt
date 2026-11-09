@@ -4,6 +4,7 @@ import com.attendo.core.data.csv.CsvStore
 import com.attendo.core.data.csv.CsvTable
 import com.attendo.core.model.AnimationMode
 import com.attendo.core.model.AppSettings
+import com.attendo.core.model.ThemeMode
 import com.attendo.core.model.AttendanceRecord
 import com.attendo.core.model.AttendanceStatus
 import com.attendo.core.model.CatalogSubject
@@ -42,9 +43,20 @@ internal class CsvSettingsRepository(
                     // Migrate the v0.10 on/off switch.
                     ?: if (m[KEY_IOS_MOTION] == "false") AnimationMode.NONE else AnimationMode.IOS,
                 tinderMode = m[KEY_TINDER_MODE] == "true",
+                theme = m[KEY_THEME]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() } ?: ThemeMode.LIGHT,
+                customColors = m.filterKeys { it.startsWith(COLOR_PREFIX) }
+                    .mapKeys { (k, _) -> k.removePrefix(COLOR_PREFIX) },
             )
         }
     }
+
+    override suspend fun setTheme(mode: ThemeMode) = put(KEY_THEME, mode.name)
+
+    override suspend fun setCustomColors(colors: Map<String, String>) =
+        store.update { list ->
+            val keys = colors.keys.map { COLOR_PREFIX + it }.toSet()
+            list.filterNot { it.first in keys } + colors.map { (k, v) -> COLOR_PREFIX + k to v }
+        }
 
     override suspend fun setTinderMode(enabled: Boolean) = put(KEY_TINDER_MODE, enabled.toString())
 
@@ -63,6 +75,8 @@ internal class CsvSettingsRepository(
         const val KEY_IOS_MOTION = "ios_motion" // legacy (v0.5 – v0.11)
         const val KEY_ANIMATION_MODE = "animation_mode"
         const val KEY_TINDER_MODE = "tinder_mode"
+        const val KEY_THEME = "theme"
+        const val COLOR_PREFIX = "color."
     }
 }
 

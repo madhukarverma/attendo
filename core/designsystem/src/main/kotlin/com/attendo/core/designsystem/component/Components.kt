@@ -161,7 +161,7 @@ fun PillBottomBar(
         modifier
             .fillMaxWidth()
             .clip(CircleShape)
-            .background(AttendoColors.Ink)
+            .background(AttendoColors.Hero)
             .padding(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -192,7 +192,7 @@ fun BarIconButton(onClick: () -> Unit, contentDescription: String, content: @Com
 
 /** Three-bar "stats" glyph drawn in code (the icon isn't in material-icons-core). */
 @Composable
-fun StatsGlyph(color: Color = AttendoColors.Cream, size: Dp = 22.dp) {
+fun StatsGlyph(color: Color = AttendoColors.OnHero, size: Dp = 22.dp) {
     Canvas(Modifier.size(size)) {
         val w = this.size.width * 0.18f
         listOf(0.25f to 0.45f, 0.5f to 0.15f, 0.75f to 0.65f).forEach { (x, top) ->
@@ -209,7 +209,7 @@ fun StatsGlyph(color: Color = AttendoColors.Cream, size: Dp = 22.dp) {
 
 /** Stopwatch glyph for the Pomodoro button (not in material-icons-core). */
 @Composable
-fun TimerGlyph(color: Color = AttendoColors.Cream, size: Dp = 22.dp) {
+fun TimerGlyph(color: Color = AttendoColors.OnHero, size: Dp = 22.dp) {
     Canvas(Modifier.size(size)) {
         val s = this.size.minDimension
         val stroke = s * 0.11f

@@ -406,7 +406,7 @@ private fun OverviewCard(summary: PomodoroSummary) {
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(28.dp))
-            .background(AttendoColors.Ink)
+            .background(AttendoColors.Hero)
             .padding(24.dp),
     ) {
         Text("FOCUSED TODAY", style = MaterialTheme.typography.labelMedium, color = AttendoColors.Muted)
@@ -427,7 +427,7 @@ private fun OverviewCard(summary: PomodoroSummary) {
 @Composable
 private fun Stat(label: String, value: String) {
     Column {
-        Text(value, style = MaterialTheme.typography.titleMedium, color = AttendoColors.Cream)
+        Text(value, style = MaterialTheme.typography.titleMedium, color = AttendoColors.OnHero)
         Text(label, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
     }
 }

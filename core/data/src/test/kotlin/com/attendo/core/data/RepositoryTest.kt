@@ -1,6 +1,7 @@
 package com.attendo.core.data
 
 import com.attendo.core.model.AnimationMode
+import com.attendo.core.model.ThemeMode
 import com.attendo.core.model.AttendanceStatus
 import com.attendo.core.model.CourseCatalog
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,6 +38,12 @@ class RepositoryTest {
         assertEquals(AnimationMode.IOS, reloaded.settings.settings.first()?.animationMode)
         reloaded.settings.setAnimationMode(AnimationMode.SMOOTH)
         assertEquals(AnimationMode.SMOOTH, reloaded.settings.settings.first()?.animationMode)
+        reloaded.settings.setTheme(ThemeMode.CUSTOM)
+        reloaded.settings.setCustomColors(mapOf("background" to "#101010", "accent" to "#FF8800"))
+        reloaded.settings.setCustomColors(mapOf("accent" to "#00AAFF"))
+        val s = reloaded.settings.settings.first()!!
+        assertEquals(ThemeMode.CUSTOM, s.theme)
+        assertEquals(mapOf("background" to "#101010", "accent" to "#00AAFF"), s.customColors)
         assertEquals(setOf("subjects.csv", "attendance.csv", "settings.csv"), dir.list()!!.toSet())
 
         dir.deleteRecursively()
