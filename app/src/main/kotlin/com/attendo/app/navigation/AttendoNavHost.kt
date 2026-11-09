@@ -195,6 +195,7 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                     OnboardingRoute(
                         settings = data.settings,
                         subjects = data.subjects,
+                        googleBackup = container.googleBackup,
                         onFinished = {
                             navController.navigate(Routes.HOME) {
                                 popUpTo(Routes.ONBOARDING) { inclusive = true }
@@ -296,6 +297,7 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                                 data.settings.setLaunchImage(enabled = false, backgroundHex = null)
                             }
                         },
+                        googleBackup = container.googleBackup,
                         onPlanCsvImport = { uris -> data.planCsvImport(CsvImporter.read(context, uris)) },
                         onApplyCsvImport = { plan -> data.applyCsvImport(plan) },
                     )

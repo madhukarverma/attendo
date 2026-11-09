@@ -1,7 +1,8 @@
 # Current State
 
 ## Active task
-v0.19.0 released. Next: real-device feedback (reminders, tab bar, themes, animation modes).
+v0.21.0 released (CSV restore, Google account backup). Next: the user creates the Google Cloud
+OAuth client (docs/GOOGLE_BACKUP_SETUP.md), then real-device testing.
 
 ## Verified progress (2026-11-09)
 - `./gradlew test assembleRelease` passes (JDK 17, SDK 34); 31 unit tests (attendance maths incl.
@@ -11,11 +12,15 @@ v0.19.0 released. Next: real-device feedback (reminders, tab bar, themes, animat
   (latest: https://github.com/madhukarverma/attendo/releases/latest/download/Attendo.apk).
 - Navigation: tabs Home (summary) · Classes (attendance) · To-do · Timer · Stats; Settings from Home.
 - Data files: settings.csv, subjects.csv (incl. lecture_hours), attendance.csv, pomodoro.csv, todos.csv.
+  Backup: CSV export/restore (Settings › Backup) and the Google account backup
+  (`attendo-backup.zip` in Drive app data; account state in filesDir/backup/account.csv).
 
 ## Not yet verified
 - Nothing has been run on a phone or emulator; UI is checked only by compilation.
 - Reminder delivery (exact alarms, Doze, OEM battery savers), notification permission flow,
   re-arming after reboot.
+- Google sign-in and Drive calls: nothing has run against Google yet (needs the OAuth client);
+  only compiled. CSV restore is unit-tested in core:data, not on a device.
 - Dark theme contrast fix (v0.15) and the custom Recomposer / refresh-rate request on hardware.
 
 ## Next actions

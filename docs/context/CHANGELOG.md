@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-09 — v0.21.0 Google account backup
+- New `:core:backup` module (`GoogleDriveBackup`): Google sign-in via Play services
+  `AuthorizationClient` for the `drive.appdata` scope, and a small Drive v3 REST client. All CSV
+  files plus the launch image are stored as one `attendo-backup.zip` (with `manifest.csv`) in the
+  account's hidden app-data folder; only the newest copy is kept.
+- Settings › Backup › Google account: sign in, last backup time, automatic backup a few seconds
+  after every change (switch), Back up now, Restore (confirm), Sign out (revokes access, the backup
+  stays). At sign-in: no backup → upload; empty phone → restore; both → the user chooses.
+- Welcome screen: "Used Attendo before? Restore from Google" restores and skips set-up.
+- Needs a one-time Google Cloud OAuth client for `com.attendo.app` + the signing SHA-1:
+  `docs/GOOGLE_BACKUP_SETUP.md`. Adds the INTERNET permission.
+
 ## 2026-11-09 — v0.20.0 restore from CSV
 - Settings › Backup › CSV files: Export (as before) and Restore. Restore opens the system file
   picker (several files at once), matches each file to a table by its header row (renamed files,

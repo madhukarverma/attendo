@@ -1,5 +1,6 @@
 package com.attendo.feature.settings
 
+import com.attendo.core.backup.GoogleDriveBackup
 import com.attendo.core.data.backup.CsvImportPlan
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -92,8 +93,8 @@ fun SettingsRoute(
     onRemoveLaunchImage: () -> Unit = {},
     onPlanCsvImport: suspend (List<Uri>) -> CsvImportPlan = { CsvImportPlan(emptyList(), emptyList()) },
     onApplyCsvImport: suspend (CsvImportPlan) -> Map<String, Int> = { emptyMap() },
-    /** Backup › Google account card, provided by the app module (it owns the Google sign-in). */
-    accountSection: @Composable () -> Unit = {},
+    /** Backup › Google account; null hides the card. */
+    googleBackup: GoogleDriveBackup? = null,
 ) {
     val vm: SettingsViewModel = viewModel { SettingsViewModel(settings) }
     val state by vm.state.collectAsStateWithLifecycle()
@@ -118,8 +119,10 @@ fun SettingsRoute(
             )
         },
         backupSection = {
-            accountSection()
-            Spacer(Modifier.height(12.dp))
+            if (googleBackup != null) {
+                GoogleBackupSection(googleBackup)
+                Spacer(Modifier.height(12.dp))
+            }
             CsvBackupSection(onExport = onExportCsv, onPlanImport = onPlanCsvImport, onApplyImport = onApplyCsvImport)
         },
     )

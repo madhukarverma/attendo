@@ -23,7 +23,9 @@ designs (dark onboarding, cream home, green geometric mascots, handwritten speec
 ## Constraints
 - **All app data stored as CSV** in `filesDir/data/` (`settings.csv`, `subjects.csv`, `attendance.csv`,
   `pomodoro.csv`, `todos.csv`).
-- Feature modules must not depend on each other; they talk to `:core:data` interfaces only.
+- Feature modules must not depend on each other; they talk to `:core:data` interfaces only
+  (and `:core:backup` for the optional Google account backup).
+- Works fully offline; the network is used only for the optional Google account backup.
 - Keep features minimal; refinement comes later.
 
 ## Design tokens

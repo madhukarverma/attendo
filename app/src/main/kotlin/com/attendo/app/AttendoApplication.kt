@@ -1,5 +1,6 @@
 package com.attendo.app
 
+import com.attendo.core.backup.GoogleDriveBackup
 import com.attendo.app.reminders.ReminderNotifications
 import com.attendo.app.reminders.ReminderScheduler
 import kotlinx.coroutines.launch
@@ -22,6 +23,15 @@ class AppContainer(application: Application) {
 
     /** Semester calendar bundled as calendar/academic_calendar.csv (from the official PDF). */
     val academicCalendar by lazy { AcademicCalendarLoader.bundled() }
+
+    /** Settings › Backup › Google account: all data in the account's hidden Drive app folder. */
+    val googleBackup = GoogleDriveBackup(
+        context = application,
+        data = data,
+        scope = appScope,
+        appVersion = BuildConfig.VERSION_NAME,
+        extraFiles = mapOf(LaunchImageStore.FILE_NAME to LaunchImageStore.file(application)),
+    )
 
     /** One alarm per pending reminder in todos.csv. */
     val reminders = ReminderScheduler(application)
