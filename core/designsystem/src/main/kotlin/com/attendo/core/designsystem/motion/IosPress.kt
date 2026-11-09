@@ -13,6 +13,7 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.graphicsLayer
 import com.attendo.core.designsystem.theme.AttendoColors
+import com.attendo.core.model.AnimationMode
 
 enum class PressStyle {
     /** Table-row grey flash that fades out after release (UITableViewCell). */
@@ -26,8 +27,11 @@ enum class PressStyle {
 }
 
 /**
- * Click handling with iOS press feedback instead of the Material ripple. With animations switched
- * off, [AppMotionScale] makes the same feedback appear and disappear instantly (no ripple at all).
+ * Click handling whose feedback follows the Animations setting:
+ * - IOS: highlight/dim appear instantly and fade out; scale uses a snappy spring.
+ * - SMOOTH: the same effects, but both press and release ease gently (nothing pops).
+ * - ANDROID: the standard Material ripple.
+ * - NONE: the press state shows and clears instantly; no ripple.
  */
 fun Modifier.iosPress(
     style: PressStyle = PressStyle.Highlight,
@@ -35,6 +39,11 @@ fun Modifier.iosPress(
     onClickLabel: String? = null,
     onClick: () -> Unit,
 ): Modifier = composed {
+    val mode = LocalAnimationMode.current
+    if (mode == AnimationMode.ANDROID) {
+        return@composed clickable(enabled = enabled, onClickLabel = onClickLabel, onClick = onClick)
+    }
+    val smooth = mode == AnimationMode.SMOOTH
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val base = clickable(
@@ -48,7 +57,11 @@ fun Modifier.iosPress(
         PressStyle.Highlight -> {
             val amount by animateFloatAsState(
                 targetValue = if (pressed) 1f else 0f,
-                animationSpec = if (pressed) snap() else tween(320),
+                animationSpec = when {
+                    smooth -> tween(if (pressed) 140 else 450)
+                    pressed -> snap()
+                    else -> tween(320)
+                },
                 label = "highlight",
             )
             drawWithContent {
@@ -59,7 +72,11 @@ fun Modifier.iosPress(
         PressStyle.Dim -> {
             val alpha by animateFloatAsState(
                 targetValue = if (pressed) 0.45f else 1f,
-                animationSpec = if (pressed) snap() else tween(220),
+                animationSpec = when {
+                    smooth -> tween(if (pressed) 160 else 400)
+                    pressed -> snap()
+                    else -> tween(220)
+                },
                 label = "dim",
             )
             graphicsLayer { this.alpha = alpha }.then(base)
@@ -67,7 +84,7 @@ fun Modifier.iosPress(
         PressStyle.Scale -> {
             val scale by animateFloatAsState(
                 targetValue = if (pressed) 0.95f else 1f,
-                animationSpec = IosMotion.bouncy(),
+                animationSpec = Motion.bouncy(),
                 label = "scale",
             )
             graphicsLayer {

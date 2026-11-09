@@ -19,8 +19,13 @@ import androidx.navigation.compose.rememberNavController
 import com.attendo.app.AppContainer
 import com.attendo.app.BuildConfig
 import com.attendo.app.CsvExporter
-import com.attendo.core.designsystem.motion.LocalIosMotion
+import android.app.Activity
+import androidx.compose.runtime.LaunchedEffect
+import com.attendo.app.preferHighRefreshRate
 import com.attendo.core.designsystem.motion.AppMotionScale
+import com.attendo.core.designsystem.motion.LocalAnimationMode
+import com.attendo.core.designsystem.motion.Motion
+import com.attendo.core.model.AnimationMode
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.runtime.SideEffect
@@ -78,21 +83,34 @@ fun AttendoNavHost(container: AppContainer) {
 
     val navController = rememberNavController()
     val start = remember { if (loaded.onboarded) Routes.HOME else Routes.ONBOARDING }
-    val transitions = remember(loaded.iosMotion) { NavTransitions(loaded.iosMotion, Routes.MODAL) }
-    // The Animations switch: off makes every Compose animation in the app complete instantly.
-    SideEffect { AppMotionScale.enabled = loaded.iosMotion }
+    val mode = loaded.animationMode
+    val transitions = remember(mode) { NavTransitions(mode, Routes.MODAL) }
+    // Apply the Animations setting app-wide: motion tokens, the global duration scale (NONE = 0)
+    // and the display refresh rate (SMOOTH/IOS ask for the panel's highest rate).
+    val activity = LocalContext.current as? Activity
+    SideEffect {
+        Motion.mode = mode
+        AppMotionScale.enabled = mode != AnimationMode.NONE
+    }
+    LaunchedEffect(mode) {
+        activity?.preferHighRefreshRate(mode == AnimationMode.SMOOTH || mode == AnimationMode.IOS)
+    }
 
     @OptIn(ExperimentalFoundationApi::class)
     CompositionLocalProvider(
-        LocalIosMotion provides loaded.iosMotion,
-        // No Android stretch overscroll anywhere: iOS mode uses the rubber band, off mode nothing.
-        LocalOverscrollConfiguration provides null,
+        LocalAnimationMode provides mode,
+        // Stretch overscroll only in Android mode; iOS/Smooth use the rubber band, None nothing.
+        LocalOverscrollConfiguration provides
+            if (mode == AnimationMode.ANDROID) LocalOverscrollConfiguration.current else null,
     ) {
         NavHost(
             navController = navController,
             startDestination = start,
-            // Black backdrop: covered screens fade towards it, giving the iOS dimming effect.
-            modifier = Modifier.fillMaxSize().background(Color.Black),
+            // iOS: black backdrop so covered screens dim as they fade. Other modes: the app
+            // background, so cross-fades never flash dark.
+            modifier = Modifier
+                .fillMaxSize()
+                .background(if (mode == AnimationMode.IOS) Color.Black else AttendoColors.Cream),
             enterTransition = transitions.enter,
             exitTransition = transitions.exit,
             popEnterTransition = transitions.popEnter,

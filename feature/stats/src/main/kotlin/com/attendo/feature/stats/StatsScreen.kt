@@ -8,7 +8,7 @@ import androidx.compose.runtime.remember
 import com.attendo.core.designsystem.component.AnimatedNumber
 import com.attendo.core.designsystem.motion.BounceContainer
 import com.attendo.core.designsystem.motion.CollapsingTopBar
-import com.attendo.core.designsystem.motion.IosMotion
+import com.attendo.core.designsystem.motion.Motion
 import com.attendo.core.designsystem.motion.LargeTitle
 import com.attendo.core.designsystem.motion.rememberCollapseFraction
 import androidx.compose.foundation.layout.Arrangement
@@ -156,7 +156,7 @@ private fun SubjectBar(summary: AttendanceSummary, modifier: Modifier = Modifier
     // Bars grow from zero on first show, then spring to new values.
     val target = (summary.percent / 100).toFloat().coerceIn(0f, 1f)
     val progress = remember { Animatable(0f) }
-    LaunchedEffect(target) { progress.animateTo(target, IosMotion.settle()) }
+    LaunchedEffect(target) { progress.animateTo(target, Motion.settle()) }
     Column(
         modifier
             .fillMaxWidth()

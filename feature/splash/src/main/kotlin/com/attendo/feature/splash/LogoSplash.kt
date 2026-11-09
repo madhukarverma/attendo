@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.attendo.core.designsystem.component.DeveloperCredit
 import com.attendo.core.designsystem.component.LaunchArt
 import com.attendo.core.designsystem.component.LaunchBackground
-import com.attendo.core.designsystem.motion.IosMotion
+import com.attendo.core.designsystem.motion.Motion
 import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.core.designsystem.theme.AttendoTheme
 import kotlinx.coroutines.delay
@@ -46,10 +46,10 @@ fun LogoSplash(animated: Boolean, onFinished: () -> Unit, modifier: Modifier = M
     val wordmark = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
-        launch { art.animateTo(1f, tween(500, easing = IosMotion.Easing)) }
+        launch { art.animateTo(1f, tween(500, easing = Motion.Easing)) }
         launch {
             delay(if (animated) 250 else 0)
-            wordmark.animateTo(1f, tween(450, easing = IosMotion.Easing))
+            wordmark.animateTo(1f, tween(450, easing = Motion.Easing))
         }
         delay(if (animated) SPLASH_MILLIS else SPLASH_MILLIS_INSTANT)
         onFinished()

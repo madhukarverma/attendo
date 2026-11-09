@@ -7,7 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import com.attendo.core.designsystem.motion.IosMotion
+import com.attendo.core.designsystem.motion.Motion
 import com.attendo.core.designsystem.motion.PressStyle
 import com.attendo.core.designsystem.motion.iosPress
 import androidx.compose.foundation.layout.Arrangement
@@ -145,7 +145,7 @@ fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifi
 /** Integer that animates between values (percentages, counters). */
 @Composable
 fun AnimatedNumber(value: Int, suffix: String = "", style: TextStyle, color: Color = Color.Unspecified, fontWeight: FontWeight? = null) {
-    val shown by animateIntAsState(value, animationSpec = IosMotion.settle(), label = "number")
+    val shown by animateIntAsState(value, animationSpec = Motion.settle(), label = "number")
     Text("$shown$suffix", style = style, color = color, fontWeight = fontWeight)
 }
 

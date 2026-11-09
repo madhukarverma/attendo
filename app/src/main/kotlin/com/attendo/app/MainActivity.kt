@@ -28,7 +28,10 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.attendo.app.navigation.AttendoNavHost
 import com.attendo.core.designsystem.motion.AppMotionScale
-import com.attendo.core.designsystem.motion.LocalIosMotion
+import androidx.compose.foundation.background
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.attendo.core.designsystem.component.LaunchBackground
+import com.attendo.core.model.AnimationMode
 import com.attendo.core.designsystem.theme.AttendoTheme
 import com.attendo.feature.splash.LogoSplash
 import kotlinx.coroutines.CoroutineStart
@@ -64,8 +67,12 @@ class MainActivity : ComponentActivity() {
             setParentCompositionContext(recomposer)
             setContent {
                 AttendoTheme {
-                    // Saveable so the launch screen only shows on a real launch, not on rotation.
+                    val settings by container.data.settings.settings.collectAsStateWithLifecycle(initialValue = null)
+                    val mode = settings?.animationMode
+                    // Saveable so the launch screen only shows once per launch.
                     var showSplash by rememberSaveable { mutableStateOf(true) }
+                    // "No animations" means no launch screen either: straight into the app.
+                    if (mode == AnimationMode.NONE) showSplash = false
                     Box(Modifier.fillMaxSize()) {
                         AttendoNavHost(container)
                         AnimatedVisibility(
@@ -73,10 +80,15 @@ class MainActivity : ComponentActivity() {
                             enter = EnterTransition.None,
                             exit = fadeOut(tween(350)) + scaleOut(tween(350), targetScale = 1.08f),
                         ) {
-                            LogoSplash(
-                                animated = LocalIosMotion.current,
-                                onFinished = { showSplash = false },
-                            )
+                            if (mode == null) {
+                                // Settings still loading (a few ms): plain launch colour, no flash.
+                                Box(Modifier.fillMaxSize().background(LaunchBackground))
+                            } else {
+                                LogoSplash(
+                                    animated = true,
+                                    onFinished = { showSplash = false },
+                                )
+                            }
                         }
                     }
                 }

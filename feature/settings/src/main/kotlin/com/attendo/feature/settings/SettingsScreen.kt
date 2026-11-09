@@ -50,6 +50,7 @@ import com.attendo.core.designsystem.motion.CollapsingTopBar
 import com.attendo.core.designsystem.motion.LargeTitle
 import com.attendo.core.designsystem.motion.rememberCollapseFraction
 import com.attendo.core.designsystem.theme.AttendoColors
+import com.attendo.core.model.AnimationMode
 import com.attendo.core.model.AppSettings
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -65,8 +66,8 @@ class SettingsViewModel(private val settings: SettingsRepository) : ViewModel() 
         viewModelScope.launch { settings.setUserName(name) }
     }
 
-    fun setIosMotion(enabled: Boolean) {
-        viewModelScope.launch { settings.setIosMotion(enabled) }
+    fun setAnimationMode(mode: AnimationMode) {
+        viewModelScope.launch { settings.setAnimationMode(mode) }
     }
 }
 
@@ -85,10 +86,10 @@ fun SettingsRoute(
     val state by vm.state.collectAsStateWithLifecycle()
     SettingsScreen(
         savedName = state?.userName,
-        iosMotion = state?.iosMotion ?: true,
+        animationMode = state?.animationMode ?: AnimationMode.IOS,
         appVersion = appVersion,
         onSaveName = vm::saveName,
-        onIosMotionChange = vm::setIosMotion,
+        onAnimationModeChange = vm::setAnimationMode,
         onExportCsv = onExportCsv,
         onClose = onClose,
     )
@@ -97,10 +98,10 @@ fun SettingsRoute(
 @Composable
 fun SettingsScreen(
     savedName: String?,
-    iosMotion: Boolean,
+    animationMode: AnimationMode,
     appVersion: String,
     onSaveName: (String) -> Unit,
-    onIosMotionChange: (Boolean) -> Unit,
+    onAnimationModeChange: (AnimationMode) -> Unit,
     onExportCsv: () -> Unit,
     onClose: () -> Unit,
 ) {
@@ -149,35 +150,8 @@ fun SettingsScreen(
                     modifier = Modifier.align(Alignment.End),
                 ) { Text("Save name") }
 
-                SectionTitle("Motion")
-                AttendoCard(onClick = { onIosMotionChange(!iosMotion) }) {
-                    Column(Modifier.weight(1f)) {
-                        Text("Animations", style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            if (iosMotion) {
-                                "On: iOS-style transitions, swipe back, bouncy scrolling and a lively mascot. " +
-                                    "Turn off for an instant, snappy app."
-                            } else {
-                                "Off: every animation, scroll bounce and the mascot's motion are disabled. Everything is instant."
-                            },
-                            style = MaterialTheme.typography.labelSmall,
-                            color = AttendoColors.Muted,
-                        )
-                    }
-                    Spacer(Modifier.width(12.dp))
-                    Switch(
-                        checked = iosMotion,
-                        onCheckedChange = onIosMotionChange,
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = AttendoColors.Green,
-                            checkedThumbColor = AttendoColors.Cream,
-                            checkedBorderColor = AttendoColors.Green,
-                            uncheckedTrackColor = AttendoColors.CreamDeep,
-                            uncheckedThumbColor = AttendoColors.Cream,
-                            uncheckedBorderColor = AttendoColors.CreamDeep,
-                        ),
-                    )
-                }
+                SectionTitle("Animations")
+                AnimationModeSlider(animationMode, onAnimationModeChange)
 
                 SectionTitle("Your data")
                 AttendoCard {

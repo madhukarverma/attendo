@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.attendo.core.designsystem.component.Mood
 import com.attendo.core.designsystem.component.TriangleMascot
-import com.attendo.core.designsystem.motion.IosMotion
+import com.attendo.core.designsystem.motion.Motion
 import com.attendo.core.designsystem.motion.PressStyle
 import com.attendo.core.designsystem.motion.iosPress
 import com.attendo.core.designsystem.theme.AttendoColors
@@ -95,7 +95,7 @@ internal fun SwipeDeck(
 
                     suspend fun commit(status: AttendanceStatus) {
                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        val spec = tween<Float>(260, easing = IosMotion.Easing)
+                        val spec = tween<Float>(260, easing = Motion.Easing)
                         when (status) {
                             AttendanceStatus.PRESENT -> x.animateTo(widthPx * 1.6f, spec)
                             AttendanceStatus.ABSENT -> x.animateTo(-widthPx * 1.6f, spec)
@@ -149,16 +149,16 @@ internal fun SwipeDeck(
                                                 x.value < -thresholdX -> commit(AttendanceStatus.ABSENT)
                                                 y.value > thresholdY -> commit(AttendanceStatus.CANCELLED)
                                                 else -> {
-                                                    launch { x.animateTo(0f, IosMotion.bouncy()) }
-                                                    y.animateTo(0f, IosMotion.bouncy())
+                                                    launch { x.animateTo(0f, Motion.bouncy()) }
+                                                    y.animateTo(0f, Motion.bouncy())
                                                 }
                                             }
                                         }
                                     },
                                     onDragCancel = {
                                         scope.launch {
-                                            launch { x.animateTo(0f, IosMotion.bouncy()) }
-                                            y.animateTo(0f, IosMotion.bouncy())
+                                            launch { x.animateTo(0f, Motion.bouncy()) }
+                                            y.animateTo(0f, Motion.bouncy())
                                         }
                                     },
                                 )

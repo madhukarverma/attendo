@@ -1,5 +1,6 @@
 package com.attendo.core.data
 
+import com.attendo.core.model.AnimationMode
 import com.attendo.core.model.AppSettings
 import com.attendo.core.model.AttendanceRecord
 import com.attendo.core.model.AttendanceStatus
@@ -19,7 +20,7 @@ interface SettingsRepository {
     val settings: Flow<AppSettings?>
     suspend fun setUserName(name: String)
     suspend fun setOnboarded(onboarded: Boolean)
-    suspend fun setIosMotion(enabled: Boolean)
+    suspend fun setAnimationMode(mode: AnimationMode)
     suspend fun setTinderMode(enabled: Boolean)
 }
 

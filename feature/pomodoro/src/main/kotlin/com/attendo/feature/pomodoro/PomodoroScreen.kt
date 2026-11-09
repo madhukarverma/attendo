@@ -66,7 +66,7 @@ import com.attendo.core.designsystem.component.PrimaryButton
 import com.attendo.core.model.CourseCatalog
 import com.attendo.core.designsystem.motion.BounceContainer
 import com.attendo.core.designsystem.motion.CollapsingTopBar
-import com.attendo.core.designsystem.motion.IosMotion
+import com.attendo.core.designsystem.motion.Motion
 import com.attendo.core.designsystem.motion.LargeTitle
 import com.attendo.core.designsystem.motion.PressStyle
 import com.attendo.core.designsystem.motion.iosPress
@@ -156,8 +156,8 @@ fun PomodoroScreen(
                     targetState = tab,
                     transitionSpec = {
                         val dir = if (targetState > initialState) 1 else -1
-                        (slideInHorizontally(IosMotion.push()) { it / 4 * dir } + fadeIn(IosMotion.push()))
-                            .togetherWith(slideOutHorizontally(IosMotion.push()) { -it / 4 * dir } + fadeOut(IosMotion.push()))
+                        (slideInHorizontally(Motion.push()) { it / 4 * dir } + fadeIn(Motion.push()))
+                            .togetherWith(slideOutHorizontally(Motion.push()) { -it / 4 * dir } + fadeOut(Motion.push()))
                     },
                     label = "tab",
                 ) { page ->
@@ -185,7 +185,7 @@ private fun SegmentedControl(items: List<String>, selected: Int, onSelect: (Int)
             .padding(3.dp),
     ) {
         val segment = maxWidth / items.size
-        val x by animateDpAsState(segment * selected, IosMotion.bouncy(), label = "thumb")
+        val x by animateDpAsState(segment * selected, Motion.bouncy(), label = "thumb")
         Box(
             Modifier
                 .offset(x = x)
@@ -332,7 +332,7 @@ private fun ChipRow(content: @Composable () -> Unit) {
 
 @Composable
 private fun Chip(label: String, selected: Boolean, enabled: Boolean = true, onClick: () -> Unit) {
-    val bg by animateColorAsState(if (selected) AttendoColors.Ink else AttendoColors.CreamCard, IosMotion.bouncy(), label = "chip")
+    val bg by animateColorAsState(if (selected) AttendoColors.Ink else AttendoColors.CreamCard, Motion.bouncy(), label = "chip")
     val fg by animateColorAsState(if (selected) AttendoColors.Cream else AttendoColors.Ink, label = "chipFg")
     Box(
         Modifier
@@ -448,7 +448,7 @@ private fun WeekChart(summary: PomodoroSummary) {
         summary.last7Days.forEachIndexed { i, (day, minutes) ->
             val target = minutes / max.toFloat()
             val anim = remember { Animatable(0f) }
-            LaunchedEffect(target) { anim.animateTo(target, IosMotion.settle()) }
+            LaunchedEffect(target) { anim.animateTo(target, Motion.settle()) }
             val isToday = i == summary.last7Days.lastIndex
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
                 Text(if (minutes > 0) "$minutes" else "", style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
@@ -475,7 +475,7 @@ private fun WeekChart(summary: PomodoroSummary) {
 @Composable
 private fun SubjectFocusBar(name: String, minutes: Int, fraction: Float) {
     val anim = remember { Animatable(0f) }
-    LaunchedEffect(fraction) { anim.animateTo(fraction, IosMotion.settle()) }
+    LaunchedEffect(fraction) { anim.animateTo(fraction, Motion.settle()) }
     Column(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
         Row {
             Text(name, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f), maxLines = 1)
