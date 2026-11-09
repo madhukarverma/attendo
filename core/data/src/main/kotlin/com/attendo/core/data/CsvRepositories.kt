@@ -37,9 +37,12 @@ internal class CsvSettingsRepository(
                 userName = m[KEY_NAME].orEmpty(),
                 onboarded = m[KEY_ONBOARDED] == "true",
                 iosMotion = m[KEY_IOS_MOTION] != "false",
+                tinderMode = m[KEY_TINDER_MODE] == "true",
             )
         }
     }
+
+    override suspend fun setTinderMode(enabled: Boolean) = put(KEY_TINDER_MODE, enabled.toString())
 
     override suspend fun setIosMotion(enabled: Boolean) = put(KEY_IOS_MOTION, enabled.toString())
 
@@ -54,6 +57,7 @@ internal class CsvSettingsRepository(
         const val KEY_NAME = "user_name"
         const val KEY_ONBOARDED = "onboarded"
         const val KEY_IOS_MOTION = "ios_motion"
+        const val KEY_TINDER_MODE = "tinder_mode"
     }
 }
 

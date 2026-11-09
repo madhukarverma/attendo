@@ -29,7 +29,12 @@ data class HomeUiState(
     val selectedDate: LocalDate = LocalDate.now(),
     val items: List<SubjectDayItem> = emptyList(),
     val markedDays: Set<LocalDate> = emptySet(),
+    val tinderMode: Boolean = false,
+    val canUndoSwipe: Boolean = false,
 ) {
+    /** Cards still to swipe for the selected day. */
+    val unmarked: List<SubjectDayItem> get() = items.filter { it.statusOnDay == null }
+
     /** Two weeks back and one week ahead of today. */
     val days: List<LocalDate> get() = (-14L..7L).map { today.plusDays(it) }
 
@@ -44,10 +49,31 @@ data class HomeUiState(
 }
 
 class HomeViewModel(
-    settings: SettingsRepository,
+    private val settings: SettingsRepository,
     private val subjects: SubjectRepository,
     private val attendance: AttendanceRepository,
 ) : ViewModel() {
+
+    /** Swipes made in this session, newest last, for the Tinder-style undo button. */
+    private val swipeHistory = MutableStateFlow<List<Pair<String, LocalDate>>>(emptyList())
+
+    fun setTinderMode(enabled: Boolean) {
+        viewModelScope.launch { settings.setTinderMode(enabled) }
+    }
+
+    /** A card swipe: sets the status directly (no toggle) and remembers it for undo. */
+    fun swipe(subjectId: String, status: AttendanceStatus) {
+        val date = selectedDate.value
+        swipeHistory.value = swipeHistory.value + (subjectId to date)
+        viewModelScope.launch { attendance.mark(subjectId, date, status) }
+    }
+
+    fun undoSwipe() {
+        val last = swipeHistory.value.lastOrNull() ?: return
+        swipeHistory.value = swipeHistory.value.dropLast(1)
+        selectedDate.value = last.second
+        viewModelScope.launch { attendance.mark(last.first, last.second, null) }
+    }
 
     fun addCourseSubjects() {
         viewModelScope.launch { subjects.addFromCatalog(CourseCatalog.CURRENT_SEMESTER) }
@@ -60,7 +86,8 @@ class HomeViewModel(
         subjects.subjects,
         attendance.records,
         selectedDate,
-    ) { s, subjectList, records, date ->
+        swipeHistory,
+    ) { s, subjectList, records, date, history ->
         val onDay = records.filter { it.date == date }.associateBy { it.subjectId }
         HomeUiState(
             userName = s.userName,
@@ -69,6 +96,8 @@ class HomeViewModel(
                 SubjectDayItem(AttendanceSummary.from(subject, records), onDay[subject.id]?.status)
             },
             markedDays = records.mapTo(HashSet()) { it.date },
+            tinderMode = s.tinderMode,
+            canUndoSwipe = history.isNotEmpty(),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
