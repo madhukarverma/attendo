@@ -35,6 +35,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.attendo.core.data.SettingsRepository
+import com.attendo.core.data.SubjectRepository
+import com.attendo.core.designsystem.motion.PressStyle
+import com.attendo.core.designsystem.motion.iosPress
+import com.attendo.core.model.CourseCatalog
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import com.attendo.core.designsystem.component.BlobMascot
 import com.attendo.core.designsystem.component.PrimaryButton
 import com.attendo.core.designsystem.component.SpeechBubble
@@ -44,10 +51,14 @@ import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.core.designsystem.theme.AttendoTheme
 import kotlinx.coroutines.launch
 
-class OnboardingViewModel(private val settings: SettingsRepository) : ViewModel() {
-    fun finish(name: String, onDone: () -> Unit) {
+class OnboardingViewModel(
+    private val settings: SettingsRepository,
+    private val subjects: SubjectRepository,
+) : ViewModel() {
+    fun finish(name: String, addCourseSubjects: Boolean, onDone: () -> Unit) {
         viewModelScope.launch {
             settings.setUserName(name)
+            if (addCourseSubjects) subjects.addFromCatalog(CourseCatalog.CURRENT_SEMESTER)
             settings.setOnboarded(true)
             onDone()
         }
@@ -56,14 +67,15 @@ class OnboardingViewModel(private val settings: SettingsRepository) : ViewModel(
 
 /** Route entry point: wires the ViewModel and exposes navigation callbacks only. */
 @Composable
-fun OnboardingRoute(settings: SettingsRepository, onFinished: () -> Unit) {
-    val vm: OnboardingViewModel = viewModel { OnboardingViewModel(settings) }
-    OnboardingScreen(onContinue = { name -> vm.finish(name, onFinished) })
+fun OnboardingRoute(settings: SettingsRepository, subjects: SubjectRepository, onFinished: () -> Unit) {
+    val vm: OnboardingViewModel = viewModel { OnboardingViewModel(settings, subjects) }
+    OnboardingScreen(onContinue = { name, addCourse -> vm.finish(name, addCourse, onFinished) })
 }
 
 @Composable
-fun OnboardingScreen(onContinue: (String) -> Unit) {
+fun OnboardingScreen(onContinue: (name: String, addCourseSubjects: Boolean) -> Unit) {
     var name by rememberSaveable { mutableStateOf("") }
+    var addCourse by rememberSaveable { mutableStateOf(true) }
     Box(
         Modifier
             .fillMaxSize()
@@ -109,7 +121,7 @@ fun OnboardingScreen(onContinue: (String) -> Unit) {
                     capitalization = KeyboardCapitalization.Words,
                     imeAction = ImeAction.Done,
                 ),
-                keyboardActions = KeyboardActions(onDone = { if (name.isNotBlank()) onContinue(name) }),
+                keyboardActions = KeyboardActions(onDone = { if (name.isNotBlank()) onContinue(name, addCourse) }),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = AttendoColors.Cream,
                     unfocusedContainerColor = AttendoColors.Cream,
@@ -120,10 +132,32 @@ fun OnboardingScreen(onContinue: (String) -> Unit) {
                     cursorColor = AttendoColors.Green,
                 ),
             )
-            Spacer(Modifier.height(12.dp))
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 6.dp)
+                    .iosPress(PressStyle.Dim) { addCourse = !addCourse },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Checkbox(
+                    checked = addCourse,
+                    onCheckedChange = { addCourse = it },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = AttendoColors.Green,
+                        uncheckedColor = AttendoColors.Cream,
+                        checkmarkColor = AttendoColors.Cream,
+                    ),
+                )
+                Text(
+                    "Add my ${CourseCatalog.CURRENT_SEMESTER.size} semester subjects (CA711 – CA703)",
+                    color = AttendoColors.Cream,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Spacer(Modifier.height(6.dp))
             PrimaryButton(
                 text = "Let's go",
-                onClick = { onContinue(name) },
+                onClick = { onContinue(name, addCourse) },
                 enabled = name.isNotBlank(),
             )
         }
@@ -133,5 +167,5 @@ fun OnboardingScreen(onContinue: (String) -> Unit) {
 @Preview
 @Composable
 private fun OnboardingPreview() {
-    AttendoTheme { OnboardingScreen(onContinue = {}) }
+    AttendoTheme { OnboardingScreen(onContinue = { _, _ -> }) }
 }

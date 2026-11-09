@@ -48,10 +48,28 @@ import com.attendo.core.designsystem.component.TriangleMascot
 import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.core.designsystem.theme.AttendoTheme
 import com.attendo.core.model.Subject
+import com.attendo.core.model.CatalogSubject
+import com.attendo.core.model.CourseCatalog
+import com.attendo.core.designsystem.motion.PressStyle
+import com.attendo.core.designsystem.motion.iosPress
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.draw.clip
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 class AddSubjectViewModel(private val subjects: SubjectRepository) : ViewModel() {
+    /** Course subjects not added yet, offered as one-tap suggestions. */
+    val suggestions: StateFlow<List<CatalogSubject>> = subjects.subjects
+        .map { CourseCatalog.missing(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     fun save(name: String, code: String, target: Int, onSaved: () -> Unit) {
         if (name.isBlank()) return
         viewModelScope.launch {
@@ -64,11 +82,20 @@ class AddSubjectViewModel(private val subjects: SubjectRepository) : ViewModel()
 @Composable
 fun AddSubjectRoute(subjects: SubjectRepository, onClose: () -> Unit) {
     val vm: AddSubjectViewModel = viewModel { AddSubjectViewModel(subjects) }
-    AddSubjectScreen(onClose = onClose, onSave = { name, code, target -> vm.save(name, code, target, onClose) })
+    val suggestions by vm.suggestions.collectAsStateWithLifecycle()
+    AddSubjectScreen(
+        suggestions = suggestions,
+        onClose = onClose,
+        onSave = { name, code, target -> vm.save(name, code, target, onClose) },
+    )
 }
 
 @Composable
-fun AddSubjectScreen(onClose: () -> Unit, onSave: (name: String, code: String, target: Int) -> Unit) {
+fun AddSubjectScreen(
+    onClose: () -> Unit,
+    onSave: (name: String, code: String, target: Int) -> Unit,
+    suggestions: List<CatalogSubject> = emptyList(),
+) {
     var name by rememberSaveable { mutableStateOf("") }
     var code by rememberSaveable { mutableStateOf("") }
     var target by rememberSaveable { mutableFloatStateOf(Subject.DEFAULT_TARGET_PERCENT.toFloat()) }
@@ -91,6 +118,44 @@ fun AddSubjectScreen(onClose: () -> Unit, onSave: (name: String, code: String, t
         Row(Modifier.fillMaxWidth().padding(vertical = 12.dp), verticalAlignment = Alignment.Bottom) {
             TriangleMascot(Modifier.size(150.dp))
             SpeechBubble("Which class are we tracking?", tail = TailSide.BottomStart, modifier = Modifier.padding(bottom = 80.dp))
+        }
+
+        if (suggestions.isNotEmpty()) {
+            FieldLabel("From your course")
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                suggestions.forEach { s ->
+                    val selected = s.code == code
+                    Column(
+                        Modifier
+                            .iosPress(PressStyle.Scale, onClickLabel = "Use ${s.name}") {
+                                name = s.name
+                                code = s.code
+                            }
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(if (selected) AttendoColors.Ink else AttendoColors.CreamCard)
+                            .padding(horizontal = 14.dp, vertical = 10.dp)
+                            .widthIn(max = 180.dp),
+                    ) {
+                        Text(
+                            s.code + if (s.isLab) " · Lab" else "",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (selected) AttendoColors.Green else AttendoColors.Pink,
+                        )
+                        Text(
+                            s.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (selected) AttendoColors.Cream else AttendoColors.Ink,
+                            maxLines = 2,
+                        )
+                    }
+                }
+            }
         }
 
         FieldLabel("Subject name")

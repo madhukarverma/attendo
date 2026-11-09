@@ -1,6 +1,7 @@
 package com.attendo.core.data
 
 import com.attendo.core.model.AttendanceStatus
+import com.attendo.core.model.CourseCatalog
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -37,6 +38,19 @@ class RepositoryTest {
         assertEquals(false, reloaded.settings.settings.first()?.iosMotion)
         assertEquals(setOf("subjects.csv", "attendance.csv", "settings.csv"), dir.list()!!.toSet())
 
+        dir.deleteRecursively()
+    }
+
+    @Test
+    fun addFromCatalogSkipsExistingCodes() = runTest {
+        val dir = Files.createTempDirectory("attendo").toFile()
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val data = AttendoData(dir, TestScope(dispatcher), dispatcher)
+        advanceUntilIdle()
+        data.subjects.add("OS", "CA719", 80)
+        assertEquals(6, data.subjects.addFromCatalog(CourseCatalog.CURRENT_SEMESTER))
+        assertEquals(0, data.subjects.addFromCatalog(CourseCatalog.CURRENT_SEMESTER))
+        assertEquals(7, data.subjects.subjects.first().size)
         dir.deleteRecursively()
     }
 

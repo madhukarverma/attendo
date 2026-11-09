@@ -62,6 +62,8 @@ import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.core.designsystem.theme.AttendoTheme
 import com.attendo.core.model.AttendanceStatus
 import com.attendo.core.model.AttendanceSummary
+import com.attendo.core.model.CourseCatalog
+import com.attendo.core.designsystem.component.AttendoCard
 import com.attendo.core.model.Subject
 import java.time.LocalDate
 import kotlin.math.roundToInt
@@ -82,6 +84,7 @@ fun HomeRoute(
         state = state,
         onSelectDate = vm::selectDate,
         onMark = vm::mark,
+        onAddCourseSubjects = vm::addCourseSubjects,
         onAddSubject = onAddSubject,
         onOpenSubject = onOpenSubject,
         onOpenStats = onOpenStats,
@@ -98,6 +101,7 @@ fun HomeScreen(
     onOpenSubject: (String) -> Unit,
     onOpenStats: () -> Unit,
     onOpenSettings: () -> Unit,
+    onAddCourseSubjects: () -> Unit = {},
 ) {
     Box(
         Modifier
@@ -122,6 +126,24 @@ fun HomeScreen(
             item {
                 val (message, mood) = mascotMessage(state)
                 MascotHeader(message = message, mood = mood)
+            }
+            if (state.items.isEmpty()) {
+                item(key = "course") {
+                    AttendoCard(
+                        modifier = Modifier.animateItem().padding(horizontal = 20.dp),
+                        onClick = onAddCourseSubjects,
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text("Add my semester subjects", style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                CourseCatalog.CURRENT_SEMESTER.joinToString(" · ") { it.code },
+                                style = MaterialTheme.typography.labelSmall,
+                                color = AttendoColors.Muted,
+                            )
+                        }
+                        Text("+ ${CourseCatalog.CURRENT_SEMESTER.size}", color = AttendoColors.Green, style = MaterialTheme.typography.titleMedium)
+                    }
+                }
             }
             items(state.items, key = { it.summary.subject.id }) { item ->
                 SubjectDayRow(

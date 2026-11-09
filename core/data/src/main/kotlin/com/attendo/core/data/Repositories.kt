@@ -3,6 +3,7 @@ package com.attendo.core.data
 import com.attendo.core.model.AppSettings
 import com.attendo.core.model.AttendanceRecord
 import com.attendo.core.model.AttendanceStatus
+import com.attendo.core.model.CatalogSubject
 import com.attendo.core.model.Subject
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
@@ -23,6 +24,9 @@ interface SettingsRepository {
 interface SubjectRepository {
     val subjects: Flow<List<Subject>>
     suspend fun add(name: String, code: String, targetPercent: Int): Subject
+
+    /** Adds catalog subjects whose code isn't present yet, in one write. Returns how many were added. */
+    suspend fun addFromCatalog(items: List<CatalogSubject>, targetPercent: Int = Subject.DEFAULT_TARGET_PERCENT): Int
     suspend fun update(subject: Subject)
     suspend fun delete(subjectId: String)
 }
