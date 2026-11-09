@@ -32,6 +32,9 @@ class RepositoryTest {
         assertEquals(listOf(maths), reloaded.subjects.subjects.first())
         assertEquals(AttendanceStatus.PRESENT, reloaded.attendance.records.first().single().status)
         assertEquals("Madhukar", reloaded.settings.settings.first()?.userName)
+        assertEquals(true, reloaded.settings.settings.first()?.iosMotion)
+        reloaded.settings.setIosMotion(false)
+        assertEquals(false, reloaded.settings.settings.first()?.iosMotion)
         assertEquals(setOf("subjects.csv", "attendance.csv", "settings.csv"), dir.list()!!.toSet())
 
         dir.deleteRecursively()

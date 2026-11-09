@@ -24,6 +24,14 @@
 - Decision: `attendance.csv` keyed by (subject_id, date).
 - Consequence: double lectures are not yet representable — see OPEN_ISSUES.
 
+## DEC-006 — iOS-style motion as a switchable design-system layer
+- Date: 2026-11-09 · Status: Active
+- Decision: motion lives in `core/designsystem/motion` (`IosMotion` tokens, `BounceContainer`,
+  `iosPress`, `CollapsingTopBar`) and in `app/navigation/Transitions.kt`; `LocalIosMotion` turns it off.
+- Rationale: one place to tune curves; features opt in through shared components; users can disable it.
+- Notes: swipe-back relies on Android predictive back (Android 14+ with gesture navigation); older
+  versions get the same animation on the back button. System "Remove animations" is respected.
+
 ## DEC-005 — Release APK signed with debug key
 - Date: 2026-11-09 · Status: Active (testing only)
 - Rationale: no release keystore yet; lets the user install and test. Replace before any store upload.

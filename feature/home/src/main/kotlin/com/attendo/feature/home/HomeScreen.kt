@@ -1,7 +1,14 @@
 package com.attendo.feature.home
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import com.attendo.core.designsystem.component.AnimatedNumber
+import com.attendo.core.designsystem.motion.BounceContainer
+import com.attendo.core.designsystem.motion.IosMotion
+import com.attendo.core.designsystem.motion.PressStyle
+import com.attendo.core.designsystem.motion.iosPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -98,6 +105,7 @@ fun HomeScreen(
             .background(AttendoColors.Cream)
             .safeDrawingPadding(),
     ) {
+        BounceContainer(Modifier.fillMaxSize()) {
         LazyColumn(
             Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -120,10 +128,11 @@ fun HomeScreen(
                     item = item,
                     onMark = { status -> onMark(item.summary.subject.id, status) },
                     onClick = { onOpenSubject(item.summary.subject.id) },
-                    modifier = Modifier.padding(horizontal = 20.dp),
+                    modifier = Modifier.animateItem().padding(horizontal = 20.dp),
                 )
             }
             item { Spacer(Modifier.height(96.dp)) }
+        }
         }
 
         PillBottomBar(
@@ -213,7 +222,7 @@ internal fun SubjectDayRow(
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
             .background(AttendoColors.CreamCard)
-            .clickable(onClick = onClick)
+            .iosPress(PressStyle.Highlight, onClickLabel = "Open ${subject.name}", onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 14.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -250,12 +259,18 @@ internal fun SubjectDayRow(
 @Composable
 private fun PercentColumn(summary: AttendanceSummary) {
     Column(Modifier.width(72.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            if (summary.held == 0) "–" else "${summary.percent.roundToInt()}%",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = if (summary.isOnTrack) AttendoColors.Ink else AttendoColors.Pink,
-        )
+        val color by animateColorAsState(if (summary.isOnTrack) AttendoColors.Ink else AttendoColors.Pink, label = "pct")
+        if (summary.held == 0) {
+            Text("–", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        } else {
+            AnimatedNumber(
+                value = summary.percent.roundToInt(),
+                suffix = "%",
+                style = MaterialTheme.typography.titleMedium,
+                color = color,
+                fontWeight = FontWeight.Bold,
+            )
+        }
         Text(
             "${summary.present}/${summary.held}",
             style = MaterialTheme.typography.labelSmall,
@@ -266,20 +281,26 @@ private fun PercentColumn(summary: AttendanceSummary) {
 
 @Composable
 private fun MarkChip(text: String, color: Color, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    val haptics = LocalHapticFeedback.current
+    val background by animateColorAsState(
+        if (selected) color else AttendoColors.Cream,
+        animationSpec = IosMotion.bouncy(),
+        label = "chipBg",
+    )
+    val content by animateColorAsState(if (selected) AttendoColors.Cream else color, label = "chipFg")
     Box(
         modifier
+            .iosPress(PressStyle.Scale, onClickLabel = "Mark $text") {
+                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                onClick()
+            }
             .clip(CircleShape)
-            .background(if (selected) color else AttendoColors.Cream)
-            .clickable(onClickLabel = "Mark $text", onClick = onClick)
+            .background(background)
             .padding(vertical = 9.dp)
             .fillMaxHeight(),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text,
-            style = MaterialTheme.typography.labelMedium,
-            color = if (selected) AttendoColors.Cream else color,
-        )
+        Text(text, style = MaterialTheme.typography.labelMedium, color = content)
     }
 }
 

@@ -1,6 +1,10 @@
 package com.attendo.feature.subjects
 
 import androidx.compose.foundation.background
+import com.attendo.core.designsystem.motion.BounceContainer
+import com.attendo.core.designsystem.motion.CollapsingTopBar
+import com.attendo.core.designsystem.motion.LargeTitle
+import com.attendo.core.designsystem.motion.rememberCollapseFraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -114,20 +118,23 @@ fun SubjectDetailScreen(state: SubjectDetailUiState, onClose: () -> Unit, onDele
     var confirmDelete by remember { mutableStateOf(false) }
     val subject = summary.subject
 
+    val scroll = rememberScrollState()
+    val collapse by rememberCollapseFraction(scroll)
     Column(
         Modifier
             .fillMaxSize()
             .background(AttendoColors.Cream)
-            .safeDrawingPadding()
-            .verticalScroll(rememberScrollState())
+            .safeDrawingPadding(),
+    ) {
+    CollapsingTopBar(title = subject.name, collapseFraction = { collapse }, onBack = onClose, backLabel = "Home")
+    BounceContainer(Modifier.fillMaxSize()) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .verticalScroll(scroll)
             .padding(horizontal = 20.dp),
     ) {
-        Box(Modifier.fillMaxWidth().padding(top = 8.dp)) {
-            Text(subject.name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.align(Alignment.Center))
-            IconButton(onClick = onClose, modifier = Modifier.align(Alignment.CenterEnd)) {
-                Icon(Icons.Filled.Close, contentDescription = "Close")
-            }
-        }
+        LargeTitle(subject.name)
 
         Box(Modifier.fillMaxWidth().height(260.dp)) {
             Confetti(Modifier.fillMaxSize(), seed = subject.id.hashCode())
@@ -186,6 +193,8 @@ fun SubjectDetailScreen(state: SubjectDetailUiState, onClose: () -> Unit, onDele
             Text("Delete subject", color = AttendoColors.Pink)
         }
         Spacer(Modifier.height(16.dp))
+    }
+    }
     }
 
     if (confirmDelete) {

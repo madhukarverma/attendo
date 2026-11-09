@@ -1,8 +1,15 @@
 package com.attendo.core.designsystem.component
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import com.attendo.core.designsystem.motion.IosMotion
+import com.attendo.core.designsystem.motion.PressStyle
+import com.attendo.core.designsystem.motion.iosPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,8 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -109,7 +114,7 @@ fun AttendoCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
             .background(AttendoColors.CreamCard)
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .then(if (onClick != null) Modifier.iosPress(PressStyle.Highlight, onClick = onClick) else Modifier)
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         content = content,
@@ -119,20 +124,29 @@ fun AttendoCard(
 /** Full-width green call-to-action button ("Finish" in the designs). */
 @Composable
 fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
-    Button(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = modifier.fillMaxWidth().height(58.dp),
-        shape = CircleShape,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = AttendoColors.Green,
-            contentColor = AttendoColors.Cream,
-            disabledContainerColor = AttendoColors.CreamDeep,
-            disabledContentColor = AttendoColors.Muted,
-        ),
+    val container by animateColorAsState(if (enabled) AttendoColors.Green else AttendoColors.CreamDeep, label = "btn")
+    Box(
+        modifier
+            .fillMaxWidth()
+            .height(58.dp)
+            .iosPress(PressStyle.Dim, enabled = enabled, onClick = onClick)
+            .clip(CircleShape)
+            .background(container),
+        contentAlignment = Alignment.Center,
     ) {
-        Text(text, style = MaterialTheme.typography.labelLarge)
+        Text(
+            text,
+            style = MaterialTheme.typography.labelLarge,
+            color = if (enabled) AttendoColors.Cream else AttendoColors.Muted,
+        )
     }
+}
+
+/** Integer that animates between values (percentages, counters). */
+@Composable
+fun AnimatedNumber(value: Int, suffix: String = "", style: TextStyle, color: Color = Color.Unspecified, fontWeight: FontWeight? = null) {
+    val shown by animateIntAsState(value, animationSpec = IosMotion.settle(), label = "number")
+    Text("$shown$suffix", style = style, color = color, fontWeight = fontWeight)
 }
 
 /** Dark pill bottom bar: green primary action on the left, icon actions on the right. */
@@ -153,9 +167,9 @@ fun PillBottomBar(
     ) {
         Box(
             Modifier
+                .iosPress(PressStyle.Scale, onClick = onPrimary)
                 .clip(CircleShape)
                 .background(AttendoColors.Green)
-                .clickable(onClick = onPrimary)
                 .padding(horizontal = 22.dp, vertical = 14.dp),
         ) {
             Text("+ $primaryLabel", color = AttendoColors.Cream, style = MaterialTheme.typography.labelLarge)
@@ -171,7 +185,7 @@ fun BarIconButton(onClick: () -> Unit, contentDescription: String, content: @Com
         Modifier
             .size(44.dp)
             .clip(CircleShape)
-            .clickable(onClickLabel = contentDescription, onClick = onClick),
+            .iosPress(PressStyle.Dim, onClickLabel = contentDescription, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) { content() }
 }

@@ -1,7 +1,11 @@
 package com.attendo.core.designsystem.component
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.runtime.getValue
+import com.attendo.core.designsystem.motion.IosMotion
+import com.attendo.core.designsystem.motion.PressStyle
+import com.attendo.core.designsystem.motion.iosPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,11 +59,16 @@ fun DayStrip(
     ) {
         items(days, key = { it.toEpochDay() }) { day ->
             val isSelected = day == selected
+            val pill by animateColorAsState(
+                if (isSelected) AttendoColors.Ink else AttendoColors.Cream,
+                animationSpec = IosMotion.bouncy(),
+                label = "dayPill",
+            )
             Column(
                 Modifier
+                    .iosPress(PressStyle.Scale, onClickLabel = day.toString()) { onSelect(day) }
                     .clip(RoundedCornerShape(50))
-                    .background(if (isSelected) AttendoColors.Ink else AttendoColors.Cream)
-                    .clickable { onSelect(day) }
+                    .background(pill)
                     .padding(horizontal = 6.dp, vertical = 8.dp)
                     .width(30.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -76,9 +85,9 @@ fun DayStrip(
                         .clip(CircleShape)
                         .background(
                             when {
-                                isSelected -> AttendoColors.Ink
+                                isSelected -> pill
                                 day in markedDays -> AttendoColors.CreamDeep
-                                else -> AttendoColors.Cream
+                                else -> pill
                             },
                         ),
                     contentAlignment = Alignment.Center,

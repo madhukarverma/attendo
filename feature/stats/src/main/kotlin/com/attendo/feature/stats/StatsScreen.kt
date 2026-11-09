@@ -1,6 +1,16 @@
 package com.attendo.feature.stats
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import com.attendo.core.designsystem.component.AnimatedNumber
+import com.attendo.core.designsystem.motion.BounceContainer
+import com.attendo.core.designsystem.motion.CollapsingTopBar
+import com.attendo.core.designsystem.motion.IosMotion
+import com.attendo.core.designsystem.motion.LargeTitle
+import com.attendo.core.designsystem.motion.rememberCollapseFraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -76,22 +86,22 @@ fun StatsRoute(subjects: SubjectRepository, attendance: AttendanceRepository, on
 
 @Composable
 fun StatsScreen(state: StatsUiState, onClose: () -> Unit) {
-    LazyColumn(
+    val listState = rememberLazyListState()
+    val collapse by rememberCollapseFraction(listState)
+    Column(
         Modifier
             .fillMaxSize()
             .background(AttendoColors.Cream)
-            .safeDrawingPadding()
-            .padding(horizontal = 20.dp),
+            .safeDrawingPadding(),
+    ) {
+    CollapsingTopBar(title = "Statistics", collapseFraction = { collapse }, onBack = onClose, backLabel = "Home")
+    BounceContainer(Modifier.fillMaxSize()) {
+    LazyColumn(
+        Modifier.fillMaxSize().padding(horizontal = 20.dp),
+        state = listState,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        item {
-            Box(Modifier.fillMaxWidth().padding(top = 8.dp)) {
-                Text("Statistics", style = MaterialTheme.typography.titleMedium, modifier = Modifier.align(Alignment.Center))
-                IconButton(onClick = onClose, modifier = Modifier.align(Alignment.CenterEnd)) {
-                    Icon(Icons.Filled.Close, contentDescription = "Close")
-                }
-            }
-        }
+        item { LargeTitle("Statistics") }
         item { OverallCard(state) }
         item {
             Text("By subject", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 8.dp))
@@ -99,8 +109,10 @@ fun StatsScreen(state: StatsUiState, onClose: () -> Unit) {
         if (state.summaries.isEmpty()) {
             item { Text("Add a subject to see statistics.", color = AttendoColors.Muted) }
         }
-        items(state.summaries, key = { it.subject.id }) { SubjectBar(it) }
+        items(state.summaries, key = { it.subject.id }) { SubjectBar(it, Modifier.animateItem()) }
         item { Spacer(Modifier.height(24.dp)) }
+    }
+    }
     }
 }
 
@@ -114,11 +126,12 @@ private fun OverallCard(state: StatsUiState) {
             .padding(24.dp),
     ) {
         Text("OVERALL", style = MaterialTheme.typography.labelMedium, color = AttendoColors.Muted)
-        Text(
-            state.overallPercent?.let { "${it.roundToInt()}%" } ?: "–",
-            style = MaterialTheme.typography.displayLarge,
-            color = AttendoColors.Green,
-        )
+        val overall = state.overallPercent
+        if (overall == null) {
+            Text("–", style = MaterialTheme.typography.displayLarge, color = AttendoColors.Green)
+        } else {
+            AnimatedNumber(overall.roundToInt(), "%", MaterialTheme.typography.displayLarge, AttendoColors.Green)
+        }
         Spacer(Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
             Stat("Present", state.present)
@@ -139,9 +152,13 @@ private fun Stat(label: String, value: Int) {
 
 /** Horizontal progress bar with a tick at the subject's target percentage. */
 @Composable
-private fun SubjectBar(summary: AttendanceSummary) {
+private fun SubjectBar(summary: AttendanceSummary, modifier: Modifier = Modifier) {
+    // Bars grow from zero on first show, then spring to new values.
+    val target = (summary.percent / 100).toFloat().coerceIn(0f, 1f)
+    val progress = remember { Animatable(0f) }
+    LaunchedEffect(target) { progress.animateTo(target, IosMotion.settle()) }
     Column(
-        Modifier
+        modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
             .background(AttendoColors.CreamCard)
@@ -164,11 +181,10 @@ private fun SubjectBar(summary: AttendanceSummary) {
                 .clip(CircleShape)
                 .background(AttendoColors.CreamDeep),
         ) {
-            val fraction = (summary.percent / 100).toFloat().coerceIn(0f, 1f)
             Box(
                 Modifier
                     .fillMaxHeight()
-                    .fillMaxWidth(fraction)
+                    .fillMaxWidth(progress.value)
                     .clip(CircleShape)
                     .background(if (summary.isOnTrack) AttendoColors.Green else AttendoColors.Pink),
             )
