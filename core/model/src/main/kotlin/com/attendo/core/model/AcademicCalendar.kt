@@ -1,5 +1,6 @@
 package com.attendo.core.model
 
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -15,8 +16,15 @@ data class CalendarEvent(
     operator fun contains(date: LocalDate) = !date.isBefore(start) && !date.isAfter(end)
 }
 
-/** The semester's academic calendar (loaded from academic_calendar.csv). */
-data class AcademicCalendar(val events: List<CalendarEvent>) {
+/**
+ * The semester's academic calendar (loaded from academic_calendar.csv).
+ *
+ * @property weekend days with no classes every week (Saturday and Sunday at the user's college).
+ */
+data class AcademicCalendar(
+    val events: List<CalendarEvent>,
+    val weekend: Set<DayOfWeek> = setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY),
+) {
 
     val classesStart: LocalDate? = events.firstOrNull { it.kind == DayKind.CLASSES_START }?.start
     val classesEnd: LocalDate? = events.firstOrNull { it.kind == DayKind.CLASSES_END }?.start
@@ -26,7 +34,24 @@ data class AcademicCalendar(val events: List<CalendarEvent>) {
 
     fun eventsOn(date: LocalDate): List<CalendarEvent> = events.filter { date in it }
 
-    fun isHoliday(date: LocalDate) = eventsOn(date).any { it.kind == DayKind.HOLIDAY }
+    fun isWeekend(date: LocalDate) = date.dayOfWeek in weekend
+
+    /** Listed holiday or a regular weekend day. */
+    fun isHoliday(date: LocalDate) = isWeekend(date) || eventsOn(date).any { it.kind == DayKind.HOLIDAY }
+
+    /** A day on which classes are expected: inside the class-work period and not a holiday/weekend. */
+    fun isClassDay(date: LocalDate): Boolean {
+        val start = classesStart ?: return !isHoliday(date)
+        val end = classesEnd ?: return !isHoliday(date)
+        return !date.isBefore(start) && !date.isAfter(end) && !isHoliday(date)
+    }
+
+    /** Number of class days in the semester (class-work period minus weekends and holidays). */
+    fun classDayCount(): Int {
+        val start = classesStart ?: return 0
+        val end = classesEnd ?: return 0
+        return generateSequence(start) { it.plusDays(1) }.takeWhile { !it.isAfter(end) }.count { isClassDay(it) }
+    }
 
     /** Next event starting within [days] days after [date] (exclusive of [date]). */
     fun upcoming(date: LocalDate, days: Long = 3): Pair<CalendarEvent, Long>? =
@@ -61,6 +86,7 @@ data class AcademicCalendar(val events: List<CalendarEvent>) {
                 DayKind.EVENT -> "${e.title}$dayOf! Have fun, but don't forget your classes."
             }
         }
+        if (isWeekend(date)) return "It's the weekend! No classes today, recharge."
         val (next, inDays) = upcoming(date) ?: return null
         val whenText = if (inDays == 1L) "tomorrow" else "in $inDays days"
         return "Heads up: ${next.title} $whenText."
