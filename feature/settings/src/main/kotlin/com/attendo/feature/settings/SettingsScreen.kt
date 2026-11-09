@@ -43,6 +43,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.attendo.core.data.SettingsRepository
 import com.attendo.core.designsystem.component.AttendoCard
+import com.attendo.core.designsystem.component.DeveloperCredit
 import com.attendo.core.designsystem.component.PrimaryButton
 import com.attendo.core.designsystem.motion.BounceContainer
 import com.attendo.core.designsystem.motion.CollapsingTopBar
@@ -151,9 +152,14 @@ fun SettingsScreen(
                 SectionTitle("Motion")
                 AttendoCard(onClick = { onIosMotionChange(!iosMotion) }) {
                     Column(Modifier.weight(1f)) {
-                        Text("iOS-style motion", style = MaterialTheme.typography.titleMedium)
+                        Text("Animations", style = MaterialTheme.typography.titleMedium)
                         Text(
-                            "Slide-in screens with swipe back, bouncy scrolling, collapsing titles and press highlights.",
+                            if (iosMotion) {
+                                "On: iOS-style transitions, swipe back, bouncy scrolling and a lively mascot. " +
+                                    "Turn off for an instant, snappy app."
+                            } else {
+                                "Off: every animation, scroll bounce and the mascot's motion are disabled. Everything is instant."
+                            },
                             style = MaterialTheme.typography.labelSmall,
                             color = AttendoColors.Muted,
                         )
@@ -198,6 +204,8 @@ fun SettingsScreen(
 
                 SectionTitle("About")
                 Text("Attendo $appVersion", style = MaterialTheme.typography.bodyMedium, color = AttendoColors.Muted)
+                Spacer(Modifier.height(4.dp))
+                DeveloperCredit()
                 Spacer(Modifier.height(24.dp))
             }
         }

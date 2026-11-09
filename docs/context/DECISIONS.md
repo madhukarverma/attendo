@@ -32,6 +32,14 @@
 - Notes: swipe-back relies on Android predictive back (Android 14+ with gesture navigation); older
   versions get the same animation on the back button. System "Remove animations" is respected.
 
+## DEC-007 — Global animation kill-switch via MotionDurationScale
+- Date: 2026-11-09 · Status: Active (supersedes the Material-fallback part of DEC-006)
+- Decision: MainActivity hosts Compose on its own Recomposer whose context carries
+  `AppMotionScale`; the Settings "Animations" switch sets its scale to 0 so all Compose animations
+  (including Material components) complete instantly. Flings keep their own scale.
+- Consequence: the activity manages the Recomposer lifecycle (frame clock paused in onStop,
+  cancelled in onDestroy). Not yet verified on a physical device.
+
 ## DEC-005 — Release APK signed with debug key
 - Date: 2026-11-09 · Status: Active (testing only)
 - Rationale: no release keystore yet; lets the user install and test. Replace before any store upload.

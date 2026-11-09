@@ -26,8 +26,8 @@ enum class PressStyle {
 }
 
 /**
- * Click handling with iOS press feedback instead of the Material ripple. Falls back to the normal
- * ripple `clickable` when iOS motion is turned off.
+ * Click handling with iOS press feedback instead of the Material ripple. With animations switched
+ * off, [AppMotionScale] makes the same feedback appear and disappear instantly (no ripple at all).
  */
 fun Modifier.iosPress(
     style: PressStyle = PressStyle.Highlight,
@@ -35,9 +35,6 @@ fun Modifier.iosPress(
     onClickLabel: String? = null,
     onClick: () -> Unit,
 ): Modifier = composed {
-    if (!LocalIosMotion.current) {
-        return@composed clickable(enabled = enabled, onClickLabel = onClickLabel, onClick = onClick)
-    }
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val base = clickable(

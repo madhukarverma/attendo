@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-11-09 — v0.10.0 animations switch + launch screen
+- Settings "Animations" switch (on by default, key `ios_motion`). Off = every animation instant:
+  `AppMotionScale` (MotionDurationScale) is installed in the activity's own Recomposer, nav
+  transitions become None, rubber-band bounce and the pentagon's idle loop are disabled, no ripples.
+- Android stretch overscroll removed app-wide.
+- New launch screen on #1A1D1A (the colour the user's reference image uses at its edges) with an
+  original flat-vector portrait (`LaunchArt`), wordmark and a greyed "Developed by @madhukarverma"
+  credit; Android 12+ system splash uses the same colour. Credit also in Settings › About.
+
+## 2026-11-09 — v0.9.0 UI tweaks
+- Tinder mode hides the mascot; month separators in the day strip; selected date in the header.
+- Cards use short names on distinct solid colours; sad pentagon light red; Pomodoro without bubble,
+  short subject names, no labs.
+
 ## 2026-11-09 — v0.8.0 academic calendar
 - Bundled `core/data/src/main/resources/calendar/academic_calendar.csv` transcribed from the official
   NIT Trichy PG/MCA (I) July 2026 calendar PDF: classes 13 Aug – 25 Nov, finals to 17 Dec, holidays,
