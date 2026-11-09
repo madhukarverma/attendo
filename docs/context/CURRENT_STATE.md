@@ -1,17 +1,21 @@
 # Current State
 
 ## Active task
-Task 1 — base framework (multi-module skeleton, theme, CSV data layer, onboarding, home shell).
+v0.1.0 feature-complete (bare bones). Next: refinement on real-device feedback.
 
-## Verified progress
-- (updated after each task is built and pushed)
+## Verified progress (2026-11-09)
+- `./gradlew test assembleDebug assembleRelease` passes (JDK 17, SDK 34).
+- Unit tests: attendance maths (`core:model`), CSV codec + repositories reload from disk (`core:data`).
+- Release APK built with R8 minify + resource shrinking (~1.2 MB), signed with the debug key.
+- Merged to `master`: base, feature/subjects, feature/attendance, feature/subject-detail,
+  feature/stats, feature/settings.
+
+## Not yet verified
+- Not run on a physical device or emulator in this session; UI checked only by compilation.
 
 ## Next actions
-1. feature/subjects
-2. feature/attendance
-3. feature/subject-detail
-4. feature/stats
-5. feature/settings (CSV export)
+1. Install `Attendo-v0.1.0.apk` on a phone and collect UI feedback.
+2. Pick items from `OPEN_ISSUES.md` (timetable, multiple lectures/day, reminders, CSV import).
 
 ## Last updated
 2026-11-09
