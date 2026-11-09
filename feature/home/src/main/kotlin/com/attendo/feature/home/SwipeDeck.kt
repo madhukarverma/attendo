@@ -256,9 +256,12 @@ private fun SubjectProfileCard(
     }
 }
 
-/** Ink text on light cards, cream text on dark ones. */
+/**
+ * Dark text on light cards, light text on dark ones. Fixed colours (not the theme's ink/background)
+ * because the card colours themselves don't change with the theme.
+ */
 private fun contentColorFor(background: Color): Color =
-    if (background.luminance() > 0.45f) AttendoColors.Ink else AttendoColors.Cream
+    if (background.luminance() > 0.45f) Color(0xFF232323) else Color(0xFFF8FAED)
 
 /** Ten clearly different colours; shuffled once with a fixed seed so they look random but stay stable. */
 private val CardPalette: List<Color> = listOf(

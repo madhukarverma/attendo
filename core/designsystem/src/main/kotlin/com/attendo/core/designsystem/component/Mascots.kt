@@ -32,8 +32,11 @@ import kotlin.math.sin
 
 enum class Mood { Happy, Neutral, Sad }
 
+/** Face colour: always dark, since it sits on the mascot's coloured body in every theme. */
+private val FaceInk = Color(0xFF232323)
+
 /** Draws the simple mascot face: two eyes and a mouth whose shape follows [mood]. */
-fun DrawScope.drawMascotFace(center: Offset, size: Float, mood: Mood, color: Color = AttendoColors.Ink) {
+fun DrawScope.drawMascotFace(center: Offset, size: Float, mood: Mood, color: Color = FaceInk) {
     val stroke = size * 0.07f
     val eyeDx = size * 0.22f
     val eyeTop = center.y - size * 0.22f
