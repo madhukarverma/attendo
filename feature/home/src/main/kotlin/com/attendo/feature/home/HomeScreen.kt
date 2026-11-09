@@ -29,6 +29,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -88,6 +90,9 @@ fun HomeRoute(
         onMark = vm::mark,
         onAddCourseSubjects = vm::addCourseSubjects,
         onOpenPomodoro = onOpenPomodoro,
+        onTinderModeChange = vm::setTinderMode,
+        onSwipe = vm::swipe,
+        onUndoSwipe = vm::undoSwipe,
         onAddSubject = onAddSubject,
         onOpenSubject = onOpenSubject,
         onOpenStats = onOpenStats,
@@ -106,6 +111,9 @@ fun HomeScreen(
     onOpenSettings: () -> Unit,
     onAddCourseSubjects: () -> Unit = {},
     onOpenPomodoro: () -> Unit = {},
+    onTinderModeChange: (Boolean) -> Unit = {},
+    onSwipe: (subjectId: String, status: AttendanceStatus) -> Unit = { _, _ -> },
+    onUndoSwipe: () -> Unit = {},
 ) {
     Box(
         Modifier
@@ -149,13 +157,31 @@ fun HomeScreen(
                     }
                 }
             }
-            items(state.items, key = { it.summary.subject.id }) { item ->
-                SubjectDayRow(
-                    item = item,
-                    onMark = { status -> onMark(item.summary.subject.id, status) },
-                    onClick = { onOpenSubject(item.summary.subject.id) },
-                    modifier = Modifier.animateItem().padding(horizontal = 20.dp),
-                )
+            if (state.items.isNotEmpty()) {
+                item(key = "tinderSwitch") {
+                    TinderModeSwitch(state.tinderMode, onTinderModeChange, Modifier.animateItem().padding(horizontal = 20.dp))
+                }
+            }
+            if (state.tinderMode && state.items.isNotEmpty()) {
+                item(key = "deck") {
+                    SwipeDeck(
+                        cards = state.unmarked,
+                        totalToday = state.items.size,
+                        canUndo = state.canUndoSwipe,
+                        onSwipe = onSwipe,
+                        onUndo = onUndoSwipe,
+                        modifier = Modifier.animateItem(),
+                    )
+                }
+            } else {
+                items(state.items, key = { it.summary.subject.id }) { item ->
+                    SubjectDayRow(
+                        item = item,
+                        onMark = { status -> onMark(item.summary.subject.id, status) },
+                        onClick = { onOpenSubject(item.summary.subject.id) },
+                        modifier = Modifier.animateItem().padding(horizontal = 20.dp),
+                    )
+                }
             }
             item { Spacer(Modifier.height(96.dp)) }
         }
@@ -208,6 +234,32 @@ internal fun MascotHeader(message: String, mood: Mood, modifier: Modifier = Modi
             SpeechBubble(text = message, tail = TailSide.BottomStart, modifier = Modifier.width(230.dp))
         }
         PentagonMascot(Modifier.size(170.dp), mood = mood)
+    }
+}
+
+@Composable
+private fun TinderModeSwitch(enabled: Boolean, onChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
+    AttendoCard(modifier = modifier, onClick = { onChange(!enabled) }) {
+        Column(Modifier.weight(1f)) {
+            Text("Tinder mode", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Swipe right present · left absent · down no class",
+                style = MaterialTheme.typography.labelSmall,
+                color = AttendoColors.Muted,
+            )
+        }
+        Switch(
+            checked = enabled,
+            onCheckedChange = onChange,
+            colors = SwitchDefaults.colors(
+                checkedTrackColor = AttendoColors.Pink,
+                checkedThumbColor = AttendoColors.Cream,
+                checkedBorderColor = AttendoColors.Pink,
+                uncheckedTrackColor = AttendoColors.CreamDeep,
+                uncheckedThumbColor = AttendoColors.Cream,
+                uncheckedBorderColor = AttendoColors.CreamDeep,
+            ),
+        )
     }
 }
 

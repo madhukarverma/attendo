@@ -20,6 +20,7 @@ interface SettingsRepository {
     suspend fun setUserName(name: String)
     suspend fun setOnboarded(onboarded: Boolean)
     suspend fun setIosMotion(enabled: Boolean)
+    suspend fun setTinderMode(enabled: Boolean)
 }
 
 interface SubjectRepository {
