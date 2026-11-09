@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-09 — v0.18.0 to-do list and reminders
+- New `:feature:todo` module: to-dos belong to a day; adding a time makes it a reminder. Sections
+  Overdue / Today / Upcoming / Done (clearable). Stored in `todos.csv`
+  (id,title,date,remind_at,done,created_at) and included in CSV export.
+- Reminders: `ReminderScheduler` (app module) keeps one AlarmManager alarm per pending reminder,
+  re-synced whenever todos.csv changes and after boot / app update / clock or time-zone changes.
+  `ReminderReceiver` re-checks the file before notifying; the notification has "Mark done" and
+  opens the To-do screen. Android 13+ notification permission is asked when the first reminder
+  is set. Exact alarms via USE_EXACT_ALARM (SCHEDULE_EXACT_ALARM on 12/12L), inexact fallback.
+- Academic calendar shows to-dos: ring marker on the day, "Your to-dos" card, and per-month rows.
+- Bottom bar: the green button is now "To-do"; "Add a subject" moved under the subject list.
+
 ## 2026-11-09 — v0.17.0 lecture hours
 - Subjects have optional total lecture hours (`lecture_hours` column in subjects.csv; 1 lecture =
   1 hour). Lectures left = hours - classes held (cancelled classes don't count).

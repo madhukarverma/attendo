@@ -1,5 +1,8 @@
 package com.attendo.app
 
+import android.content.Intent
+import com.attendo.app.reminders.ReminderNotifications
+import kotlinx.coroutines.flow.MutableStateFlow
 import android.graphics.Color
 import android.os.Bundle
 import android.provider.Settings
@@ -48,8 +51,12 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var recomposer: Recomposer
 
+    /** Screen requested by the launching intent (a reminder notification opens "todo"). */
+    private val openRequest = MutableStateFlow<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) openRequest.value = intent.openTarget()
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
@@ -99,7 +106,8 @@ class MainActivity : ComponentActivity() {
                     val ready = settings != null && (!wantsImage || image != null)
                     val launchBg = settings?.launchBackground?.let(::parseHexColor) ?: LaunchBackground
                     Box(Modifier.fillMaxSize()) {
-                        AttendoNavHost(container)
+                        val open by openRequest.collectAsStateWithLifecycle()
+                        AttendoNavHost(container, openRequest = open, onOpenHandled = { openRequest.value = null })
                         AnimatedVisibility(
                             visible = showSplash,
                             enter = EnterTransition.None,
@@ -122,6 +130,14 @@ class MainActivity : ComponentActivity() {
         }
         setContentView(view)
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        intent.openTarget()?.let { openRequest.value = it }
+    }
+
+    private fun Intent?.openTarget(): String? =
+        this?.data?.takeIf { it.scheme == ReminderNotifications.OPEN_TODO_URI.scheme }?.host
 
     override fun onDestroy() {
         recomposer.cancel()

@@ -1,5 +1,8 @@
 package com.attendo.core.designsystem.component
 
+import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.Canvas
@@ -155,6 +158,7 @@ fun PillBottomBar(
     primaryLabel: String,
     onPrimary: () -> Unit,
     modifier: Modifier = Modifier,
+    primaryIcon: ImageVector? = null,
     actions: @Composable RowScope.() -> Unit,
 ) {
     Row(
@@ -165,14 +169,19 @@ fun PillBottomBar(
             .padding(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
+        Row(
             Modifier
-                .iosPress(PressStyle.Scale, onClick = onPrimary)
+                .iosPress(PressStyle.Scale, onClickLabel = primaryLabel, onClick = onPrimary)
                 .clip(CircleShape)
                 .background(AttendoColors.Green)
-                .padding(horizontal = 22.dp, vertical = 14.dp),
+                .padding(horizontal = 20.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("+ $primaryLabel", color = AttendoColors.Cream, style = MaterialTheme.typography.labelLarge)
+            if (primaryIcon != null) {
+                Icon(primaryIcon, contentDescription = null, tint = AttendoColors.Cream, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+            }
+            Text(primaryLabel, color = AttendoColors.Cream, style = MaterialTheme.typography.labelLarge)
         }
         Row(Modifier.weight(1f), horizontalArrangement = Arrangement.SpaceEvenly, content = actions)
     }

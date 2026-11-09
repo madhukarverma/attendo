@@ -1,5 +1,8 @@
 package com.attendo.app
 
+import com.attendo.app.reminders.ReminderNotifications
+import com.attendo.app.reminders.ReminderScheduler
+import kotlinx.coroutines.launch
 import android.app.Application
 import com.attendo.core.data.AttendoData
 import com.attendo.core.data.pomodoro.PomodoroTimer
@@ -20,6 +23,9 @@ class AppContainer(application: Application) {
     /** Semester calendar bundled as calendar/academic_calendar.csv (from the official PDF). */
     val academicCalendar by lazy { AcademicCalendarLoader.bundled() }
 
+    /** One alarm per pending reminder in todos.csv. */
+    val reminders = ReminderScheduler(application)
+
     /** App-scoped so the countdown keeps going when the user leaves the timer screen. */
     val pomodoroTimer = PomodoroTimer(CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate), data.pomodoro)
 }
@@ -31,5 +37,10 @@ class AttendoApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
+        ReminderNotifications.createChannel(this)
+        // Re-arm alarms whenever the to-do list changes (and once at start-up).
+        container.appScope.launch {
+            container.data.todos.todos.collect { container.reminders.sync(it) }
+        }
     }
 }

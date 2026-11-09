@@ -50,12 +50,13 @@ fun rememberCollapseFraction(state: ScrollState): State<Float> {
 /**
  * Navigation bar in the style of iOS Settings: "‹ Back" on the left, a small centred title that
  * fades in once the [LargeTitle] scrolls underneath, and a hairline that appears with it.
+ * [onBack] null hides the back button (top-level tabs).
  */
 @Composable
 fun CollapsingTopBar(
     title: String,
     collapseFraction: () -> Float,
-    onBack: () -> Unit,
+    onBack: (() -> Unit)?,
     backLabel: String = "Back",
     modifier: Modifier = Modifier,
 ) {
@@ -65,7 +66,7 @@ fun CollapsingTopBar(
             .height(48.dp)
             .background(AttendoColors.Cream),
     ) {
-        Row(
+        if (onBack != null) Row(
             Modifier
                 .align(Alignment.CenterStart)
                 .padding(start = 4.dp)

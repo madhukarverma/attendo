@@ -12,8 +12,8 @@ android {
         applicationId = "com.attendo.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 17
-        versionName = "0.17.0"
+        versionCode = 18
+        versionName = "0.18.0"
     }
 
     buildTypes {
@@ -53,6 +53,7 @@ dependencies {
     implementation(project(":feature:splash"))
     implementation(project(":feature:pomodoro"))
     implementation(project(":feature:calendar"))
+    implementation(project(":feature:todo"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
