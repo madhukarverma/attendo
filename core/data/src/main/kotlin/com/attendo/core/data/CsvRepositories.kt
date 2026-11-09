@@ -46,9 +46,17 @@ internal class CsvSettingsRepository(
                 theme = m[KEY_THEME]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() } ?: ThemeMode.LIGHT,
                 customColors = m.filterKeys { it.startsWith(COLOR_PREFIX) }
                     .mapKeys { (k, _) -> k.removePrefix(COLOR_PREFIX) },
+                launchImage = m[KEY_LAUNCH_IMAGE] == "true",
+                launchBackground = m[KEY_LAUNCH_BG]?.takeIf { it.isNotBlank() },
             )
         }
     }
+
+    override suspend fun setLaunchImage(enabled: Boolean, backgroundHex: String?) =
+        store.update { list ->
+            list.filterNot { it.first == KEY_LAUNCH_IMAGE || it.first == KEY_LAUNCH_BG } +
+                (KEY_LAUNCH_IMAGE to enabled.toString()) + (KEY_LAUNCH_BG to backgroundHex.orEmpty())
+        }
 
     override suspend fun setTheme(mode: ThemeMode) = put(KEY_THEME, mode.name)
 
@@ -77,6 +85,8 @@ internal class CsvSettingsRepository(
         const val KEY_TINDER_MODE = "tinder_mode"
         const val KEY_THEME = "theme"
         const val COLOR_PREFIX = "color."
+        const val KEY_LAUNCH_IMAGE = "launch_image"
+        const val KEY_LAUNCH_BG = "launch_background"
     }
 }
 

@@ -27,4 +27,8 @@ data class AppSettings(
     val theme: ThemeMode = ThemeMode.LIGHT,
     /** Custom theme colours, palette key -> "#RRGGBB" (stored as `color.<key>` in settings.csv). */
     val customColors: Map<String, String> = emptyMap(),
+    /** Whether the user picked a launch-screen image (stored in app files). */
+    val launchImage: Boolean = false,
+    /** Launch-screen background "#RRGGBB", sampled from the picked image's edges. */
+    val launchBackground: String? = null,
 )

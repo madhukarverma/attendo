@@ -99,7 +99,11 @@ fun moodColor(mood: Mood): Color = when (mood) {
 }
 
 /**
- * Rounded pentagon home mascot, animated by mood:
+ * Meet Penta, the rounded pentagon who lives on the Home screen. (He never introduces himself in the
+ * app; his name is a codebase-only easter egg.) Penta is happy when every subject is at or above its
+ * target and sad otherwise.
+ *
+ * Animated by mood:
  * - Happy: small bounce with a little squash on landing; the shadow shrinks as it rises.
  * - Sad: slow left-right sway from the base, like a sigh.
  * - Neutral: gentle "breathing" scale.

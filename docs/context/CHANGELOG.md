@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-11-09 — v0.14.0 launch screen, rotation lock, header, Penta
+- Generated launch art removed; launch screen shows "MCA 2026-29", an optional user-picked image
+  (Settings › Launch screen, system photo picker) on a background sampled from the image's edges,
+  the wordmark and the developer credit. Android 12+ system splash no longer shows an icon.
+- App locked to portrait.
+- Home header top padding 24 → 14 dp, list spacing 10 → 8 dp (constants in HomeScreen.kt).
+- Penta (pentagon mascot, name is a code-only easter egg) is 156 dp; mood = in the clear (all
+  subjects at/above target) → happy, else sad, independent of the day. Bubble alternates between
+  the day's significance and the attendance warning only when not in the clear.
+
+## 2026-11-09 — v0.13.0 themes
+- Light / Dark (pitch black + dark grey) / Custom (11 hex colours); stored as `theme`, `color.<key>`.
+
+## 2026-11-09 — v0.12.0 animation modes
+- Smooth / iOS / Android / None slider (`animation_mode`); Apple spring model for iOS; high refresh
+  rate in Smooth and iOS; None removes transitions, motion and the launch screen.
+
+## 2026-11-09 — v0.11.0 academic calendar screen
+- Calendar button beside the date; month grids, legend, coming-up list; weekends are holidays.
+
 ## 2026-11-09 — v0.10.0 animations switch + launch screen
 - Settings "Animations" switch (on by default, key `ios_motion`). Off = every animation instant:
   `AppMotionScale` (MotionDurationScale) is installed in the activity's own Recomposer, nav
