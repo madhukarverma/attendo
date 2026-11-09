@@ -37,6 +37,9 @@ import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.core.designsystem.theme.AttendoPalette
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.graphics.ImageBitmap
+import com.attendo.core.designsystem.theme.parseHexColor
 import com.attendo.feature.splash.LogoSplash
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
@@ -88,6 +91,13 @@ class MainActivity : ComponentActivity() {
                     var showSplash by rememberSaveable { mutableStateOf(true) }
                     // "No animations" means no launch screen either: straight into the app.
                     if (mode == AnimationMode.NONE) showSplash = false
+                    // The user's launch image (picked in Settings), decoded off the main thread.
+                    val wantsImage = settings?.launchImage == true
+                    val image by produceState<ImageBitmap?>(null, wantsImage) {
+                        value = if (wantsImage) LaunchImageStore.load(this@MainActivity) else null
+                    }
+                    val ready = settings != null && (!wantsImage || image != null)
+                    val launchBg = settings?.launchBackground?.let(::parseHexColor) ?: LaunchBackground
                     Box(Modifier.fillMaxSize()) {
                         AttendoNavHost(container)
                         AnimatedVisibility(
@@ -95,12 +105,13 @@ class MainActivity : ComponentActivity() {
                             enter = EnterTransition.None,
                             exit = fadeOut(tween(350)) + scaleOut(tween(350), targetScale = 1.08f),
                         ) {
-                            if (mode == null) {
-                                // Settings still loading (a few ms): plain launch colour, no flash.
-                                Box(Modifier.fillMaxSize().background(LaunchBackground))
+                            if (!ready) {
+                                // Settings/image still loading (a few ms): plain launch colour, no flash.
+                                Box(Modifier.fillMaxSize().background(launchBg))
                             } else {
                                 LogoSplash(
-                                    animated = true,
+                                    image = image,
+                                    background = launchBg,
                                     onFinished = { showSplash = false },
                                 )
                             }

@@ -22,6 +22,9 @@ import com.attendo.app.CsvExporter
 import android.app.Activity
 import androidx.compose.runtime.LaunchedEffect
 import com.attendo.app.preferHighRefreshRate
+import com.attendo.app.LaunchImageStore
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import com.attendo.core.designsystem.motion.AppMotionScale
 import com.attendo.core.designsystem.motion.LocalAnimationMode
 import com.attendo.core.designsystem.motion.Motion
@@ -177,11 +180,24 @@ fun AttendoNavHost(container: AppContainer) {
             }
             composable(Routes.SETTINGS) {
                 val context = LocalContext.current
+                val scope = rememberCoroutineScope()
                 SettingsRoute(
                     settings = data.settings,
                     appVersion = BuildConfig.VERSION_NAME,
                     onExportCsv = { CsvExporter.share(context, data) },
                     onClose = { navController.back() },
+                    onPickLaunchImage = { uri ->
+                        scope.launch {
+                            val edge = LaunchImageStore.save(context, uri)
+                            data.settings.setLaunchImage(enabled = edge != null, backgroundHex = edge)
+                        }
+                    },
+                    onRemoveLaunchImage = {
+                        scope.launch {
+                            LaunchImageStore.delete(context)
+                            data.settings.setLaunchImage(enabled = false, backgroundHex = null)
+                        }
+                    },
                 )
             }
             composable(Routes.SUBJECT_DETAIL) { entry ->

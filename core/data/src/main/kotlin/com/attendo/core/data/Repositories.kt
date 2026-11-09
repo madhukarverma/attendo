@@ -26,6 +26,9 @@ interface SettingsRepository {
 
     /** Saves custom-theme colours (palette key -> "#RRGGBB"), replacing the given keys. */
     suspend fun setCustomColors(colors: Map<String, String>)
+
+    /** Records whether a launch image is set and the background colour sampled from it. */
+    suspend fun setLaunchImage(enabled: Boolean, backgroundHex: String?)
     suspend fun setTinderMode(enabled: Boolean)
 }
 

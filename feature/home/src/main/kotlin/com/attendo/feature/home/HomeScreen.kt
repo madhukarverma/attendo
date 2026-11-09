@@ -30,6 +30,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -141,7 +149,7 @@ fun HomeScreen(
         BounceContainer(Modifier.fillMaxSize()) {
         LazyColumn(
             Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item { Greeting(state.userName, state.selectedDate) { onOpenCalendar(state.selectedDate) } }
             item {
@@ -157,8 +165,8 @@ fun HomeScreen(
             // In Tinder mode the mascot steps aside so the card stack sits in the middle of the screen.
             if (!(state.tinderMode && state.items.isNotEmpty())) {
                 item(key = "mascot") {
-                    val (message, mood) = mascotMessage(state)
-                    MascotHeader(message = message, mood = mood, modifier = Modifier.animateItem())
+                    val (messages, mood) = pentaSays(state)
+                    MascotHeader(messages = messages, mood = mood, modifier = Modifier.animateItem())
                 }
             }
             if (state.items.isEmpty()) {
@@ -226,38 +234,43 @@ fun HomeScreen(
     }
 }
 
-private fun mascotMessage(state: HomeUiState): Pair<String, Mood> {
+/**
+ * What Penta (the pentagon mascot) feels and says.
+ *
+ * Mood never depends on the day: Penta is happy only when the student is "in the clear", i.e. every
+ * subject is at or above its target (75% by default), and sad otherwise.
+ *
+ * Bubble: in the clear it shows one steady line (the day's significance, else a friendly default).
+ * Not in the clear, it alternates between the day's significance and the attendance warning.
+ */
+private fun pentaSays(state: HomeUiState): Pair<List<String>, Mood> {
+    val dayLine = state.calendar.mascotLine(state.selectedDate)
+    val inClear = state.subjectsBelowTarget == 0
+    if (!inClear) {
+        val warning = "${state.subjectsBelowTarget} subject(s) below target. Time to show up!"
+        return listOfNotNull(dayLine, warning) to Mood.Sad
+    }
     val overall = state.overallPercent
-    // 1. A significant day in the academic calendar always wins.
-    val event = state.selectedDayEvents.firstOrNull()
-    val calendarLine = state.calendar.mascotLine(state.selectedDate)
-    if (event != null && calendarLine != null) {
-        val mood = when (event.kind) {
-            DayKind.HOLIDAY, DayKind.EVENT, DayKind.CLASSES_START -> Mood.Happy
-            DayKind.EXAM, DayKind.DEADLINE, DayKind.CLASSES_END -> Mood.Neutral
-        }
-        return calendarLine to mood
+    val default = when {
+        state.items.isEmpty() -> "Add your subjects and start tracking your attendance!"
+        overall == null -> "Mark today's classes below. Tap again to undo."
+        else -> "You're at ${overall.roundToInt()}% overall. Good job!"
     }
-    // 2. Attendance warnings; 3. upcoming calendar heads-up; 4. defaults.
-    if (state.items.isNotEmpty() && state.subjectsBelowTarget > 0) {
-        return "${state.subjectsBelowTarget} subject(s) below target. Time to show up!" to Mood.Sad
-    }
-    if (calendarLine != null) return calendarLine to Mood.Happy
-    return when {
-        state.items.isEmpty() -> "Add your subjects and start tracking your attendance!" to Mood.Happy
-        overall == null -> "Mark today's classes below. Tap again to undo." to Mood.Happy
-        state.subjectsBelowTarget > 0 ->
-            "${state.subjectsBelowTarget} subject(s) below target. Time to show up!" to Mood.Sad
-        else -> "You're at ${overall.roundToInt()}% overall. Good job!" to Mood.Happy
-    }
+    return listOf(dayLine ?: default) to Mood.Happy
 }
+
+/** Seconds each bubble line stays up when Penta alternates between messages. */
+private const val BUBBLE_PHASE_MILLIS = 4_000L
+
+/** Home header top padding; tightened slightly in v0.14 (was 24.dp: change back here if preferred). */
+private val HeaderTopPadding = 14.dp
 
 private val HeaderDate = java.time.format.DateTimeFormatter.ofPattern("EEE, d MMM")
 
 @Composable
 internal fun Greeting(name: String, selectedDate: LocalDate, onOpenCalendar: () -> Unit = {}) {
     Row(
-        Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 24.dp),
+        Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = HeaderTopPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -295,12 +308,28 @@ internal fun Greeting(name: String, selectedDate: LocalDate, onOpenCalendar: () 
 }
 
 @Composable
-internal fun MascotHeader(message: String, mood: Mood, modifier: Modifier = Modifier) {
+internal fun MascotHeader(messages: List<String>, mood: Mood, modifier: Modifier = Modifier) {
+    // Cycle through the lines when there's more than one ("phase change"); a single line stays put.
+    var phase by remember(messages) { mutableIntStateOf(0) }
+    LaunchedEffect(messages) {
+        while (messages.size > 1) {
+            delay(BUBBLE_PHASE_MILLIS)
+            phase++
+        }
+    }
+    val message = messages.getOrElse(phase % messages.size.coerceAtLeast(1)) { "" }
     Column(modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            SpeechBubble(text = message, tail = TailSide.BottomStart, modifier = Modifier.width(230.dp))
+            AnimatedContent(
+                targetState = message,
+                transitionSpec = { fadeIn(Motion.settle()) togetherWith fadeOut(Motion.settle()) },
+                label = "bubble",
+            ) { text ->
+                SpeechBubble(text = text, tail = TailSide.BottomStart, modifier = Modifier.width(230.dp))
+            }
         }
-        PentagonMascot(Modifier.size(170.dp), mood = mood)
+        // Penta, slightly smaller since v0.14 (was 170.dp).
+        PentagonMascot(Modifier.size(156.dp), mood = mood)
     }
 }
 

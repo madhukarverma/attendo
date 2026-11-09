@@ -53,6 +53,7 @@ import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.core.model.AnimationMode
 import com.attendo.core.model.AppSettings
 import com.attendo.core.model.ThemeMode
+import android.net.Uri
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -90,6 +91,8 @@ fun SettingsRoute(
     appVersion: String,
     onExportCsv: () -> Unit,
     onClose: () -> Unit,
+    onPickLaunchImage: (Uri) -> Unit = {},
+    onRemoveLaunchImage: () -> Unit = {},
 ) {
     val vm: SettingsViewModel = viewModel { SettingsViewModel(settings) }
     val state by vm.state.collectAsStateWithLifecycle()
@@ -105,6 +108,14 @@ fun SettingsRoute(
         customColors = state?.customColors.orEmpty(),
         onThemeChange = vm::setTheme,
         onCustomColorsChange = vm::setCustomColors,
+        launchSection = {
+            LaunchImageSection(
+                hasImage = state?.launchImage == true,
+                backgroundHex = state?.launchBackground,
+                onPick = onPickLaunchImage,
+                onRemove = onRemoveLaunchImage,
+            )
+        },
     )
 }
 
@@ -121,6 +132,7 @@ fun SettingsScreen(
     customColors: Map<String, String> = emptyMap(),
     onThemeChange: (ThemeMode) -> Unit = {},
     onCustomColorsChange: (Map<String, String>) -> Unit = {},
+    launchSection: @Composable () -> Unit = {},
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     LaunchedEffect(savedName) { if (savedName != null && name.isEmpty()) name = savedName }
@@ -172,6 +184,9 @@ fun SettingsScreen(
 
                 SectionTitle("Animations")
                 AnimationModeSlider(animationMode, onAnimationModeChange)
+
+                SectionTitle("Launch screen")
+                launchSection()
 
                 SectionTitle("Your data")
                 AttendoCard {
