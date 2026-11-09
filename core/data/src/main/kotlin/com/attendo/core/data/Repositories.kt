@@ -17,6 +17,7 @@ interface SettingsRepository {
     val settings: Flow<AppSettings?>
     suspend fun setUserName(name: String)
     suspend fun setOnboarded(onboarded: Boolean)
+    suspend fun setIosMotion(enabled: Boolean)
 }
 
 interface SubjectRepository {

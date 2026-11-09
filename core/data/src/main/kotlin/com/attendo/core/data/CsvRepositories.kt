@@ -34,9 +34,12 @@ internal class CsvSettingsRepository(
             AppSettings(
                 userName = m[KEY_NAME].orEmpty(),
                 onboarded = m[KEY_ONBOARDED] == "true",
+                iosMotion = m[KEY_IOS_MOTION] != "false",
             )
         }
     }
+
+    override suspend fun setIosMotion(enabled: Boolean) = put(KEY_IOS_MOTION, enabled.toString())
 
     override suspend fun setUserName(name: String) = put(KEY_NAME, name.trim())
 
@@ -48,6 +51,7 @@ internal class CsvSettingsRepository(
     private companion object {
         const val KEY_NAME = "user_name"
         const val KEY_ONBOARDED = "onboarded"
+        const val KEY_IOS_MOTION = "ios_motion"
     }
 }
 
