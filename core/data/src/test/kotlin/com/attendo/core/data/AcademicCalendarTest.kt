@@ -30,7 +30,20 @@ class AcademicCalendarTest {
     @Test
     fun mascotLineMentionsUpcomingEventsAndStaysQuietOtherwise() {
         assertEquals("Heads up: Diwali (Deepavali) in 2 days.", cal.mascotLine(LocalDate.of(2026, 11, 6)))
-        assertNull(cal.mascotLine(LocalDate.of(2026, 10, 10)))
+        assertNull(cal.mascotLine(LocalDate.of(2026, 10, 8))) // ordinary Thursday
+    }
+
+    @Test
+    fun weekendsAreHolidays() {
+        val saturday = LocalDate.of(2026, 10, 10)
+        assertTrue(cal.isWeekend(saturday))
+        assertTrue(cal.isHoliday(saturday))
+        assertEquals(false, cal.isClassDay(saturday))
+        assertEquals("It's the weekend! No classes today, recharge.", cal.mascotLine(saturday))
+        assertTrue(cal.isClassDay(LocalDate.of(2026, 10, 8)))
+        assertEquals(false, cal.isClassDay(LocalDate.of(2026, 10, 2))) // Gandhi Jayanti (Friday)
+        // 13 Aug - 25 Nov: 75 weekdays minus 5 weekday holidays (15 Aug is a Saturday, 8 Nov a Sunday).
+        assertEquals(70, cal.classDayCount())
     }
 
     @Test

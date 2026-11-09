@@ -28,6 +28,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -84,9 +86,19 @@ fun HomeRoute(
     onOpenSettings: () -> Unit,
     onOpenPomodoro: () -> Unit,
     calendar: AcademicCalendar = AcademicCalendar.EMPTY,
+    onOpenCalendar: (LocalDate) -> Unit = {},
+    /** A date picked on the calendar screen; selected once, then [onRequestedDateHandled] clears it. */
+    requestedDate: LocalDate? = null,
+    onRequestedDateHandled: () -> Unit = {},
 ) {
     val vm: HomeViewModel = viewModel { HomeViewModel(settings, subjects, attendance, calendar) }
     val state by vm.uiState.collectAsStateWithLifecycle()
+    LaunchedEffect(requestedDate) {
+        if (requestedDate != null) {
+            vm.selectDate(requestedDate)
+            onRequestedDateHandled()
+        }
+    }
     HomeScreen(
         state = state,
         onSelectDate = vm::selectDate,
@@ -96,6 +108,7 @@ fun HomeRoute(
         onTinderModeChange = vm::setTinderMode,
         onSwipe = vm::swipe,
         onUndoSwipe = vm::undoSwipe,
+        onOpenCalendar = onOpenCalendar,
         onAddSubject = onAddSubject,
         onOpenSubject = onOpenSubject,
         onOpenStats = onOpenStats,
@@ -117,6 +130,7 @@ fun HomeScreen(
     onTinderModeChange: (Boolean) -> Unit = {},
     onSwipe: (subjectId: String, status: AttendanceStatus) -> Unit = { _, _ -> },
     onUndoSwipe: () -> Unit = {},
+    onOpenCalendar: (LocalDate) -> Unit = {},
 ) {
     Box(
         Modifier
@@ -129,7 +143,7 @@ fun HomeScreen(
             Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            item { Greeting(state.userName, state.selectedDate) }
+            item { Greeting(state.userName, state.selectedDate) { onOpenCalendar(state.selectedDate) } }
             item {
                 DayStrip(
                     days = state.days,
@@ -137,6 +151,7 @@ fun HomeScreen(
                     markedDays = state.markedDays,
                     onSelect = onSelectDate,
                     dots = state.dayKinds.mapValues { (_, kind) -> kind.dotColor() },
+                    isOffDay = state.calendar::isWeekend,
                 )
             }
             // In Tinder mode the mascot steps aside so the card stack sits in the middle of the screen.
@@ -240,7 +255,7 @@ private fun mascotMessage(state: HomeUiState): Pair<String, Mood> {
 private val HeaderDate = java.time.format.DateTimeFormatter.ofPattern("EEE, d MMM")
 
 @Composable
-internal fun Greeting(name: String, selectedDate: LocalDate) {
+internal fun Greeting(name: String, selectedDate: LocalDate, onOpenCalendar: () -> Unit = {}) {
     Row(
         Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 24.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -255,7 +270,18 @@ internal fun Greeting(name: String, selectedDate: LocalDate) {
             maxLines = 1,
             modifier = Modifier.weight(1f),
         )
-        // Selected date, top right.
+        // Academic calendar button, then the selected date (top right).
+        Box(
+            Modifier
+                .size(34.dp)
+                .clip(CircleShape)
+                .iosPress(PressStyle.Scale, onClickLabel = "Open academic calendar", onClick = onOpenCalendar)
+                .background(AttendoColors.CreamDeep),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(Icons.Filled.DateRange, contentDescription = null, tint = AttendoColors.Ink, modifier = Modifier.size(18.dp))
+        }
+        Spacer(Modifier.width(8.dp))
         Text(
             selectedDate.format(HeaderDate),
             style = MaterialTheme.typography.labelLarge,

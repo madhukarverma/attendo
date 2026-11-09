@@ -28,6 +28,8 @@ import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.feature.home.HomeRoute
 import com.attendo.feature.onboarding.OnboardingRoute
 import com.attendo.feature.pomodoro.PomodoroRoute
+import com.attendo.feature.calendar.CalendarScreen
+import java.time.LocalDate
 import com.attendo.core.data.AttendoData
 import com.attendo.feature.settings.SettingsRoute
 import com.attendo.feature.stats.StatsRoute
@@ -44,10 +46,15 @@ object Routes {
     const val STATS = "stats"
     const val SETTINGS = "settings"
     const val POMODORO = "pomodoro"
+    const val CALENDAR = "calendar/{date}"
+    fun calendar(date: LocalDate) = "calendar/$date"
 
     /** Presented as bottom sheets rather than pushed screens. */
     val MODAL = setOf(ADD_SUBJECT)
 }
+
+/** savedStateHandle key used by the calendar screen to hand a picked date back to Home. */
+private const val KEY_PICKED_DATE = "picked_date"
 
 /** Ignores taps on a screen that is already animating away (prevents double pushes). */
 private fun NavHostController.push(route: String) {
@@ -102,7 +109,10 @@ fun AttendoNavHost(container: AppContainer) {
                     },
                 )
             }
-            composable(Routes.HOME) {
+            composable(Routes.HOME) { entry ->
+                val requested by entry.savedStateHandle
+                    .getStateFlow<String?>(KEY_PICKED_DATE, null)
+                    .collectAsStateWithLifecycle()
                 HomeRoute(
                     settings = data.settings,
                     subjects = data.subjects,
@@ -113,6 +123,22 @@ fun AttendoNavHost(container: AppContainer) {
                     onOpenSettings = { navController.push(Routes.SETTINGS) },
                     onOpenPomodoro = { navController.push(Routes.POMODORO) },
                     calendar = container.academicCalendar,
+                    onOpenCalendar = { date -> navController.push(Routes.calendar(date)) },
+                    requestedDate = requested?.let(LocalDate::parse),
+                    onRequestedDateHandled = { entry.savedStateHandle[KEY_PICKED_DATE] = null },
+                )
+            }
+            composable(Routes.CALENDAR) { entry ->
+                val selected = entry.arguments?.getString("date")?.let(LocalDate::parse) ?: LocalDate.now()
+                CalendarScreen(
+                    calendar = container.academicCalendar,
+                    selected = selected,
+                    onPickDate = { date ->
+                        // Hand the date back to Home, then return there.
+                        navController.previousBackStackEntry?.savedStateHandle?.set(KEY_PICKED_DATE, date.toString())
+                        navController.back()
+                    },
+                    onClose = { navController.back() },
                 )
             }
             composable(Routes.POMODORO) {

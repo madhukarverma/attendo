@@ -51,6 +51,8 @@ fun DayStrip(
     modifier: Modifier = Modifier,
     /** Optional coloured marker under a day (academic calendar events). */
     dots: Map<LocalDate, Color> = emptyMap(),
+    /** Regular days off (weekends): their weekday label is tinted. */
+    isOffDay: (LocalDate) -> Boolean = { false },
 ) {
     // Days interleaved with a month label wherever a new month begins (and at the very start).
     val entries: List<Any> = remember(days) {
@@ -65,6 +67,12 @@ fun DayStrip(
     LaunchedEffect(days.firstOrNull()) {
         val idx = entries.indexOf(selected)
         if (idx >= 0) state.scrollToItem((idx - 3).coerceAtLeast(0))
+    }
+    // Bring the selected day into view when it's changed from elsewhere (e.g. the calendar screen).
+    LaunchedEffect(selected) {
+        val idx = entries.indexOf(selected)
+        val visible = state.layoutInfo.visibleItemsInfo.map { it.index }
+        if (idx >= 0 && idx !in visible) state.animateScrollToItem((idx - 3).coerceAtLeast(0))
     }
     LazyRow(
         modifier = modifier,
@@ -97,7 +105,11 @@ fun DayStrip(
                 Text(
                     day.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()).take(2).uppercase(),
                     style = MaterialTheme.typography.labelMedium,
-                    color = if (isSelected) AttendoColors.Cream else AttendoColors.Muted,
+                    color = when {
+                        isSelected -> AttendoColors.Cream
+                        isOffDay(day) -> AttendoColors.Pink
+                        else -> AttendoColors.Muted
+                    },
                 )
                 Spacer(Modifier.height(6.dp))
                 Box(
