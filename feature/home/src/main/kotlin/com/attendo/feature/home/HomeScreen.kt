@@ -56,6 +56,7 @@ import com.attendo.core.designsystem.component.PentagonMascot
 import com.attendo.core.designsystem.component.PillBottomBar
 import com.attendo.core.designsystem.component.SpeechBubble
 import com.attendo.core.designsystem.component.StatsGlyph
+import com.attendo.core.designsystem.component.TimerGlyph
 import com.attendo.core.designsystem.component.StatusLabel
 import com.attendo.core.designsystem.component.TailSide
 import com.attendo.core.designsystem.theme.AttendoColors
@@ -77,6 +78,7 @@ fun HomeRoute(
     onOpenSubject: (String) -> Unit,
     onOpenStats: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenPomodoro: () -> Unit,
 ) {
     val vm: HomeViewModel = viewModel { HomeViewModel(settings, subjects, attendance) }
     val state by vm.uiState.collectAsStateWithLifecycle()
@@ -85,6 +87,7 @@ fun HomeRoute(
         onSelectDate = vm::selectDate,
         onMark = vm::mark,
         onAddCourseSubjects = vm::addCourseSubjects,
+        onOpenPomodoro = onOpenPomodoro,
         onAddSubject = onAddSubject,
         onOpenSubject = onOpenSubject,
         onOpenStats = onOpenStats,
@@ -102,6 +105,7 @@ fun HomeScreen(
     onOpenStats: () -> Unit,
     onOpenSettings: () -> Unit,
     onAddCourseSubjects: () -> Unit = {},
+    onOpenPomodoro: () -> Unit = {},
 ) {
     Box(
         Modifier
@@ -164,6 +168,7 @@ fun HomeScreen(
                 .align(Alignment.BottomCenter)
                 .padding(horizontal = 20.dp, vertical = 12.dp),
         ) {
+            BarIconButton(onClick = onOpenPomodoro, contentDescription = "Pomodoro timer") { TimerGlyph() }
             BarIconButton(onClick = onOpenStats, contentDescription = "Statistics") { StatsGlyph() }
             BarIconButton(onClick = onOpenSettings, contentDescription = "Settings") {
                 Icon(Icons.Filled.Settings, contentDescription = null, tint = AttendoColors.Cream)

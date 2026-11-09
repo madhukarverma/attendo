@@ -23,6 +23,8 @@ import com.attendo.core.designsystem.motion.LocalIosMotion
 import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.feature.home.HomeRoute
 import com.attendo.feature.onboarding.OnboardingRoute
+import com.attendo.feature.pomodoro.PomodoroRoute
+import com.attendo.core.data.AttendoData
 import com.attendo.feature.settings.SettingsRoute
 import com.attendo.feature.stats.StatsRoute
 import com.attendo.feature.subjects.AddSubjectRoute
@@ -37,6 +39,7 @@ object Routes {
     fun subjectDetail(id: String) = "subject/$id"
     const val STATS = "stats"
     const val SETTINGS = "settings"
+    const val POMODORO = "pomodoro"
 
     /** Presented as bottom sheets rather than pushed screens. */
     val MODAL = setOf(ADD_SUBJECT)
@@ -97,6 +100,17 @@ fun AttendoNavHost(container: AppContainer) {
                     onOpenSubject = { id -> navController.push(Routes.subjectDetail(id)) },
                     onOpenStats = { navController.push(Routes.STATS) },
                     onOpenSettings = { navController.push(Routes.SETTINGS) },
+                    onOpenPomodoro = { navController.push(Routes.POMODORO) },
+                )
+            }
+            composable(Routes.POMODORO) {
+                val context = LocalContext.current
+                PomodoroRoute(
+                    timer = container.pomodoroTimer,
+                    pomodoro = data.pomodoro,
+                    subjects = data.subjects,
+                    onExportCsv = { CsvExporter.share(context, data, only = listOf(AttendoData.POMODORO_FILE)) },
+                    onClose = { navController.back() },
                 )
             }
             composable(Routes.ADD_SUBJECT) {

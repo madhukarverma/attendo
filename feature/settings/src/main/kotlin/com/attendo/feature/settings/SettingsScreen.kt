@@ -178,8 +178,8 @@ fun SettingsScreen(
                     Icon(Icons.Filled.Info, contentDescription = null, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(14.dp))
                     Text(
-                        "Everything is stored on this phone as CSV files: subjects.csv, attendance.csv and " +
-                            "settings.csv. Export them to open in Excel or Google Sheets.",
+                        "Everything is stored on this phone as CSV files: subjects.csv, attendance.csv, " +
+                            "pomodoro.csv and settings.csv. Export them to open in Excel or Google Sheets.",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }

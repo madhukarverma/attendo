@@ -7,4 +7,7 @@
 - ISSUE-005 — Dark theme for the cream screens.
 - ISSUE-006 — Release signing keystore + CI build (GitHub Actions).
 - ISSUE-007 — Home-screen widget.
+- ISSUE-009 — Pomodoro: notification/alarm when a run ends while the app is in the background, and
+  restoring a running timer after the system kills the app (needs a foreground service or AlarmManager).
+- ISSUE-010 — Pomodoro: remember the chosen focus length and allow custom break lengths.
 - ISSUE-008 — Bundle a grotesk + handwritten font (current: system sans / cursive).

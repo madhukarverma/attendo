@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-09 — v0.6.0 Pomodoro
+- `:feature:pomodoro` with Timer / Stats tabs (segmented control), opened from a new bottom-bar button.
+- `PomodoroTimer` (core:data): wall-clock based, app-scoped; focus 15/25/45/60, 5 min short break,
+  15 min long break after 4 focus sessions; pause / resume / reset / skip; per-subject focus.
+- Sessions saved to `pomodoro.csv` (completed runs, and focus runs stopped after ≥ 60 s).
+- Stats: today / week / all-time focus, sessions, streak, 7-day chart, per-subject bars, recent list.
+- Export pomodoro.csv from the Stats tab; Settings export now includes it.
+- Haptic on finish; screen kept on while running. Unit tests for timer and stats.
+
+## 2026-11-09 — v0.5.0 mood mascot
+- Pentagon bounces (green) when on track, sways (slate blue) when below target, breathes when neutral.
+
 ## 2026-11-09 — v0.4.0 course catalog
 - `CourseCatalog` with the semester's 7 subjects (CA711, CA713, CA715, CA717, CA719, CA701 lab, CA703 lab).
 - Onboarding checkbox (on by default) adds them; empty Home shows a one-tap "Add my semester subjects".
