@@ -146,7 +146,7 @@ private fun SemesterCard(calendar: AcademicCalendar, today: LocalDate) {
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(28.dp))
-            .background(AttendoColors.Ink)
+            .background(AttendoColors.Hero)
             .padding(22.dp),
     ) {
         Text("JULY 2026 SESSION", style = MaterialTheme.typography.labelMedium, color = AttendoColors.Muted)
@@ -158,7 +158,7 @@ private fun SemesterCard(calendar: AcademicCalendar, today: LocalDate) {
                 fontWeight = FontWeight.Bold,
                 color = AttendoColors.Green,
             )
-            Text("Class work", style = MaterialTheme.typography.labelLarge, color = AttendoColors.Cream)
+            Text("Class work", style = MaterialTheme.typography.labelLarge, color = AttendoColors.OnHero)
             Spacer(Modifier.height(14.dp))
             val total = ChronoUnit.DAYS.between(start, end).coerceAtLeast(1)
             val done = ChronoUnit.DAYS.between(start, today).coerceIn(0, total)
@@ -167,7 +167,7 @@ private fun SemesterCard(calendar: AcademicCalendar, today: LocalDate) {
                     .fillMaxWidth()
                     .height(8.dp)
                     .clip(CircleShape)
-                    .background(AttendoColors.Cream.copy(alpha = 0.15f)),
+                    .background(AttendoColors.OnHero.copy(alpha = 0.15f)),
             ) {
                 Box(
                     Modifier
@@ -192,7 +192,7 @@ private fun SemesterCard(calendar: AcademicCalendar, today: LocalDate) {
 @Composable
 private fun Stat(label: String, value: String) {
     Column {
-        Text(value, style = MaterialTheme.typography.titleMedium, color = AttendoColors.Cream)
+        Text(value, style = MaterialTheme.typography.titleMedium, color = AttendoColors.OnHero)
         Text(label, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
     }
 }

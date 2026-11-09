@@ -15,10 +15,16 @@ enum class AnimationMode {
     NONE,
 }
 
+/** Settings › Theme. */
+enum class ThemeMode { LIGHT, DARK, CUSTOM }
+
 data class AppSettings(
     val userName: String = "",
     val onboarded: Boolean = false,
     val animationMode: AnimationMode = AnimationMode.IOS,
     /** Home shows swipeable subject cards instead of the list. */
     val tinderMode: Boolean = false,
+    val theme: ThemeMode = ThemeMode.LIGHT,
+    /** Custom theme colours, palette key -> "#RRGGBB" (stored as `color.<key>` in settings.csv). */
+    val customColors: Map<String, String> = emptyMap(),
 )

@@ -2,6 +2,7 @@ package com.attendo.core.data
 
 import com.attendo.core.model.AnimationMode
 import com.attendo.core.model.AppSettings
+import com.attendo.core.model.ThemeMode
 import com.attendo.core.model.AttendanceRecord
 import com.attendo.core.model.AttendanceStatus
 import com.attendo.core.model.CatalogSubject
@@ -21,6 +22,10 @@ interface SettingsRepository {
     suspend fun setUserName(name: String)
     suspend fun setOnboarded(onboarded: Boolean)
     suspend fun setAnimationMode(mode: AnimationMode)
+    suspend fun setTheme(mode: ThemeMode)
+
+    /** Saves custom-theme colours (palette key -> "#RRGGBB"), replacing the given keys. */
+    suspend fun setCustomColors(colors: Map<String, String>)
     suspend fun setTinderMode(enabled: Boolean)
 }
 

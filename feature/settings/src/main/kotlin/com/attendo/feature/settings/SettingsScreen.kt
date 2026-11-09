@@ -52,6 +52,7 @@ import com.attendo.core.designsystem.motion.rememberCollapseFraction
 import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.core.model.AnimationMode
 import com.attendo.core.model.AppSettings
+import com.attendo.core.model.ThemeMode
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -68,6 +69,14 @@ class SettingsViewModel(private val settings: SettingsRepository) : ViewModel() 
 
     fun setAnimationMode(mode: AnimationMode) {
         viewModelScope.launch { settings.setAnimationMode(mode) }
+    }
+
+    fun setTheme(mode: ThemeMode) {
+        viewModelScope.launch { settings.setTheme(mode) }
+    }
+
+    fun setCustomColors(colors: Map<String, String>) {
+        viewModelScope.launch { settings.setCustomColors(colors) }
     }
 }
 
@@ -92,6 +101,10 @@ fun SettingsRoute(
         onAnimationModeChange = vm::setAnimationMode,
         onExportCsv = onExportCsv,
         onClose = onClose,
+        theme = state?.theme ?: ThemeMode.LIGHT,
+        customColors = state?.customColors.orEmpty(),
+        onThemeChange = vm::setTheme,
+        onCustomColorsChange = vm::setCustomColors,
     )
 }
 
@@ -104,6 +117,10 @@ fun SettingsScreen(
     onAnimationModeChange: (AnimationMode) -> Unit,
     onExportCsv: () -> Unit,
     onClose: () -> Unit,
+    theme: ThemeMode = ThemeMode.LIGHT,
+    customColors: Map<String, String> = emptyMap(),
+    onThemeChange: (ThemeMode) -> Unit = {},
+    onCustomColorsChange: (Map<String, String>) -> Unit = {},
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     LaunchedEffect(savedName) { if (savedName != null && name.isEmpty()) name = savedName }
@@ -149,6 +166,9 @@ fun SettingsScreen(
                     enabled = name.isNotBlank() && name.trim() != savedName,
                     modifier = Modifier.align(Alignment.End),
                 ) { Text("Save name") }
+
+                SectionTitle("Theme")
+                ThemeSection(theme, customColors, onThemeChange, onCustomColorsChange)
 
                 SectionTitle("Animations")
                 AnimationModeSlider(animationMode, onAnimationModeChange)

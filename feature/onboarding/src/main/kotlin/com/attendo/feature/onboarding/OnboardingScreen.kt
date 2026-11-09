@@ -79,7 +79,7 @@ fun OnboardingScreen(onContinue: (name: String, addCourseSubjects: Boolean) -> U
     Box(
         Modifier
             .fillMaxSize()
-            .background(AttendoColors.Ink),
+            .background(AttendoColors.Hero),
     ) {
         BlobMascot(
             Modifier
@@ -96,11 +96,11 @@ fun OnboardingScreen(onContinue: (name: String, addCourseSubjects: Boolean) -> U
         ) {
             Spacer(Modifier.height(32.dp))
             val headline = MaterialTheme.typography.displayLarge
-            Text("NEVER", style = headline, color = AttendoColors.Cream)
+            Text("NEVER", style = headline, color = AttendoColors.OnHero)
             Text("MISS", style = headline, color = AttendoColors.Green)
             Text("A CLASS", style = headline, color = AttendoColors.Green)
-            Text("WITH", style = headline, color = AttendoColors.Cream)
-            Text("ATTENDO", style = headline, color = AttendoColors.Cream)
+            Text("WITH", style = headline, color = AttendoColors.OnHero)
+            Text("ATTENDO", style = headline, color = AttendoColors.OnHero)
             Squiggle(Modifier.width(150.dp).padding(top = 4.dp))
 
             Spacer(Modifier.weight(1f))
@@ -144,13 +144,13 @@ fun OnboardingScreen(onContinue: (name: String, addCourseSubjects: Boolean) -> U
                     onCheckedChange = { addCourse = it },
                     colors = CheckboxDefaults.colors(
                         checkedColor = AttendoColors.Green,
-                        uncheckedColor = AttendoColors.Cream,
-                        checkmarkColor = AttendoColors.Cream,
+                        uncheckedColor = AttendoColors.OnHero,
+                        checkmarkColor = AttendoColors.OnHero,
                     ),
                 )
                 Text(
                     "Add my ${CourseCatalog.CURRENT_SEMESTER.size} semester subjects (CA711 – CA703)",
-                    color = AttendoColors.Cream,
+                    color = AttendoColors.OnHero,
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }

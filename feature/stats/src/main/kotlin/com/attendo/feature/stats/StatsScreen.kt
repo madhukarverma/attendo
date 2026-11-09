@@ -122,7 +122,7 @@ private fun OverallCard(state: StatsUiState) {
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(28.dp))
-            .background(AttendoColors.Ink)
+            .background(AttendoColors.Hero)
             .padding(24.dp),
     ) {
         Text("OVERALL", style = MaterialTheme.typography.labelMedium, color = AttendoColors.Muted)
@@ -145,7 +145,7 @@ private fun OverallCard(state: StatsUiState) {
 @Composable
 private fun Stat(label: String, value: Int) {
     Column {
-        Text(value.toString(), style = MaterialTheme.typography.headlineSmall, color = AttendoColors.Cream)
+        Text(value.toString(), style = MaterialTheme.typography.headlineSmall, color = AttendoColors.OnHero)
         Text(label, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
     }
 }

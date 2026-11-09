@@ -33,6 +33,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.attendo.core.designsystem.component.LaunchBackground
 import com.attendo.core.model.AnimationMode
 import com.attendo.core.designsystem.theme.AttendoTheme
+import com.attendo.core.designsystem.theme.AttendoColors
+import com.attendo.core.designsystem.theme.AttendoPalette
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import com.attendo.feature.splash.LogoSplash
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
@@ -66,8 +70,19 @@ class MainActivity : ComponentActivity() {
         val view = ComposeView(this).apply {
             setParentCompositionContext(recomposer)
             setContent {
+                val settings by container.data.settings.settings.collectAsStateWithLifecycle(initialValue = null)
+                // Theme: Light / Dark / Custom palette from settings.csv, applied app-wide.
+                val palette = settings?.let { AttendoPalette.forMode(it.theme, it.customColors) } ?: AttendoPalette.Light
+                SideEffect { AttendoColors.palette = palette }
+                LaunchedEffect(palette.isDark) {
+                    val bars = if (palette.isDark) {
+                        SystemBarStyle.dark(Color.TRANSPARENT)
+                    } else {
+                        SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+                    }
+                    enableEdgeToEdge(statusBarStyle = bars, navigationBarStyle = bars)
+                }
                 AttendoTheme {
-                    val settings by container.data.settings.settings.collectAsStateWithLifecycle(initialValue = null)
                     val mode = settings?.animationMode
                     // Saveable so the launch screen only shows once per launch.
                     var showSplash by rememberSaveable { mutableStateOf(true) }
