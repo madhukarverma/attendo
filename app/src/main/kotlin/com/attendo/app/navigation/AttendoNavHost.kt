@@ -101,6 +101,7 @@ fun AttendoNavHost(container: AppContainer) {
                     onOpenStats = { navController.push(Routes.STATS) },
                     onOpenSettings = { navController.push(Routes.SETTINGS) },
                     onOpenPomodoro = { navController.push(Routes.POMODORO) },
+                    calendar = container.academicCalendar,
                 )
             }
             composable(Routes.POMODORO) {

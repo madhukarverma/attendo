@@ -3,6 +3,7 @@ package com.attendo.core.designsystem.component
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import com.attendo.core.designsystem.motion.IosMotion
 import com.attendo.core.designsystem.motion.PressStyle
 import com.attendo.core.designsystem.motion.iosPress
@@ -45,6 +46,8 @@ fun DayStrip(
     markedDays: Set<LocalDate>,
     onSelect: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
+    /** Optional coloured marker under a day (academic calendar events). */
+    dots: Map<LocalDate, Color> = emptyMap(),
 ) {
     val state = rememberLazyListState()
     LaunchedEffect(days.firstOrNull()) {
@@ -99,6 +102,13 @@ fun DayStrip(
                         color = if (isSelected) AttendoColors.Cream else AttendoColors.Ink,
                     )
                 }
+                Spacer(Modifier.height(4.dp))
+                Box(
+                    Modifier
+                        .size(5.dp)
+                        .clip(CircleShape)
+                        .background(dots[day] ?: Color.Transparent),
+                )
             }
         }
     }

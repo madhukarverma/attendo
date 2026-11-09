@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-09 — v0.8.0 academic calendar
+- Bundled `core/data/src/main/resources/calendar/academic_calendar.csv` transcribed from the official
+  NIT Trichy PG/MCA (I) July 2026 calendar PDF: classes 13 Aug – 25 Nov, finals to 17 Dec, holidays,
+  assessments, CCM deadlines, Sportsfete, Festember.
+- Home day strip now spans the whole semester with coloured dots (pink holiday, blue exam,
+  green fest/milestone, yellow deadline).
+- Mascot bubble talks about the selected day (holiday, assessment day N of M, deadlines, first/last
+  day of class) and gives a heads-up 1–3 days before an event.
+
+## 2026-11-09 — v0.7.0 Tinder mode
+- Home switch shows swipeable subject cards: right present, left absent, down no class; undo.
+
 ## 2026-11-09 — v0.6.0 Pomodoro
 - `:feature:pomodoro` with Timer / Stats tabs (segmented control), opened from a new bottom-bar button.
 - `PomodoroTimer` (core:data): wall-clock based, app-scoped; focus 15/25/45/60, 5 min short break,

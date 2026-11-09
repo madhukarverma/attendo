@@ -66,6 +66,8 @@ import com.attendo.core.designsystem.theme.AttendoTheme
 import com.attendo.core.model.AttendanceStatus
 import com.attendo.core.model.AttendanceSummary
 import com.attendo.core.model.CourseCatalog
+import com.attendo.core.model.AcademicCalendar
+import com.attendo.core.model.DayKind
 import com.attendo.core.designsystem.component.AttendoCard
 import com.attendo.core.model.Subject
 import java.time.LocalDate
@@ -81,8 +83,9 @@ fun HomeRoute(
     onOpenStats: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenPomodoro: () -> Unit,
+    calendar: AcademicCalendar = AcademicCalendar.EMPTY,
 ) {
-    val vm: HomeViewModel = viewModel { HomeViewModel(settings, subjects, attendance) }
+    val vm: HomeViewModel = viewModel { HomeViewModel(settings, subjects, attendance, calendar) }
     val state by vm.uiState.collectAsStateWithLifecycle()
     HomeScreen(
         state = state,
@@ -133,6 +136,7 @@ fun HomeScreen(
                     selected = state.selectedDate,
                     markedDays = state.markedDays,
                     onSelect = onSelectDate,
+                    dots = state.dayKinds.mapValues { (_, kind) -> kind.dotColor() },
                 )
             }
             item {
@@ -205,6 +209,21 @@ fun HomeScreen(
 
 private fun mascotMessage(state: HomeUiState): Pair<String, Mood> {
     val overall = state.overallPercent
+    // 1. A significant day in the academic calendar always wins.
+    val event = state.selectedDayEvents.firstOrNull()
+    val calendarLine = state.calendar.mascotLine(state.selectedDate)
+    if (event != null && calendarLine != null) {
+        val mood = when (event.kind) {
+            DayKind.HOLIDAY, DayKind.EVENT, DayKind.CLASSES_START -> Mood.Happy
+            DayKind.EXAM, DayKind.DEADLINE, DayKind.CLASSES_END -> Mood.Neutral
+        }
+        return calendarLine to mood
+    }
+    // 2. Attendance warnings; 3. upcoming calendar heads-up; 4. defaults.
+    if (state.items.isNotEmpty() && state.subjectsBelowTarget > 0) {
+        return "${state.subjectsBelowTarget} subject(s) below target. Time to show up!" to Mood.Sad
+    }
+    if (calendarLine != null) return calendarLine to Mood.Happy
     return when {
         state.items.isEmpty() -> "Add your subjects and start tracking your attendance!" to Mood.Happy
         overall == null -> "Mark today's classes below. Tap again to undo." to Mood.Happy
@@ -235,6 +254,14 @@ internal fun MascotHeader(message: String, mood: Mood, modifier: Modifier = Modi
         }
         PentagonMascot(Modifier.size(170.dp), mood = mood)
     }
+}
+
+/** Day-strip dot colour: holidays pink, exams blue, fests/semester milestones green, deadlines yellow. */
+private fun DayKind.dotColor(): Color = when (this) {
+    DayKind.HOLIDAY -> AttendoColors.Pink
+    DayKind.EXAM -> AttendoColors.Blue
+    DayKind.EVENT, DayKind.CLASSES_START, DayKind.CLASSES_END -> AttendoColors.Green
+    DayKind.DEADLINE -> AttendoColors.Yellow
 }
 
 @Composable
