@@ -53,7 +53,9 @@ fun AttendoNavHost(container: AppContainer) {
             HomeRoute(
                 settings = data.settings,
                 subjects = data.subjects,
+                attendance = data.attendance,
                 onAddSubject = { navController.navigate(Routes.ADD_SUBJECT) },
+                onOpenSubject = { /* feature/subject-detail */ },
                 onOpenStats = { /* feature/stats */ },
                 onOpenSettings = { /* feature/settings */ },
             )
