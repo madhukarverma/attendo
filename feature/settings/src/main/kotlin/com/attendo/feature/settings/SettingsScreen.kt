@@ -52,6 +52,7 @@ import com.attendo.core.designsystem.motion.rememberCollapseFraction
 import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.core.model.AnimationMode
 import com.attendo.core.model.AppSettings
+import com.attendo.core.model.Nickname
 import com.attendo.core.model.ThemeMode
 import android.net.Uri
 import kotlinx.coroutines.flow.SharingStarted
@@ -173,11 +174,19 @@ fun SettingsScreen(
                         cursorColor = AttendoColors.Green,
                     ),
                 )
-                TextButton(
-                    onClick = { onSaveName(name) },
-                    enabled = name.isNotBlank() && name.trim() != savedName,
-                    modifier = Modifier.align(Alignment.End),
-                ) { Text("Save name") }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        if (Nickname.isShortened(name)) "The app calls you “${Nickname.of(name)}” (first 4 letters of names over 10 characters)."
+                        else "",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AttendoColors.Muted,
+                        modifier = Modifier.weight(1f).padding(start = 4.dp),
+                    )
+                    TextButton(
+                        onClick = { onSaveName(name) },
+                        enabled = name.isNotBlank() && name.trim() != savedName,
+                    ) { Text("Save name") }
+                }
 
                 SectionTitle("Theme")
                 ThemeSection(theme, customColors, onThemeChange, onCustomColorsChange)
