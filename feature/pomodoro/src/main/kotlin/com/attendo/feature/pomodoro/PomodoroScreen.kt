@@ -63,8 +63,7 @@ import com.attendo.core.data.pomodoro.PomodoroTimer
 import com.attendo.core.data.pomodoro.PomodoroTimerState
 import com.attendo.core.designsystem.component.AnimatedNumber
 import com.attendo.core.designsystem.component.PrimaryButton
-import com.attendo.core.designsystem.component.SpeechBubble
-import com.attendo.core.designsystem.component.TailSide
+import com.attendo.core.model.CourseCatalog
 import com.attendo.core.designsystem.motion.BounceContainer
 import com.attendo.core.designsystem.motion.CollapsingTopBar
 import com.attendo.core.designsystem.motion.IosMotion
@@ -236,17 +235,7 @@ private fun TimerTab(
     onFocusMinutes: (Int) -> Unit,
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        SpeechBubble(
-            text = when {
-                state.running && state.kind == PomodoroKind.FOCUS -> "Stay with it!"
-                state.running -> "Breathe. Stretch."
-                state.isFresh && state.kind == PomodoroKind.FOCUS -> "Ready when you are"
-                state.isFresh -> "Break time!"
-                else -> "Paused"
-            },
-            tail = TailSide.BottomStart,
-            modifier = Modifier.padding(top = 12.dp),
-        )
+        Spacer(Modifier.height(12.dp))
         TimerRing(state, Modifier.size(260.dp))
         CycleDots(state)
         Spacer(Modifier.height(20.dp))
@@ -267,8 +256,9 @@ private fun TimerTab(
         SectionLabel("Studying")
         ChipRow {
             Chip("General", state.subjectId == null) { onSelectSubject(null) }
-            subjects.forEach { s ->
-                Chip(s.code.ifBlank { s.name }, state.subjectId == s.id) { onSelectSubject(s.id) }
+            // Short names (DSA, DLCO, Python, OS, Maths); labs aren't study sessions, so they're left out.
+            subjects.filterNot { CourseCatalog.isLab(it) }.forEach { s ->
+                Chip(CourseCatalog.shortName(s), state.subjectId == s.id) { onSelectSubject(s.id) }
             }
         }
 

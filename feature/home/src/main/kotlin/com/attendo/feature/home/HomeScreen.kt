@@ -129,7 +129,7 @@ fun HomeScreen(
             Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            item { Greeting(state.userName) }
+            item { Greeting(state.userName, state.selectedDate) }
             item {
                 DayStrip(
                     days = state.days,
@@ -139,9 +139,12 @@ fun HomeScreen(
                     dots = state.dayKinds.mapValues { (_, kind) -> kind.dotColor() },
                 )
             }
-            item {
-                val (message, mood) = mascotMessage(state)
-                MascotHeader(message = message, mood = mood)
+            // In Tinder mode the mascot steps aside so the card stack sits in the middle of the screen.
+            if (!(state.tinderMode && state.items.isNotEmpty())) {
+                item(key = "mascot") {
+                    val (message, mood) = mascotMessage(state)
+                    MascotHeader(message = message, mood = mood, modifier = Modifier.animateItem())
+                }
             }
             if (state.items.isEmpty()) {
                 item(key = "course") {
@@ -174,6 +177,7 @@ fun HomeScreen(
                         canUndo = state.canUndoSwipe,
                         onSwipe = onSwipe,
                         onUndo = onUndoSwipe,
+                        colorFor = { id -> cardColor(state.items.indexOfFirst { it.summary.subject.id == id }) },
                         modifier = Modifier.animateItem(),
                     )
                 }
@@ -233,17 +237,35 @@ private fun mascotMessage(state: HomeUiState): Pair<String, Mood> {
     }
 }
 
+private val HeaderDate = java.time.format.DateTimeFormatter.ofPattern("EEE, d MMM")
+
 @Composable
-internal fun Greeting(name: String) {
-    Text(
-        buildAnnotatedString {
-            append("Hey, ")
-            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(name.ifBlank { "there" }) }
-            append("!")
-        },
-        style = MaterialTheme.typography.headlineLarge,
-        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 24.dp),
-    )
+internal fun Greeting(name: String, selectedDate: LocalDate) {
+    Row(
+        Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 24.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            buildAnnotatedString {
+                append("Hey, ")
+                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(name.ifBlank { "there" }) }
+                append("!")
+            },
+            style = MaterialTheme.typography.headlineLarge,
+            maxLines = 1,
+            modifier = Modifier.weight(1f),
+        )
+        // Selected date, top right.
+        Text(
+            selectedDate.format(HeaderDate),
+            style = MaterialTheme.typography.labelLarge,
+            color = if (selectedDate == LocalDate.now()) AttendoColors.Cream else AttendoColors.Ink,
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(if (selectedDate == LocalDate.now()) AttendoColors.Green else AttendoColors.CreamDeep)
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+        )
+    }
 }
 
 @Composable

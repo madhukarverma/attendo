@@ -32,6 +32,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.attendo.core.designsystem.theme.AttendoColors
 import java.time.LocalDate
+import java.time.YearMonth
+import androidx.compose.foundation.layout.Row
+import androidx.compose.runtime.remember
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -49,9 +52,18 @@ fun DayStrip(
     /** Optional coloured marker under a day (academic calendar events). */
     dots: Map<LocalDate, Color> = emptyMap(),
 ) {
+    // Days interleaved with a month label wherever a new month begins (and at the very start).
+    val entries: List<Any> = remember(days) {
+        buildList {
+            days.forEachIndexed { i, d ->
+                if (i == 0 || d.dayOfMonth == 1) add(YearMonth.from(d))
+                add(d)
+            }
+        }
+    }
     val state = rememberLazyListState()
     LaunchedEffect(days.firstOrNull()) {
-        val idx = days.indexOf(selected)
+        val idx = entries.indexOf(selected)
         if (idx >= 0) state.scrollToItem((idx - 3).coerceAtLeast(0))
     }
     LazyRow(
@@ -59,8 +71,14 @@ fun DayStrip(
         state = state,
         contentPadding = PaddingValues(horizontal = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        items(days, key = { it.toEpochDay() }) { day ->
+        items(entries, key = { if (it is LocalDate) it.toEpochDay() else "m$it" }) { entry ->
+            if (entry is YearMonth) {
+                MonthSeparator(entry)
+                return@items
+            }
+            val day = entry as LocalDate
             val isSelected = day == selected
             val pill by animateColorAsState(
                 if (isSelected) AttendoColors.Ink else AttendoColors.Cream,
@@ -109,6 +127,19 @@ fun DayStrip(
                         .clip(CircleShape)
                         .background(dots[day] ?: Color.Transparent),
                 )
+            }
+        }
+    }
+}
+
+/** Thin divider with the month name written vertically, e.g. "SEP". */
+@Composable
+private fun MonthSeparator(month: YearMonth) {
+    Row(Modifier.padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.width(1.dp).height(56.dp).background(AttendoColors.CreamDeep))
+        Column(Modifier.padding(horizontal = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            month.month.getDisplayName(TextStyle.SHORT, Locale.getDefault()).uppercase().forEach { ch ->
+                Text(ch.toString(), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = AttendoColors.Green)
             }
         }
     }

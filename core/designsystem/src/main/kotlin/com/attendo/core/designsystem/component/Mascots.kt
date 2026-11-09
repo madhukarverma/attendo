@@ -88,11 +88,11 @@ private fun DrawScope.drawShadow(centerX: Float, y: Float, width: Float) {
     )
 }
 
-/** Body colour per mood: brand green when happy, olive when neutral, slate blue when sad. */
+/** Body colour per mood: brand green when happy, olive when neutral, light red when attendance is too low. */
 fun moodColor(mood: Mood): Color = when (mood) {
     Mood.Happy -> AttendoColors.Green
     Mood.Neutral -> Color(0xFF9DB35A)
-    Mood.Sad -> Color(0xFF6F86A6)
+    Mood.Sad -> Color(0xFFF08080)
 }
 
 /**
