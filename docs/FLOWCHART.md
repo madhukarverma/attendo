@@ -41,7 +41,9 @@ flowchart TD
         Stats[Statistics]
     end
 
-    Home -- gear --> Settings[Settings<br/>profile · theme · animations · launch image · export]
+    Home -- gear --> Settings[Settings<br/>profile · theme · animations · launch image<br/>Backup: Google account · CSV export / restore]
+    Settings -- sign in --> Drive[(Google Drive<br/>app-data folder<br/>attendo-backup.zip)]
+    Onb -- Restore from Google --> Drive
     Home -- exams card --> Cal[Academic calendar<br/>events + your to-dos]
     Classes -- calendar button --> Cal
     Cal -- pick a day --> Classes
@@ -79,6 +81,10 @@ flowchart LR
     features --> DS
     features --> D
     Rem --> D
+    Bk[":core:backup<br/>Google sign-in · Drive app data"] --> D
+    Se --> Bk
+    O --> Bk
+    Bk <--> G[("Google Drive<br/>app-data folder")]
     D --> M
     D <--> CSV[("filesDir/data/<br/>settings · subjects · attendance<br/>pomodoro · todos (.csv)")]
 ```

@@ -73,3 +73,21 @@
 - Date: 2026-11-09 · Status: Active
 - Decision: `Nickname.of(name)`: names longer than 10 characters show as their first 4 letters.
   Only the full name is stored, so the rule can change without migrating settings.csv.
+
+## DEC-012 — Account backup in the Drive app-data folder via AuthorizationClient
+- Date: 2026-11-09 · Status: Active
+- Decision: Google sign-in = Play services `AuthorizationClient` requesting only `drive.appdata`
+  (account picker + consent in one step); the user's email comes from Drive `about`. Drive is
+  called over plain HTTPS (HttpURLConnection + org.json) instead of the Google API client
+  libraries. One zip of all CSVs (+ launch image) per account, newest copy only; uploaded after
+  changes (4 s debounce, skipped when the content hash is unchanged).
+- Rationale: smallest possible permission (a private folder, not the user's files), no client
+  secret or ID in the APK, ~no extra APK size, CSV stays the source of truth.
+- Consequence: works only after an Android OAuth client (package + SHA-1) exists in Google Cloud
+  (docs/GOOGLE_BACKUP_SETUP.md); a different signing key needs its SHA-1 added (ISSUE-006).
+
+## DEC-013 — CSV restore matches files by header, replaces per table
+- Date: 2026-11-09 · Status: Active
+- Decision: each picked CSV is matched to a table by its required columns (not its file name) and
+  replaces that table only, after a confirmation that lists row counts. Rows that don't decode are
+  dropped. A Google restore is a full replace (tables missing from the backup are emptied).

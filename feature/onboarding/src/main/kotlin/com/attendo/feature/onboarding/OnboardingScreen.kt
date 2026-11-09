@@ -1,5 +1,15 @@
 package com.attendo.feature.onboarding
 
+import com.attendo.core.backup.GoogleDriveBackup
+import com.attendo.core.backup.rememberGoogleSignIn
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,25 +66,68 @@ class OnboardingViewModel(
     private val settings: SettingsRepository,
     private val subjects: SubjectRepository,
 ) : ViewModel() {
-    fun finish(name: String, addCourseSubjects: Boolean, onDone: () -> Unit) {
+    /** Becomes true when "Let's go" is tapped, or when a restored backup brings the flag back. */
+    val onboarded: StateFlow<Boolean> = settings.settings.map { it?.onboarded == true }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun finish(name: String, addCourseSubjects: Boolean) {
         viewModelScope.launch {
             settings.setUserName(name)
             if (addCourseSubjects) subjects.addFromCatalog(CourseCatalog.CURRENT_SEMESTER)
             settings.setOnboarded(true)
-            onDone()
         }
     }
 }
 
-/** Route entry point: wires the ViewModel and exposes navigation callbacks only. */
+/**
+ * Route entry point: wires the ViewModel and exposes navigation callbacks only.
+ *
+ * @param googleBackup when given, offers "Restore from Google" so a reinstall can skip set-up.
+ */
 @Composable
-fun OnboardingRoute(settings: SettingsRepository, subjects: SubjectRepository, onFinished: () -> Unit) {
+fun OnboardingRoute(
+    settings: SettingsRepository,
+    subjects: SubjectRepository,
+    onFinished: () -> Unit,
+    googleBackup: GoogleDriveBackup? = null,
+) {
     val vm: OnboardingViewModel = viewModel { OnboardingViewModel(settings, subjects) }
-    OnboardingScreen(onContinue = { name, addCourse -> vm.finish(name, addCourse, onFinished) })
+    val onboarded by vm.onboarded.collectAsStateWithLifecycle()
+    LaunchedEffect(onboarded) { if (onboarded) onFinished() }
+    OnboardingScreen(
+        onContinue = { name, addCourse -> vm.finish(name, addCourse) },
+        restoreSection = { if (googleBackup != null) RestoreFromGoogle(googleBackup) },
+    )
 }
 
 @Composable
-fun OnboardingScreen(onContinue: (name: String, addCourseSubjects: Boolean) -> Unit) {
+private fun RestoreFromGoogle(backup: GoogleDriveBackup) {
+    val state by backup.state.collectAsStateWithLifecycle()
+    val signIn = rememberGoogleSignIn(backup)
+    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        TextButton(onClick = signIn, enabled = !state.busy && state.loaded) {
+            Text(
+                if (state.busy) "Connecting…" else "Used Attendo before? Restore from Google",
+                color = AttendoColors.OnHero,
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+        state.message?.let {
+            Text(
+                it,
+                color = if (state.isError) AttendoColors.Pink else AttendoColors.OnHero.copy(alpha = 0.7f),
+                style = MaterialTheme.typography.labelSmall,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+@Composable
+fun OnboardingScreen(
+    onContinue: (name: String, addCourseSubjects: Boolean) -> Unit,
+    restoreSection: @Composable () -> Unit = {},
+) {
     var name by rememberSaveable { mutableStateOf("") }
     var addCourse by rememberSaveable { mutableStateOf(true) }
     Box(
@@ -169,6 +222,7 @@ fun OnboardingScreen(onContinue: (name: String, addCourseSubjects: Boolean) -> U
                 onClick = { onContinue(name, addCourse) },
                 enabled = name.isNotBlank(),
             )
+            restoreSection()
         }
     }
 }

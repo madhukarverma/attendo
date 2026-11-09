@@ -12,8 +12,8 @@ android {
         applicationId = "com.attendo.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 20
-        versionName = "0.20.0"
+        versionCode = 21
+        versionName = "0.21.0"
     }
 
     buildTypes {
@@ -45,6 +45,7 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:data"))
     implementation(project(":core:designsystem"))
+    implementation(project(":core:backup"))
     implementation(project(":feature:onboarding"))
     implementation(project(":feature:attendance"))
     implementation(project(":feature:subjects"))

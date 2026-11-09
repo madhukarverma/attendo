@@ -20,7 +20,9 @@ object LaunchImageStore {
 
     private const val MAX_SIDE = 1600
 
-    private fun file(context: Context) = File(context.filesDir, "launch_image.jpg")
+    const val FILE_NAME = "launch_image.jpg"
+
+    fun file(context: Context) = File(context.filesDir, FILE_NAME)
 
     /** Copies [uri] into app storage; returns the image's edge colour as `#RRGGBB`, or null on failure. */
     suspend fun save(context: Context, uri: Uri): String? = withContext(Dispatchers.IO) {
