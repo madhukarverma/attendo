@@ -56,8 +56,8 @@ android {
         buildConfigField("String", "FIREBASE_WEB_CLIENT_ID", firebaseValue("webClientId"))
         minSdk = 26
         targetSdk = 34
-        versionCode = 30
-        versionName = "0.30.0"
+        versionCode = 31
+        versionName = "0.30.1"
     }
 
     buildTypes {
