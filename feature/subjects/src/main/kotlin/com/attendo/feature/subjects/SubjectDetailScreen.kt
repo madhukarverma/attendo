@@ -7,9 +7,6 @@ import com.attendo.core.model.Grades
 import com.attendo.core.model.SubjectGrades
 import java.time.LocalDate
 import kotlinx.coroutines.flow.flowOf
-import com.attendo.core.model.Curriculum
-import com.attendo.core.model.CurriculumCourse
-import com.attendo.feature.curriculum.CourseDetails
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -147,8 +144,8 @@ fun SubjectDetailRoute(
     onClose: () -> Unit,
     grades: GradeRepository? = null,
     planner: PlannerRepository? = null,
-    curriculum: Curriculum = Curriculum.EMPTY,
-    onOpenCurriculum: (code: String) -> Unit = {},
+    /** The course's syllabus, provided by the app (it lives in the curriculum feature). */
+    syllabusSection: @Composable (code: String) -> Unit = {},
 ) {
     val vm: SubjectDetailViewModel = viewModel(key = subjectId) {
         SubjectDetailViewModel(subjectId, subjects, attendance, grades, planner)
@@ -159,8 +156,7 @@ fun SubjectDetailRoute(
         onClose = onClose,
         onDelete = { vm.delete(onClose) },
         onSetLectureHours = vm::setLectureHours,
-        syllabus = state.summary?.subject?.code?.let(curriculum::course),
-        onOpenCurriculum = onOpenCurriculum,
+        syllabusSection = syllabusSection,
         onAddMarks = vm::addMarks,
         onUpdateMarks = vm::updateMarks,
         onDeleteMarks = vm::deleteMarks,
@@ -175,8 +171,7 @@ fun SubjectDetailScreen(
     onClose: () -> Unit,
     onDelete: () -> Unit,
     onSetLectureHours: (Int?) -> Unit = {},
-    syllabus: CurriculumCourse? = null,
-    onOpenCurriculum: (code: String) -> Unit = {},
+    syllabusSection: @Composable (code: String) -> Unit = {},
     onAddMarks: (title: String, scored: Double, maxMarks: Double, date: LocalDate?) -> Unit = { _, _, _, _ -> },
     onUpdateMarks: (Assessment) -> Unit = {},
     onDeleteMarks: (Assessment) -> Unit = {},
@@ -246,27 +241,7 @@ fun SubjectDetailScreen(
         Text("Course hours", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 24.dp, bottom = 10.dp))
         CourseHours(summary, onEdit = { editHours = true })
 
-        if (syllabus != null) {
-            Row(Modifier.padding(top = 24.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("Syllabus", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
-                TextButton(onClick = { onOpenCurriculum(syllabus.code) }) { Text("Full curriculum", color = AttendoColors.Green) }
-            }
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(AttendoColors.CreamCard)
-                    .padding(16.dp),
-            ) {
-                Text(
-                    "${syllabus.contactHours} contact hours · ${syllabus.type} · ${syllabus.assessment}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = AttendoColors.Muted,
-                )
-                Spacer(Modifier.height(12.dp))
-                CourseDetails(syllabus)
-            }
-        }
+        summary.subject.code.takeIf { it.isNotBlank() }?.let { code -> syllabusSection(code) }
 
         state.grades?.let { GradesSection(it, onAddMarks, onUpdateMarks, onDeleteMarks) }
 

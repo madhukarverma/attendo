@@ -20,6 +20,14 @@ data class CurriculumCourse(
     val outcomes: List<String>,
 )
 
+/** One unit of one course, e.g. CA717 unit III; codes and numerals are stored upper-case. */
+data class UnitKey(val code: String, val unit: String)
+
+/** How much of a course the student has covered. */
+data class CourseProgress(val covered: Int, val total: Int) {
+    val fraction: Float get() = if (total == 0) 0f else covered.toFloat() / total
+}
+
 /** The programme's curriculum (bundled from the institute's PDF). */
 data class Curriculum(val title: String, val courses: List<CurriculumCourse>) {
 
@@ -28,6 +36,14 @@ data class Curriculum(val title: String, val courses: List<CurriculumCourse>) {
     fun course(code: String): CurriculumCourse? = byCode[code.trim().uppercase()]
 
     val totalHours: Int get() = courses.sumOf { it.contactHours }
+
+    val totalUnits: Int get() = courses.sumOf { it.units.size }
+
+    fun progress(course: CurriculumCourse, covered: Set<UnitKey>): CourseProgress =
+        CourseProgress(course.units.count { UnitKey(course.code.uppercase(), it.number.uppercase()) in covered }, course.units.size)
+
+    /** Units covered across the whole curriculum (ignores keys of courses that aren't in it). */
+    fun coveredUnits(covered: Set<UnitKey>): Int = courses.sumOf { progress(it, covered).covered }
 
     companion object {
         val EMPTY = Curriculum("", emptyList())

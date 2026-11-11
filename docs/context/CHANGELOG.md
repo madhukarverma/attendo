@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-11-12 — v0.31.0 Focus tab: animated dial timer and the syllabus
+- Timer redesigned after the user's references: a dial of 60 ticks that fade as time passes with a
+  glowing marker gliding between seconds, and a soft disc that slowly fills with a two-layer wave
+  and rising bubbles while a session runs (frozen when paused; nothing moves in "None" mode). Big
+  play/pause button with reset and skip, "Up next" and "Today" cards, session dots.
+- The curriculum moved into the Focus tab as **Syllabus** (Timer · Syllabus · Stats) and was
+  redesigned: overall "units covered" card, one card per course with a progress ring, units as a
+  timeline you tick off (stored in `syllabus.csv`), topics as text, course outcomes, and "Focus on
+  DSA" which picks that subject on the timer. Home's curriculum card and the old screen are gone;
+  a subject page shows its own timeline with "All courses".
+- Feature modules no longer depend on each other: the app passes the syllabus into Focus and the
+  subject page as composable slots.
+
 ## 2026-11-12 — v0.30.1 Firebase project connected
 - Built with the Firebase project `attendo-65239` (app/google-services.json from the console, not
   committed): Friends sign-in and the Google backup authorise against it. The project's Android

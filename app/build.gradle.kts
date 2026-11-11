@@ -13,10 +13,10 @@ plugins {
  * builds and Friends shows "not set up". The Google Services Gradle plugin isn't used: the values
  * are compiled into BuildConfig and Firebase is initialised in code.
  */
+@Suppress("UNCHECKED_CAST")
 val firebaseValues: Map<String, String> = run {
     val json = file("google-services.json")
     if (json.exists()) {
-        @Suppress("UNCHECKED_CAST")
         val root = groovy.json.JsonSlurper().parse(json) as Map<String, Any?>
         val project = root["project_info"] as? Map<String, Any?> ?: emptyMap()
         val clients = (root["client"] as? List<Map<String, Any?>>).orEmpty()
@@ -56,8 +56,8 @@ android {
         buildConfigField("String", "FIREBASE_WEB_CLIENT_ID", firebaseValue("webClientId"))
         minSdk = 26
         targetSdk = 34
-        versionCode = 31
-        versionName = "0.30.1"
+        versionCode = 32
+        versionName = "0.31.0"
     }
 
     buildTypes {

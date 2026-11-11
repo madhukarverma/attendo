@@ -1,5 +1,6 @@
 package com.attendo.core.data
 
+import com.attendo.core.model.UnitKey
 import com.attendo.core.model.AcademicCalendar
 import com.attendo.core.model.DayKind
 import com.attendo.core.model.PersonalEvent
@@ -266,6 +267,21 @@ class RepositoryTest {
         assertEquals(listOf(true, true), calendar.events.map { it.personal })
         reloaded.planner.deleteSlotsForSubject("os")
         assertEquals(emptyList<TimetableSlot>(), reloaded.planner.slots.first())
+        dir.deleteRecursively()
+    }
+
+    @Test
+    fun syllabusProgressSurvivesReload() = runTest {
+        val dir = Files.createTempDirectory("attendo").toFile()
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val data = AttendoData(dir, TestScope(dispatcher), dispatcher) { 13L }
+        advanceUntilIdle()
+        data.syllabus.setCovered("ca717", "i", true)
+        data.syllabus.setCovered("CA717", "II", true)
+        data.syllabus.setCovered("CA717", "II", false)
+        val reloaded = AttendoData(dir, TestScope(dispatcher), dispatcher)
+        advanceUntilIdle()
+        assertEquals(setOf(UnitKey("CA717", "I")), reloaded.syllabus.covered.first())
         dir.deleteRecursively()
     }
 

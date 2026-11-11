@@ -3,7 +3,10 @@ package com.attendo.app.navigation
 import com.attendo.feature.friends.FriendsScreen
 import com.attendo.feature.friends.StudentScreen
 import com.attendo.feature.calendar.TimetableScreen
-import com.attendo.feature.curriculum.CurriculumScreen
+import com.attendo.feature.curriculum.SubjectSyllabusSection
+import com.attendo.feature.curriculum.SyllabusRoute
+import com.attendo.feature.pomodoro.FocusPage
+import com.attendo.feature.pomodoro.FocusRequest
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.compose.runtime.mutableStateOf
@@ -99,8 +102,6 @@ object Routes {
     const val FRIENDS = "friends"
     const val STUDENT = "student/{uid}"
     fun student(uid: String) = "student/$uid"
-    const val CURRICULUM = "curriculum?code={code}"
-    fun curriculum(code: String? = null) = if (code == null) "curriculum" else "curriculum?code=$code"
     const val CALENDAR = "calendar/{date}"
     fun calendar(date: LocalDate) = "calendar/$date"
 
@@ -166,6 +167,7 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
 
     val navController = rememberNavController()
     var tasksPage by remember { mutableStateOf<TasksPage?>(null) }
+    var focusRequest by remember { mutableStateOf<FocusRequest?>(null) }
     val start = remember { if (loaded.onboarded) Routes.HOME else Routes.ONBOARDING }
     val mode = loaded.animationMode
     val transitions = remember(mode) { NavTransitions(mode, Routes.MODAL, Routes.TABS.toSet()) }
@@ -235,8 +237,6 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                         timer = container.pomodoroTimer,
                         calendar = container.academicCalendar,
                         planner = data.planner,
-                        curriculum = container.curriculum,
-                        onOpenCurriculum = { navController.push(Routes.curriculum()) },
                         onOpenAttendance = { navController.switchTab(Routes.ATTENDANCE) },
                         onOpenChecklist = {
                             tasksPage = TasksPage.CHECKLIST
@@ -291,6 +291,11 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                         subjects = data.subjects,
                         onExportCsv = { CsvExporter.share(context, data, only = listOf(AttendoData.POMODORO_FILE)) },
                         onClose = null,
+                        syllabus = { focusCode, onFocusSubject ->
+                            SyllabusRoute(container.curriculum, data.syllabus, focusCode, onFocusSubject)
+                        },
+                        request = focusRequest,
+                        onRequestHandled = { focusRequest = null },
                     )
                 }
                 composable(Routes.STATS) {
@@ -393,18 +398,12 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                         onClose = { navController.back() },
                         grades = data.grades,
                         planner = data.planner,
-                        curriculum = container.curriculum,
-                        onOpenCurriculum = { code -> navController.push(Routes.curriculum(code)) },
-                    )
-                }
-                composable(
-                    Routes.CURRICULUM,
-                    arguments = listOf(navArgument("code") { type = NavType.StringType; nullable = true; defaultValue = null }),
-                ) { entry ->
-                    CurriculumScreen(
-                        curriculum = container.curriculum,
-                        focusCode = entry.arguments?.getString("code"),
-                        onClose = { navController.back() },
+                        syllabusSection = { code ->
+                            SubjectSyllabusSection(container.curriculum, data.syllabus, code) { courseCode ->
+                                focusRequest = FocusRequest(FocusPage.SYLLABUS, courseCode)
+                                navController.switchTab(Routes.POMODORO)
+                            }
+                        },
                     )
                 }
             }
