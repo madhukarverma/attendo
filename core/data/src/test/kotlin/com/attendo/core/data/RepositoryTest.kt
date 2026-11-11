@@ -194,6 +194,21 @@ class RepositoryTest {
     }
 
     @Test
+    fun catalogLectureHoursFillOnlyEmptyValues() = runTest {
+        val dir = Files.createTempDirectory("attendo").toFile()
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val data = AttendoData(dir, TestScope(dispatcher), dispatcher)
+        advanceUntilIdle()
+        data.subjects.add("Operating Systems", "CA719", 75)
+        data.subjects.add("DSA", "ca717", 75, lectureHours = 45)
+        data.subjects.add("Python Lab", "CA701", 75)
+        assertEquals(1, data.fillCatalogLectureHours())
+        assertEquals(0, data.fillCatalogLectureHours())
+        assertEquals(listOf(40, 45, null), data.subjects.subjects.first().map { it.lectureHours })
+        dir.deleteRecursively()
+    }
+
+    @Test
     fun addFromCatalogSkipsExistingCodes() = runTest {
         val dir = Files.createTempDirectory("attendo").toFile()
         val dispatcher = StandardTestDispatcher(testScheduler)

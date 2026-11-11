@@ -1,5 +1,6 @@
 package com.attendo.feature.dashboard
 
+import com.attendo.core.model.Curriculum
 import com.attendo.core.data.HabitRepository
 import com.attendo.core.data.KanbanRepository
 import androidx.compose.foundation.background
@@ -85,6 +86,8 @@ fun DashboardRoute(
     pomodoro: PomodoroRepository,
     timer: PomodoroTimer,
     calendar: AcademicCalendar,
+    curriculum: Curriculum = Curriculum.EMPTY,
+    onOpenCurriculum: () -> Unit = {},
     onOpenAttendance: () -> Unit,
     onOpenChecklist: () -> Unit,
     onOpenBoard: () -> Unit,
@@ -109,6 +112,8 @@ fun DashboardRoute(
         onOpenReminders = onOpenReminders,
         onOpenPomodoro = onOpenPomodoro,
         onOpenCalendar = onOpenCalendar,
+        curriculum = curriculum,
+        onOpenCurriculum = onOpenCurriculum,
         onOpenSettings = onOpenSettings,
     )
 }
@@ -126,6 +131,8 @@ fun DashboardScreen(
     onOpenPomodoro: () -> Unit,
     onOpenCalendar: () -> Unit,
     onOpenSettings: () -> Unit,
+    curriculum: Curriculum = Curriculum.EMPTY,
+    onOpenCurriculum: () -> Unit = {},
 ) {
     Box(
         Modifier
@@ -148,6 +155,7 @@ fun DashboardScreen(
                 BoardCard(state, onOpenBoard)
                 RemindersCard(state, onOpenReminders)
                 ExamsCard(state, onOpenCalendar)
+                if (curriculum.courses.isNotEmpty()) CurriculumCard(curriculum, onOpenCurriculum)
                 Spacer(Modifier.height(TabBarClearance))
             }
         }
@@ -451,6 +459,23 @@ private fun ExamsCard(state: DashboardUiState, onOpen: () -> Unit) {
             EmptyLine("No more exams on the academic calendar.")
         }
         state.exams.forEach { exam -> ExamLine(exam, state.today) }
+    }
+}
+
+@Composable
+private fun CurriculumCard(curriculum: Curriculum, onOpen: () -> Unit) {
+    Card(onOpen, "Open curriculum") {
+        CardHeader("CURRICULUM", curriculum.title)
+        Text(
+            "${curriculum.courses.size} courses · ${curriculum.totalHours} contact hours · units, topics and outcomes",
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            curriculum.courses.joinToString("  ·  ") { it.code },
+            style = MaterialTheme.typography.labelSmall,
+            color = AttendoColors.Muted,
+        )
     }
 }
 

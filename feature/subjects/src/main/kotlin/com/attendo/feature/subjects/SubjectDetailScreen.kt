@@ -1,5 +1,8 @@
 package com.attendo.feature.subjects
 
+import com.attendo.core.model.Curriculum
+import com.attendo.core.model.CurriculumCourse
+import com.attendo.feature.curriculum.CourseDetails
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -114,6 +117,8 @@ fun SubjectDetailRoute(
     subjects: SubjectRepository,
     attendance: AttendanceRepository,
     onClose: () -> Unit,
+    curriculum: Curriculum = Curriculum.EMPTY,
+    onOpenCurriculum: (code: String) -> Unit = {},
 ) {
     val vm: SubjectDetailViewModel = viewModel(key = subjectId) {
         SubjectDetailViewModel(subjectId, subjects, attendance)
@@ -124,6 +129,8 @@ fun SubjectDetailRoute(
         onClose = onClose,
         onDelete = { vm.delete(onClose) },
         onSetLectureHours = vm::setLectureHours,
+        syllabus = state.summary?.subject?.code?.let(curriculum::course),
+        onOpenCurriculum = onOpenCurriculum,
     )
 }
 
@@ -135,6 +142,8 @@ fun SubjectDetailScreen(
     onClose: () -> Unit,
     onDelete: () -> Unit,
     onSetLectureHours: (Int?) -> Unit = {},
+    syllabus: CurriculumCourse? = null,
+    onOpenCurriculum: (code: String) -> Unit = {},
 ) {
     val summary = state.summary ?: run {
         Box(Modifier.fillMaxSize().background(AttendoColors.Cream))
@@ -200,6 +209,28 @@ fun SubjectDetailScreen(
 
         Text("Course hours", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 24.dp, bottom = 10.dp))
         CourseHours(summary, onEdit = { editHours = true })
+
+        if (syllabus != null) {
+            Row(Modifier.padding(top = 24.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text("Syllabus", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
+                TextButton(onClick = { onOpenCurriculum(syllabus.code) }) { Text("Full curriculum", color = AttendoColors.Green) }
+            }
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(AttendoColors.CreamCard)
+                    .padding(16.dp),
+            ) {
+                Text(
+                    "${syllabus.contactHours} contact hours · ${syllabus.type} · ${syllabus.assessment}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = AttendoColors.Muted,
+                )
+                Spacer(Modifier.height(12.dp))
+                CourseDetails(syllabus)
+            }
+        }
 
         if (state.history.isNotEmpty()) {
             Text("History", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 24.dp, bottom = 10.dp))

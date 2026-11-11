@@ -1,5 +1,6 @@
 package com.attendo.app
 
+import com.attendo.core.data.curriculum.CurriculumLoader
 import com.attendo.core.backup.GoogleDriveBackup
 import com.attendo.app.reminders.ReminderNotifications
 import com.attendo.app.reminders.ReminderScheduler
@@ -23,6 +24,9 @@ class AppContainer(application: Application) {
 
     /** Semester calendar bundled as calendar/academic_calendar.csv (from the official PDF). */
     val academicCalendar by lazy { AcademicCalendarLoader.bundled() }
+
+    /** MCA curriculum bundled as curriculum/mca_semester1.csv (from the official PDF). */
+    val curriculum by lazy { CurriculumLoader.bundled() }
 
     /** Settings › Backup › Google account: all data in the account's hidden Drive app folder. */
     val googleBackup = GoogleDriveBackup(
@@ -50,6 +54,8 @@ class AttendoApplication : Application() {
         ReminderNotifications.createChannel(this)
         // v0.25: plain to-dos (no reminder time) become board cards, once.
         container.appScope.launch { runCatching { container.data.migratePlainTodosToBoard() } }
+        // Official lecture hours for catalog subjects that don't have any yet.
+        container.appScope.launch { runCatching { container.data.fillCatalogLectureHours() } }
         // Re-arm alarms whenever the to-do list changes (and once at start-up).
         container.appScope.launch {
             container.data.todos.todos.collect { container.reminders.sync(it) }
