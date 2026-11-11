@@ -1,5 +1,11 @@
 package com.attendo.feature.subjects
 
+import com.attendo.core.data.GradeRepository
+import com.attendo.core.model.Assessment
+import com.attendo.core.model.Grades
+import com.attendo.core.model.SubjectGrades
+import java.time.LocalDate
+import kotlinx.coroutines.flow.flowOf
 import com.attendo.core.model.Curriculum
 import com.attendo.core.model.CurriculumCourse
 import com.attendo.feature.curriculum.CourseDetails
@@ -79,22 +85,40 @@ import kotlin.math.roundToInt
 data class SubjectDetailUiState(
     val summary: AttendanceSummary? = null,
     val history: List<AttendanceRecord> = emptyList(),
+    val grades: SubjectGrades? = null,
 )
 
 class SubjectDetailViewModel(
     private val subjectId: String,
     private val subjects: SubjectRepository,
     private val attendance: AttendanceRepository,
+    private val grades: GradeRepository? = null,
 ) : ViewModel() {
 
     val uiState: StateFlow<SubjectDetailUiState> =
-        combine(subjects.subjects, attendance.records) { list, records ->
+        combine(subjects.subjects, attendance.records, grades?.assessments ?: flowOf(emptyList())) { list, records, marks ->
             val subject = list.firstOrNull { it.id == subjectId }
             SubjectDetailUiState(
                 summary = subject?.let { AttendanceSummary.from(it, records) },
                 history = records.filter { it.subjectId == subjectId }.sortedByDescending { it.date },
+                grades = subject?.let { Grades.bySubject(listOf(it), marks).single() },
             )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SubjectDetailUiState())
+
+    fun addMarks(title: String, scored: Double, maxMarks: Double, date: LocalDate?) {
+        val repo = grades ?: return
+        viewModelScope.launch { repo.add(subjectId, title, scored, maxMarks, date) }
+    }
+
+    fun updateMarks(assessment: Assessment) {
+        val repo = grades ?: return
+        viewModelScope.launch { repo.update(assessment) }
+    }
+
+    fun deleteMarks(assessment: Assessment) {
+        val repo = grades ?: return
+        viewModelScope.launch { repo.delete(assessment.id) }
+    }
 
     /** Sets the course's total lecture hours (1 lecture = 1 hour); `null` clears it. */
     fun setLectureHours(hours: Int?) {
@@ -105,6 +129,7 @@ class SubjectDetailViewModel(
     fun delete(onDeleted: () -> Unit) {
         viewModelScope.launch {
             attendance.deleteForSubject(subjectId)
+            grades?.deleteForSubject(subjectId)
             subjects.delete(subjectId)
             onDeleted()
         }
@@ -117,11 +142,12 @@ fun SubjectDetailRoute(
     subjects: SubjectRepository,
     attendance: AttendanceRepository,
     onClose: () -> Unit,
+    grades: GradeRepository? = null,
     curriculum: Curriculum = Curriculum.EMPTY,
     onOpenCurriculum: (code: String) -> Unit = {},
 ) {
     val vm: SubjectDetailViewModel = viewModel(key = subjectId) {
-        SubjectDetailViewModel(subjectId, subjects, attendance)
+        SubjectDetailViewModel(subjectId, subjects, attendance, grades)
     }
     val state by vm.uiState.collectAsStateWithLifecycle()
     SubjectDetailScreen(
@@ -131,6 +157,9 @@ fun SubjectDetailRoute(
         onSetLectureHours = vm::setLectureHours,
         syllabus = state.summary?.subject?.code?.let(curriculum::course),
         onOpenCurriculum = onOpenCurriculum,
+        onAddMarks = vm::addMarks,
+        onUpdateMarks = vm::updateMarks,
+        onDeleteMarks = vm::deleteMarks,
     )
 }
 
@@ -144,6 +173,9 @@ fun SubjectDetailScreen(
     onSetLectureHours: (Int?) -> Unit = {},
     syllabus: CurriculumCourse? = null,
     onOpenCurriculum: (code: String) -> Unit = {},
+    onAddMarks: (title: String, scored: Double, maxMarks: Double, date: LocalDate?) -> Unit = { _, _, _, _ -> },
+    onUpdateMarks: (Assessment) -> Unit = {},
+    onDeleteMarks: (Assessment) -> Unit = {},
 ) {
     val summary = state.summary ?: run {
         Box(Modifier.fillMaxSize().background(AttendoColors.Cream))
@@ -231,6 +263,8 @@ fun SubjectDetailScreen(
                 CourseDetails(syllabus)
             }
         }
+
+        state.grades?.let { GradesSection(it, onAddMarks, onUpdateMarks, onDeleteMarks) }
 
         if (state.history.isNotEmpty()) {
             Text("History", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 24.dp, bottom = 10.dp))

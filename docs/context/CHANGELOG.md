@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-12 — v0.28.0 grades (private)
+- Each subject page has a Grades section: add marks per assessment (title with one-tap
+  suggestions, scored / out of, date), edit or delete, and see the subject's total, percentage and
+  a guide letter grade on the 10-point S–F scale. Marked "Private": grades stay on the phone and in
+  the user's own backups; nothing shares them.
+- Stats tab: a "Grades · Only you" card with the overall percentage and each subject's.
+- Stored in `grades.csv` (id,subject_id,title,scored,max_marks,date,created_at); included in export,
+  CSV restore (matched by its columns) and the Google backup. Deleting a subject deletes its marks.
+
 ## 2026-11-11 — v0.27.0 security hardening and bug sweep
 - Android Lint run across every module: no security or correctness errors (remaining warnings are
   the intentional portrait lock and style notes).

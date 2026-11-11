@@ -1,5 +1,12 @@
 package com.attendo.feature.stats
 
+import com.attendo.core.data.GradeRepository
+import com.attendo.core.model.Grades
+import com.attendo.core.model.SubjectGrades
+import com.attendo.core.model.CourseCatalog
+import kotlinx.coroutines.flow.flowOf
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.foundation.layout.size
 import com.attendo.core.designsystem.component.TabBarClearance
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
@@ -61,6 +68,8 @@ import kotlin.math.roundToInt
 data class StatsUiState(
     val summaries: List<AttendanceSummary> = emptyList(),
     val cancelled: Int = 0,
+    /** Subjects with at least one assessment, best first. */
+    val grades: List<SubjectGrades> = emptyList(),
 ) {
     val present: Int get() = summaries.sumOf { it.present }
     val absent: Int get() = summaries.sumOf { it.absent }
@@ -68,19 +77,26 @@ data class StatsUiState(
     val overallPercent: Double? get() = if (held == 0) null else present * 100.0 / held
 }
 
-class StatsViewModel(subjects: SubjectRepository, attendance: AttendanceRepository) : ViewModel() {
-    val uiState: StateFlow<StatsUiState> = combine(subjects.subjects, attendance.records) { list, records ->
-        val ids = list.mapTo(HashSet()) { it.id }
-        StatsUiState(
-            summaries = list.map { AttendanceSummary.from(it, records) }.sortedBy { it.percent },
-            cancelled = records.count { it.subjectId in ids && it.status == AttendanceStatus.CANCELLED },
-        )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StatsUiState())
+class StatsViewModel(subjects: SubjectRepository, attendance: AttendanceRepository, grades: GradeRepository? = null) : ViewModel() {
+    val uiState: StateFlow<StatsUiState> =
+        combine(subjects.subjects, attendance.records, grades?.assessments ?: flowOf(emptyList())) { list, records, marks ->
+            val ids = list.mapTo(HashSet()) { it.id }
+            StatsUiState(
+                summaries = list.map { AttendanceSummary.from(it, records) }.sortedBy { it.percent },
+                cancelled = records.count { it.subjectId in ids && it.status == AttendanceStatus.CANCELLED },
+                grades = Grades.bySubject(list, marks).filter { it.percent != null }.sortedByDescending { it.percent },
+            )
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StatsUiState())
 }
 
 @Composable
-fun StatsRoute(subjects: SubjectRepository, attendance: AttendanceRepository, onClose: (() -> Unit)?) {
-    val vm: StatsViewModel = viewModel { StatsViewModel(subjects, attendance) }
+fun StatsRoute(
+    subjects: SubjectRepository,
+    attendance: AttendanceRepository,
+    onClose: (() -> Unit)?,
+    grades: GradeRepository? = null,
+) {
+    val vm: StatsViewModel = viewModel { StatsViewModel(subjects, attendance, grades) }
     val state by vm.uiState.collectAsStateWithLifecycle()
     StatsScreen(state, onClose)
 }
@@ -111,6 +127,9 @@ fun StatsScreen(state: StatsUiState, onClose: (() -> Unit)?) {
             item { Text("Add a subject to see statistics.", color = AttendoColors.Muted) }
         }
         items(state.summaries, key = { it.subject.id }) { SubjectBar(it, Modifier.animateItem()) }
+        if (state.grades.isNotEmpty()) {
+            item(key = "grades") { GradesCard(state.grades, Modifier.animateItem().padding(top = 8.dp)) }
+        }
         item { Spacer(Modifier.height(TabBarClearance)) }
     }
     }
@@ -203,5 +222,64 @@ private fun SubjectBar(summary: AttendanceSummary, modifier: Modifier = Modifier
             style = MaterialTheme.typography.labelSmall,
             color = AttendoColors.Muted,
         )
+    }
+}
+
+/** Private grades overview: overall and per subject (only subjects with marks). */
+@Composable
+private fun GradesCard(grades: List<SubjectGrades>, modifier: Modifier = Modifier) {
+    Column(
+        modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(AttendoColors.CreamCard)
+            .padding(18.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Grades", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
+            Row(
+                Modifier
+                    .clip(CircleShape)
+                    .background(AttendoColors.CreamDeep)
+                    .padding(horizontal = 8.dp, vertical = 3.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(Icons.Filled.Lock, contentDescription = null, tint = AttendoColors.Muted, modifier = Modifier.size(11.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("Only you", style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
+            }
+        }
+        Grades.overall(grades)?.let { overall ->
+            Text(
+                "${overall.roundToInt()}% overall · grade ${Grades.letter(overall)}",
+                style = MaterialTheme.typography.labelLarge,
+                color = AttendoColors.Muted,
+                modifier = Modifier.padding(top = 2.dp, bottom = 8.dp),
+            )
+        }
+        grades.forEach { g ->
+            val percent = g.percent ?: return@forEach
+            Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(CourseCatalog.shortName(g.subject), style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        "${g.assessments.size} assessment${if (g.assessments.size == 1) "" else "s"} · ${Grades.format(g.scored)}/${Grades.format(g.maxMarks)}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AttendoColors.Muted,
+                    )
+                }
+                Text("${percent.roundToInt()}%", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    g.grade.orEmpty(),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = AttendoColors.OnAccent,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(AttendoColors.GreenFill)
+                        .padding(horizontal = 9.dp, vertical = 3.dp),
+                )
+            }
+        }
     }
 }

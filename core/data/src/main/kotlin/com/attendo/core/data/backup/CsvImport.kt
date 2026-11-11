@@ -31,6 +31,7 @@ internal object CsvSchema {
     private val required = linkedMapOf(
         AttendoData.SUBJECTS_FILE to setOf("id", "name", "target_percent"),
         AttendoData.ATTENDANCE_FILE to setOf("subject_id", "date", "status"),
+        AttendoData.GRADES_FILE to setOf("id", "subject_id", "scored", "max_marks"),
         AttendoData.POMODORO_FILE to setOf("id", "kind", "planned_seconds"),
         AttendoData.TODOS_FILE to setOf("id", "title", "date"),
         AttendoData.HABITS_FILE to setOf("id", "title", "days"),
@@ -44,6 +45,7 @@ internal object CsvSchema {
     fun label(file: String): String = when (file) {
         AttendoData.SUBJECTS_FILE -> "Subjects"
         AttendoData.ATTENDANCE_FILE -> "Attendance marks"
+        AttendoData.GRADES_FILE -> "Grades"
         AttendoData.POMODORO_FILE -> "Pomodoro sessions"
         AttendoData.TODOS_FILE -> "Reminders"
         AttendoData.HABITS_FILE -> "Checklist tasks"

@@ -23,5 +23,5 @@
   friend requests that the other person approves; friends see each other's friend lists and
   attendance. Attendance visibility to friends is a toggle. Needs a shared backend (accounts,
   profiles, friend graph, privacy rules) — Drive app-data is per user and can't be shared.
-- ISSUE-017 — Grades in previous assessments, private by default.
+- ~~ISSUE-017 — Grades in previous assessments, private by default.~~ Done in v0.28.0.
 - ISSUE-018 — Personalised MCA calendar.
