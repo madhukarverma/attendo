@@ -203,8 +203,12 @@ class RepositoryTest {
         data.subjects.add("DSA", "ca717", 75, lectureHours = 45)
         data.subjects.add("Python Lab", "CA701", 75)
         assertEquals(1, data.fillCatalogLectureHours())
-        assertEquals(0, data.fillCatalogLectureHours())
         assertEquals(listOf(40, 45, null), data.subjects.subjects.first().map { it.lectureHours })
+        // Clearing the hours by hand sticks: the fill runs only once.
+        val os = data.subjects.subjects.first().first()
+        data.subjects.update(os.copy(lectureHours = null))
+        assertEquals(0, data.fillCatalogLectureHours())
+        assertEquals(null, data.subjects.subjects.first().first().lectureHours)
         dir.deleteRecursively()
     }
 

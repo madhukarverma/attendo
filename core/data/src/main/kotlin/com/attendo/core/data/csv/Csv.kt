@@ -10,6 +10,25 @@ object Csv {
         return if (needsQuotes) "\"" + field.replace("\"", "\"\"") + "\"" else field
     }
 
+    /** First characters that make spreadsheet apps treat a cell as a formula (CSV injection). */
+    private val FORMULA_START = charArrayOf('=', '+', '-', '@', '\t', '\r')
+
+    /**
+     * For files meant to be opened in Excel / Sheets: a cell starting with a formula character gets
+     * a leading apostrophe so it shows as text instead of running (OWASP "CSV injection").
+     */
+    fun neutralizeFormula(field: String): String =
+        if (field.isNotEmpty() && field[0] in FORMULA_START) "'$field" else field
+
+    /** Undoes [neutralizeFormula] when such a file is restored. */
+    fun restoreFormula(field: String): String =
+        if (field.length >= 2 && field[0] == '\'' && field[1] in FORMULA_START) field.substring(1) else field
+
+    /** Re-encodes CSV [text] with every cell passed through [neutralizeFormula]. */
+    fun neutralizeFormulas(text: String): String = buildString {
+        parse(text).forEach { row -> append(encodeRow(row.map(::neutralizeFormula))).append('\n') }
+    }
+
     fun parse(text: String): List<List<String>> {
         val rows = mutableListOf<List<String>>()
         var row = mutableListOf<String>()

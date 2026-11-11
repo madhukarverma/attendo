@@ -33,10 +33,10 @@ flowchart TD
     Load -- yes --> Home
     Notif([Reminder notification]) --> Todo
 
-    subgraph Tabs["Tab bar: Home · Classes · To-do · Timer · Stats"]
+    subgraph Tabs["Tab bar: Home · Classes · Tasks · Timer · Stats"]
         Home[Home summary<br/>attendance · focus · today's to-dos<br/>reminders · exams]
         Classes[Classes<br/>day strip · Penta · mark subjects · Tinder mode]
-        Todo[To-do & reminders<br/>overdue · today · upcoming · done]
+        Todo[Tasks<br/>Checklist · Board · Reminders]
         Timer[Pomodoro<br/>timer · stats · export]
         Stats[Statistics]
     end
@@ -44,7 +44,8 @@ flowchart TD
     Home -- gear --> Settings[Settings<br/>profile · theme · animations · launch image<br/>Backup: Google account · CSV export / restore]
     Settings -- sign in --> Drive[(Google Drive<br/>app-data folder<br/>attendo-backup.zip)]
     Onb -- Restore from Google --> Drive
-    Home -- exams card --> Cal[Academic calendar<br/>events + your to-dos]
+    Home -- exams card --> Cal[Academic calendar<br/>events + your reminders]
+    Home -- curriculum card --> Cur[Curriculum<br/>courses · units · outcomes]
     Classes -- calendar button --> Cal
     Cal -- pick a day --> Classes
     Classes -- Add a subject --> Add[Add subject<br/>name · code · target · lecture hours]
@@ -64,7 +65,8 @@ flowchart LR
         O[":feature:onboarding"]
         Db[":feature:dashboard (Home)"]
         At[":feature:attendance (Classes)"]
-        T[":feature:todo"]
+        T[":feature:tasks"]
+        Cu[":feature:curriculum"]
         P[":feature:pomodoro"]
         St[":feature:stats"]
         S[":feature:subjects"]

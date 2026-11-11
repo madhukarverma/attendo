@@ -23,6 +23,18 @@ class BackupArchiveTest {
         assertEquals(42L, contents.createdAt)
     }
 
+    @Test(expected = IllegalArgumentException::class)
+    fun tooManyEntriesAreRejected() {
+        val out = ByteArrayOutputStream()
+        ZipOutputStream(out).use { zip ->
+            repeat(100) {
+                zip.putNextEntry(ZipEntry("f$it.csv"))
+                zip.closeEntry()
+            }
+        }
+        BackupArchive.unpack(out.toByteArray())
+    }
+
     @Test
     fun entriesWithPathsAreIgnored() {
         val out = ByteArrayOutputStream()

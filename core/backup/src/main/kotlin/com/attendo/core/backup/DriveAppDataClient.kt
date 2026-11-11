@@ -28,7 +28,8 @@ internal class DriveAppDataClient(private val accessToken: String) {
 
     /** Backups named [name], newest first. */
     fun list(name: String): List<RemoteFile> {
-        val q = URLEncoder.encode("name = '$name' and trashed = false", "UTF-8")
+        val safeName = name.replace("\\", "\\\\").replace("'", "\\'")
+        val q = URLEncoder.encode("name = '$safeName' and trashed = false", "UTF-8")
         val url = "$API/files?spaces=appDataFolder&q=$q&orderBy=${URLEncoder.encode("modifiedTime desc", "UTF-8")}" +
             "&fields=${URLEncoder.encode("files(id,modifiedTime,size)", "UTF-8")}"
         val files = JSONObject(get(url).toString(Charsets.UTF_8)).optJSONArray("files") ?: return emptyList()
@@ -78,12 +79,25 @@ internal class DriveAppDataClient(private val accessToken: String) {
             if (body != null) connection.outputStream.use { it.write(body) }
             val code = connection.responseCode
             val stream = if (code in 200..299) connection.inputStream else connection.errorStream
-            val bytes = stream?.use { it.readBytes() } ?: ByteArray(0)
+            val bytes = stream?.use { readLimited(it) } ?: ByteArray(0)
             if (code !in 200..299) throw DriveHttpException(code, bytes.toString(Charsets.UTF_8))
             return bytes
         } finally {
             connection.disconnect()
         }
+    }
+
+    /** Reads a response, refusing anything larger than a backup could be. */
+    private fun readLimited(input: java.io.InputStream): ByteArray {
+        val out = java.io.ByteArrayOutputStream()
+        val buffer = ByteArray(16 * 1024)
+        while (true) {
+            val n = input.read(buffer)
+            if (n < 0) break
+            out.write(buffer, 0, n)
+            if (out.size() > MAX_RESPONSE_BYTES) throw IOException("Response too large")
+        }
+        return out.toByteArray()
     }
 
     private fun JSONObject.toRemoteFile() = RemoteFile(
@@ -96,5 +110,6 @@ internal class DriveAppDataClient(private val accessToken: String) {
     private companion object {
         const val API = "https://www.googleapis.com/drive/v3"
         const val UPLOAD = "https://www.googleapis.com/upload/drive/v3"
+        const val MAX_RESPONSE_BYTES = 64 * 1024 * 1024
     }
 }

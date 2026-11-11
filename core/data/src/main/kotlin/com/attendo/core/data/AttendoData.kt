@@ -121,6 +121,7 @@ class AttendoData(
      * empty (from the official curriculum). Values the user entered are never changed.
      */
     suspend fun fillCatalogLectureHours(): Int {
+        if (!runOnce(MIGRATION_CATALOG_HOURS)) return 0
         val hoursByCode = CourseCatalog.CURRENT_SEMESTER.mapNotNull { c -> c.lectureHours?.let { c.code.uppercase() to it } }.toMap()
         var filled = 0
         subjectsCsv.store.update { list ->
@@ -130,6 +131,24 @@ class AttendoData(
             }
         }
         return filled
+    }
+
+    /**
+     * Returns true the first time it's called for [key] (remembered in settings.csv as
+     * `migration.<key>`), false afterwards.
+     */
+    private suspend fun runOnce(key: String): Boolean {
+        var first = false
+        settingsCsv.store.update { list ->
+            val k = "migration.$key"
+            if (list.any { it.first == k }) {
+                list
+            } else {
+                first = true
+                list + (k to "done")
+            }
+        }
+        return first
     }
 
     /** The CSV files that currently exist, e.g. for export/sharing. */
@@ -149,6 +168,7 @@ class AttendoData(
                 KANBAN_COLUMNS_FILE, KANBAN_CARDS_FILE, SETTINGS_FILE,
             )
         const val SETTINGS_FILE = "settings.csv"
+        private const val MIGRATION_CATALOG_HOURS = "catalog_lecture_hours"
         const val SUBJECTS_FILE = "subjects.csv"
         const val ATTENDANCE_FILE = "attendance.csv"
     }

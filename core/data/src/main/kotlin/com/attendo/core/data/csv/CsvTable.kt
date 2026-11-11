@@ -10,7 +10,11 @@ import java.io.File
  */
 class CsvTable(val file: File, val columns: List<String>) {
 
+    private val tmp: File get() = File(file.parentFile, "${file.name}.tmp")
+
     fun read(): List<Map<String, String>> {
+        // If a write was interrupted after the old file was removed, the complete new data is in tmp.
+        if (!file.exists() && tmp.exists()) tmp.renameTo(file)
         if (!file.exists()) return emptyList()
         val rows = Csv.parse(file.readText(Charsets.UTF_8))
         if (rows.isEmpty()) return emptyList()
@@ -22,7 +26,7 @@ class CsvTable(val file: File, val columns: List<String>) {
 
     fun write(rows: List<Map<String, String>>) {
         file.parentFile?.mkdirs()
-        val tmp = File(file.parentFile, "${file.name}.tmp")
+        val tmp = this.tmp
         tmp.writeText(
             buildString {
                 append(Csv.encodeRow(columns)).append('\n')

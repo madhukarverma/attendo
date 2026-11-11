@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-11-11 — v0.27.0 security hardening and bug sweep
+- Android Lint run across every module: no security or correctness errors (remaining warnings are
+  the intentional portrait lock and style notes).
+- CSV injection: exported cells starting with = + - @ are neutralised with a leading apostrophe;
+  CSV restore strips it again (`Csv.neutralizeFormula` / `restoreFormula`).
+- Backup zip limits (64 entries, 60 MB total) and a 64 MB cap on Drive responses; the Drive query
+  escapes the file name.
+- HTTPS only: `usesCleartextTraffic="false"` and a network security config trusting system CAs.
+- Reminder notifications hide their title on the lock screen.
+- Bug: an interrupted CSV write (old file removed, temp file not yet renamed) now recovers from the
+  temp file instead of looking like lost data.
+- Bug: the official lecture hours were refilled on every start, undoing a manual "Clear"; the fill
+  now runs once (`migration.catalog_lecture_hours` in settings.csv).
+- Segmented control thumb uses the lambda offset (no recomposition per animation frame).
+- `docs/SECURITY.md` lists every measure and the known limitations.
+
 ## 2026-11-11 — v0.26.0 MCA curriculum
 - New `:feature:curriculum`: the Semester I curriculum from "MCA Detailed Curriculum" (NIT
   Tiruchirappalli) bundled as `curriculum/mca_semester1.csv` (one row per unit). Screen with an

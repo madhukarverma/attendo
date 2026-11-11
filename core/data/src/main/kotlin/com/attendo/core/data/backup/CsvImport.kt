@@ -59,7 +59,9 @@ internal object CsvSchema {
         val rows = Csv.parse(text.removePrefix("﻿"))
         val header = rows.firstOrNull()?.map { it.trim().lowercase() } ?: return null
         val file = required.entries.firstOrNull { (_, cols) -> header.containsAll(cols) }?.key ?: return null
-        val body = rows.drop(1).map { row -> header.indices.associate { i -> header[i] to row.getOrElse(i) { "" }.trim() } }
+        val body = rows.drop(1).map { row ->
+            header.indices.associate { i -> header[i] to Csv.restoreFormula(row.getOrElse(i) { "" }.trim()) }
+        }
         return file to body
     }
 

@@ -17,6 +17,10 @@ object BackupArchive {
     private const val MANIFEST = "manifest.csv"
     private const val MAX_ENTRY_BYTES = 20 * 1024 * 1024
 
+    /** A real backup has a dozen files; anything far beyond is not ours (or a zip bomb). */
+    private const val MAX_ENTRIES = 64
+    private const val MAX_TOTAL_BYTES = 60 * 1024 * 1024
+
     data class Contents(val manifest: Map<String, String>, val files: Map<String, ByteArray>) {
         val createdAt: Long? get() = manifest["created_at"]?.toLongOrNull()
     }
@@ -44,12 +48,18 @@ object BackupArchive {
     /** Reads a backup. Only flat entry names are kept; anything with a path is ignored. */
     fun unpack(bytes: ByteArray): Contents {
         val files = LinkedHashMap<String, ByteArray>()
+        var entries = 0
+        var total = 0L
         ZipInputStream(ByteArrayInputStream(bytes)).use { zip ->
             while (true) {
                 val entry = zip.nextEntry ?: break
+                require(++entries <= MAX_ENTRIES) { "Backup has too many files" }
                 val name = entry.name
                 if (!entry.isDirectory && '/' !in name && '\\' !in name && !name.startsWith(".")) {
-                    files[name] = readLimited(zip)
+                    val data = readLimited(zip)
+                    total += data.size
+                    require(total <= MAX_TOTAL_BYTES) { "Backup too large" }
+                    files[name] = data
                 }
                 zip.closeEntry()
             }

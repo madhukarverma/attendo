@@ -1,5 +1,6 @@
 package com.attendo.core.designsystem.component
 
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
@@ -46,7 +47,7 @@ fun SegmentedControl(items: List<String>, selected: Int, onSelect: (Int) -> Unit
         val x by animateDpAsState(segment * selected, Motion.bouncy(), label = "thumb")
         Box(
             Modifier
-                .offset(x = x)
+                .offset { IntOffset(x.roundToPx(), 0) }
                 .width(segment)
                 .fillMaxHeight()
                 .clip(RoundedCornerShape(10.dp))

@@ -1,5 +1,6 @@
 package com.attendo.app
 
+import com.attendo.core.data.csv.Csv
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
@@ -9,7 +10,11 @@ import androidx.core.content.FileProvider
 import com.attendo.core.data.AttendoData
 import java.io.File
 
-/** Copies the CSV files to a shareable cache folder and opens the Android share sheet. */
+/**
+ * Copies the CSV files to a shareable cache folder and opens the Android share sheet. The copies
+ * have spreadsheet formulas neutralised (cells starting with = + - @ get a leading apostrophe), so
+ * opening an export in Excel can't run anything; restoring the file removes the apostrophes again.
+ */
 object CsvExporter {
 
     fun share(context: Context, data: AttendoData, only: List<String> = AttendoData.ALL_FILES) {
@@ -25,7 +30,8 @@ object CsvExporter {
         val authority = "${context.packageName}.fileprovider"
         val uris = ArrayList<Uri>(
             files.map { source ->
-                val copy = source.copyTo(File(exportDir, source.name), overwrite = true)
+                val copy = File(exportDir, source.name)
+                copy.writeText(Csv.neutralizeFormulas(source.readText(Charsets.UTF_8)), Charsets.UTF_8)
                 FileProvider.getUriForFile(context, authority, copy)
             },
         )
