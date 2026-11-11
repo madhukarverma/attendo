@@ -91,3 +91,23 @@
 - Decision: each picked CSV is matched to a table by its required columns (not its file name) and
   replaces that table only, after a confirmation that lists row counts. Rows that don't decode are
   dropped. A Google restore is a full replace (tables missing from the backup are emptied).
+
+## DEC-014 — Themes carry fonts; pale accents get separate fill colours
+- Date: 2026-11-11 · Status: Active
+- Decision: `AttendoPalette` holds `AttendoFonts` (system fonts only: sans, cursive, monospace,
+  serif-monospace) and optional `accentFill`/`pinkFill`/`blueFill`; `AttendoColors.on(fill)` picks
+  readable text on a fill. Settings › Theme is a dropdown of presets + Custom.
+- Rationale: themes from the user's references (Ledger, Neon, Pastel, VS Code) differ in type as
+  well as colour; Pastel's accents are too pale for text. No font files are bundled (size, licences).
+
+## DEC-015 — Weekday checklist replaces the plain to-do list
+- Date: 2026-11-11 · Status: Active
+- Decision: Tasks = Checklist (habits on weekdays) · Board (Kanban) · Reminders (to-dos that have a
+  time). Plain to-dos are migrated to board cards, idempotently, at start-up and after restores.
+- Consequence: todos.csv now only holds reminders; nothing the user entered is dropped.
+
+## DEC-016 — Security baseline
+- Date: 2026-11-11 · Status: Active
+- Decision: see docs/SECURITY.md (CSV-injection neutralising on export, bounded archive and network
+  reads, HTTPS-only config, private lock-screen notifications, atomic CSV writes with recovery).
+- Not done: data-at-rest encryption (CSV files must stay readable on export), release keystore.

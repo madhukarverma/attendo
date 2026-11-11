@@ -15,3 +15,13 @@
 - ISSUE-013 — Reminders on Google Play would need SCHEDULE_EXACT_ALARM + a permission prompt (DEC-009).
 - ISSUE-014 — Google backup: merge instead of replace when both phone and account have data;
   backup history (keep a few versions); a periodic backup with WorkManager when the app is closed.
+
+## Needs to be done (requested, deferred on purpose — 2026-11-11)
+- ISSUE-015 — Google account backup: built in v0.21; still needs the Google Cloud OAuth client
+  (docs/GOOGLE_BACKUP_SETUP.md) and verification on a phone.
+- ISSUE-016 — Friends, LeetCode-style: signed-in students can search for other students and send
+  friend requests that the other person approves; friends see each other's friend lists and
+  attendance. Attendance visibility to friends is a toggle. Needs a shared backend (accounts,
+  profiles, friend graph, privacy rules) — Drive app-data is per user and can't be shared.
+- ISSUE-017 — Grades in previous assessments, private by default.
+- ISSUE-018 — Personalised MCA calendar.

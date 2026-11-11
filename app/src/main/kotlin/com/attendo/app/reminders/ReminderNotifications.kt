@@ -57,7 +57,16 @@ object ReminderNotifications {
                 .putExtra(ReminderReceiver.EXTRA_ID, todo.id),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
+        // On a locked screen only "Attendo reminder" shows; the title appears after unlocking.
+        val public = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_stat_reminder)
+            .setColor(0xFF50A65C.toInt())
+            .setContentTitle("Attendo reminder")
+            .setContentText("Unlock to see it")
+            .build()
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setPublicVersion(public)
             .setSmallIcon(R.drawable.ic_stat_reminder)
             .setColor(0xFF50A65C.toInt())
             .setContentTitle(todo.title)
