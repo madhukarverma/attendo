@@ -1,5 +1,8 @@
 package com.attendo.app.navigation
 
+import com.attendo.feature.curriculum.CurriculumScreen
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.attendo.app.CsvImporter
@@ -89,6 +92,8 @@ object Routes {
     const val SUBJECT_DETAIL = "subject/{id}"
     fun subjectDetail(id: String) = "subject/$id"
     const val SETTINGS = "settings"
+    const val CURRICULUM = "curriculum?code={code}"
+    fun curriculum(code: String? = null) = if (code == null) "curriculum" else "curriculum?code=$code"
     const val CALENDAR = "calendar/{date}"
     fun calendar(date: LocalDate) = "calendar/$date"
 
@@ -222,6 +227,8 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                         pomodoro = data.pomodoro,
                         timer = container.pomodoroTimer,
                         calendar = container.academicCalendar,
+                        curriculum = container.curriculum,
+                        onOpenCurriculum = { navController.push(Routes.curriculum()) },
                         onOpenAttendance = { navController.switchTab(Routes.ATTENDANCE) },
                         onOpenChecklist = {
                             tasksPage = TasksPage.CHECKLIST
@@ -335,6 +342,18 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                         subjectId = entry.arguments?.getString("id").orEmpty(),
                         subjects = data.subjects,
                         attendance = data.attendance,
+                        onClose = { navController.back() },
+                        curriculum = container.curriculum,
+                        onOpenCurriculum = { code -> navController.push(Routes.curriculum(code)) },
+                    )
+                }
+                composable(
+                    Routes.CURRICULUM,
+                    arguments = listOf(navArgument("code") { type = NavType.StringType; nullable = true; defaultValue = null }),
+                ) { entry ->
+                    CurriculumScreen(
+                        curriculum = container.curriculum,
+                        focusCode = entry.arguments?.getString("code"),
                         onClose = { navController.back() },
                     )
                 }

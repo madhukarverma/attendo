@@ -1,5 +1,6 @@
 package com.attendo.core.data
 
+import com.attendo.core.model.CourseCatalog
 import com.attendo.core.data.habit.CsvHabitRepository
 import kotlinx.coroutines.flow.first
 import com.attendo.core.data.kanban.CsvKanbanRepository
@@ -114,6 +115,22 @@ class AttendoData(
         listOf(SUBJECTS_FILE, ATTENDANCE_FILE, POMODORO_FILE, TODOS_FILE, KANBAN_CARDS_FILE, HABITS_FILE).all { name ->
             (stores[name]?.items?.value?.isEmpty()) ?: true
         }
+
+    /**
+     * Sets lecture hours on subjects whose code is in the course catalog and whose hours are still
+     * empty (from the official curriculum). Values the user entered are never changed.
+     */
+    suspend fun fillCatalogLectureHours(): Int {
+        val hoursByCode = CourseCatalog.CURRENT_SEMESTER.mapNotNull { c -> c.lectureHours?.let { c.code.uppercase() to it } }.toMap()
+        var filled = 0
+        subjectsCsv.store.update { list ->
+            list.map { s ->
+                val hours = hoursByCode[s.code.trim().uppercase()]
+                if (s.lectureHours == null && hours != null) s.copy(lectureHours = hours).also { filled++ } else s
+            }
+        }
+        return filled
+    }
 
     /** The CSV files that currently exist, e.g. for export/sharing. */
     fun csvFiles(names: List<String> = ALL_FILES): List<File> =

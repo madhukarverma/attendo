@@ -17,11 +17,12 @@ data class CatalogSubject(
  */
 object CourseCatalog {
     val CURRENT_SEMESTER: List<CatalogSubject> = listOf(
-        CatalogSubject("CA711", "Problem Solving and Programming", short = "Python"),
-        CatalogSubject("CA713", "Mathematical Foundations of Computer Applications", short = "Maths"),
-        CatalogSubject("CA715", "Digital Logic and Computer Organization", short = "DLCO"),
-        CatalogSubject("CA717", "Data Structures and Applications", short = "DSA"),
-        CatalogSubject("CA719", "Operating Systems", short = "OS"),
+        // Lecture hours: "Contact Hours" in the MCA Detailed Curriculum (NIT Trichy, Semester I).
+        CatalogSubject("CA711", "Problem Solving and Programming", short = "Python", lectureHours = 40),
+        CatalogSubject("CA713", "Mathematical Foundations of Computer Applications", short = "Maths", lectureHours = 40),
+        CatalogSubject("CA715", "Digital Logic and Computer Organization", short = "DLCO", lectureHours = 40),
+        CatalogSubject("CA717", "Data Structures and Applications", short = "DSA", lectureHours = 40),
+        CatalogSubject("CA719", "Operating Systems", short = "OS", lectureHours = 40),
         CatalogSubject("CA701", "Problem Solving Lab using Python", isLab = true, short = "Python Lab"),
         CatalogSubject("CA703", "Data Structures Lab using C", isLab = true, short = "DS Lab"),
     )

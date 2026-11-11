@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-11 — v0.26.0 MCA curriculum
+- New `:feature:curriculum`: the Semester I curriculum from "MCA Detailed Curriculum" (NIT
+  Tiruchirappalli) bundled as `curriculum/mca_semester1.csv` (one row per unit). Screen with an
+  overview (5 courses, 200 contact hours, 25 units) and expandable course cards: hours, type,
+  assessment, units with topic chips, course outcomes. Opened from a Home card.
+- Subject page: "Syllabus" section for catalog courses, with a link to the full curriculum.
+- Catalog subjects CA711–CA719 carry 40 lecture hours (the curriculum's contact hours); existing
+  subjects with empty hours are filled once at start-up (user-entered hours are never changed).
+  Labs (CA701, CA703) aren't in the PDF, so they have no syllabus or hours.
+
 ## 2026-11-11 — v0.25.0 weekday checklist replaces the to-do list
 - Tasks tab: Checklist · Board · Reminders. The checklist is a habit tracker: each task repeats
   on chosen weekdays; a week strip (with per-day progress and previous/next week) picks the day,
