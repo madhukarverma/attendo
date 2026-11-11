@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-12 — v0.30.1 Firebase project connected
+- Built with the Firebase project `attendo-65239` (app/google-services.json from the console, not
+  committed): Friends sign-in and the Google backup authorise against it. The project's Android
+  OAuth client matches the build PC's debug SHA-1. Firestore rules and the Drive API / consent
+  screen steps (docs/FRIENDS_SETUP.md parts 4–5) must also be done in the console.
+
 ## 2026-11-12 — v0.30.0 friends
 - New `:core:social` (Firebase Auth + Cloud Firestore, Credential Manager "Sign in with Google")
   and `:feature:friends` (Friends screen from the person icon on Home and Settings › Friends; a
