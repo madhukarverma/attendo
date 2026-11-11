@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-11-11 — v0.25.0 weekday checklist replaces the to-do list
+- Tasks tab: Checklist · Board · Reminders. The checklist is a habit tracker: each task repeats
+  on chosen weekdays; a week strip (with per-day progress and previous/next week) picks the day,
+  rows show that week's marks (done / planned / missed) and the streak. Future days can be
+  planned but not ticked. Stored in `habits.csv` (days as `MON|WED|FRI`) and `habit_log.csv`.
+- The plain to-do list is gone. Reminders (a time is now required) stay, with notifications.
+  Existing to-dos without a time are moved onto the board once at start-up and after a restore
+  (`AttendoData.migratePlainTodosToBoard`): open ones to the first column, done ones to "Done".
+- Home: "Today's checklist" (tick in place) and a board summary replace "Today's to-dos".
+- Streak and week maths in `HabitWeek` (core:model) with unit tests.
+
 ## 2026-11-11 — v0.24.0 Kanban board
 - The To-do tab is now **Tasks** (`:feature:todo` renamed `:feature:tasks`) with a segmented
   control: Board · To-do.

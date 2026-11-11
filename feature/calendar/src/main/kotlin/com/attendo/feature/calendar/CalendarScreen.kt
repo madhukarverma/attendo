@@ -215,7 +215,7 @@ private fun Legend() {
         LegendChip("Assessment", AttendoColors.Blue, filled = true)
         LegendChip("Event", AttendoColors.Green, filled = true)
         LegendChip("Deadline", AttendoColors.Yellow, filled = true)
-        LegendChip("To-do", AttendoColors.Ink, filled = false)
+        LegendChip("Reminder", AttendoColors.Ink, filled = false)
     }
 }
 
@@ -282,7 +282,7 @@ private fun YourTodos(todos: List<Todo>, today: LocalDate) {
             .background(AttendoColors.CreamCard)
             .padding(18.dp),
     ) {
-        Text("Your to-dos", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Text("Your reminders", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))
         next.forEach { TodoRow(it) }
     }

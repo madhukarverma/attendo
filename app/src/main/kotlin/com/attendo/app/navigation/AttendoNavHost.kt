@@ -169,8 +169,8 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
     }
     LaunchedEffect(openRequest) {
         if (openRequest == Routes.TODO && loaded.onboarded) {
-            // A reminder notification: open the Tasks tab on its to-do page.
-            tasksPage = TasksPage.TODO
+            // A reminder notification: open the Tasks tab on Reminders.
+            tasksPage = TasksPage.REMINDERS
             navController.switchTab(Routes.TODO)
         }
         if (openRequest != null) onOpenHandled()
@@ -217,11 +217,24 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                         subjects = data.subjects,
                         attendance = data.attendance,
                         todos = data.todos,
+                        habits = data.habits,
+                        kanban = data.kanban,
                         pomodoro = data.pomodoro,
                         timer = container.pomodoroTimer,
                         calendar = container.academicCalendar,
                         onOpenAttendance = { navController.switchTab(Routes.ATTENDANCE) },
-                        onOpenTodo = { navController.switchTab(Routes.TODO) },
+                        onOpenChecklist = {
+                            tasksPage = TasksPage.CHECKLIST
+                            navController.switchTab(Routes.TODO)
+                        },
+                        onOpenBoard = {
+                            tasksPage = TasksPage.BOARD
+                            navController.switchTab(Routes.TODO)
+                        },
+                        onOpenReminders = {
+                            tasksPage = TasksPage.REMINDERS
+                            navController.switchTab(Routes.TODO)
+                        },
                         onOpenPomodoro = { navController.switchTab(Routes.POMODORO) },
                         onOpenCalendar = { navController.push(Routes.calendar(LocalDate.now())) },
                         onOpenSettings = { navController.push(Routes.SETTINGS) },
@@ -247,6 +260,7 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                     TasksRoute(
                         todos = data.todos,
                         kanban = data.kanban,
+                        habits = data.habits,
                         bottomPadding = TabBarClearance,
                         requestedPage = tasksPage,
                         onRequestedPageHandled = { tasksPage = null },

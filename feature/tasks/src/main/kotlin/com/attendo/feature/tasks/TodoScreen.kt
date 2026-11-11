@@ -226,7 +226,8 @@ private fun AddTodoCard(today: LocalDate, now: LocalDateTime, onAdd: (String, Lo
     var pickDate by remember { mutableStateOf(false) }
     var pickTime by remember { mutableStateOf(false) }
     val timePassed = time?.let { !date.atTime(it).isAfter(now) } == true
-    val canAdd = title.isNotBlank() && !timePassed
+    // Plain to-dos moved to the board and the weekday checklist in v0.25: a reminder needs a time.
+    val canAdd = title.isNotBlank() && time != null && !timePassed
 
     fun submit() {
         if (!canAdd) return
@@ -247,7 +248,7 @@ private fun AddTodoCard(today: LocalDate, now: LocalDateTime, onAdd: (String, Lo
             onValueChange = { title = it.take(80) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
-            placeholder = { Text("What needs doing?") },
+            placeholder = { Text("Remind me to…") },
             shape = RoundedCornerShape(16.dp),
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { submit() }),
@@ -264,7 +265,7 @@ private fun AddTodoCard(today: LocalDate, now: LocalDateTime, onAdd: (String, Lo
             OptionChip(Icons.Filled.DateRange, dayLabel(date, today), selected = false) { pickDate = true }
             OptionChip(
                 Icons.Filled.Notifications,
-                time?.format(TimeFormat) ?: "Remind me",
+                time?.format(TimeFormat) ?: "Pick a time",
                 selected = time != null,
                 onClear = if (time != null) ({ time = null }) else null,
             ) { pickTime = true }
@@ -279,6 +280,14 @@ private fun AddTodoCard(today: LocalDate, now: LocalDateTime, onAdd: (String, Lo
             ) {
                 Icon(Icons.Filled.Add, contentDescription = null, tint = if (canAdd) AttendoColors.Cream else AttendoColors.Muted)
             }
+        }
+        if (time == null && title.isNotBlank()) {
+            Text(
+                "Pick a time for the reminder.",
+                style = MaterialTheme.typography.labelSmall,
+                color = AttendoColors.Muted,
+                modifier = Modifier.padding(top = 8.dp, start = 4.dp),
+            )
         }
         if (timePassed) {
             Text(
@@ -440,9 +449,9 @@ private fun EmptyState(modifier: Modifier = Modifier) {
     Column(modifier.fillMaxWidth().padding(top = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         TriangleMascot(Modifier.size(120.dp))
         Spacer(Modifier.height(12.dp))
-        Text("Nothing on your list.", style = MaterialTheme.typography.titleMedium)
+        Text("No reminders yet.", style = MaterialTheme.typography.titleMedium)
         Text(
-            "Add a to-do for any day. Set a time and you'll get a reminder.",
+            "Add something above, pick a day and a time, and you'll get a notification.",
             style = MaterialTheme.typography.bodyMedium,
             color = AttendoColors.Muted,
         )
