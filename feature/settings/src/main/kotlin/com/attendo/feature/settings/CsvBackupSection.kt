@@ -91,7 +91,7 @@ internal fun CsvBackupSection(
         }
         Spacer(Modifier.height(14.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            PillButton("Export", Icons.Filled.Share, AttendoColors.Green, AttendoColors.Cream, Modifier.weight(1f), onClick = onExport)
+            PillButton("Export", Icons.Filled.Share, AttendoColors.GreenFill, AttendoColors.OnAccent, Modifier.weight(1f), onClick = onExport)
             PillButton(
                 if (busy) "Reading…" else "Restore",
                 Icons.Filled.Refresh,

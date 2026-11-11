@@ -15,8 +15,8 @@ enum class AnimationMode {
     NONE,
 }
 
-/** Settings › Theme. */
-enum class ThemeMode { LIGHT, DARK, CUSTOM }
+/** Settings › Theme. New values go at the end; the name is what's stored in settings.csv. */
+enum class ThemeMode { LIGHT, DARK, CUSTOM, LEDGER, NEON, PASTEL, VSCODE }
 
 data class AppSettings(
     val userName: String = "",

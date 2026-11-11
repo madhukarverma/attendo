@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-11-11 — v0.22.0 theme dropdown and four new themes
+- Settings › Theme is one dropdown of every theme (with colour swatches) plus Custom.
+- New themes: Ledger (paper, black ink, magenta; Android's typewriter face "serif-monospace"),
+  Neon (near-black, lime, orange), Pastel (white, sky blue, mint, butter yellow) and VS Code
+  (colours read from VS Code 1.145's "Dark 2026" theme; system monospace font).
+- Themes now carry fonts (`AttendoFonts`: body, bubble font, size scale) as well as colours; only
+  fonts that ship with Android are used, nothing is bundled.
+- Palette gets optional fill colours (`accentFill`, `pinkFill`, `blueFill`) for themes whose
+  accents are too pale to read as text; `AttendoColors.on(fill)` picks the text colour on a fill.
+  Primary buttons, the selected tab, mark chips and the mascot use the fills.
+
 ## 2026-11-09 — v0.21.0 Google account backup
 - New `:core:backup` module (`GoogleDriveBackup`): Google sign-in via Play services
   `AuthorizationClient` for the `drive.appdata` scope, and a small Drive v3 REST client. All CSV

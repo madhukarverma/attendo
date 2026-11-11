@@ -133,8 +133,8 @@ internal fun GoogleBackupSection(backup: GoogleDriveBackup) {
                 PillButton(
                     "Back up now",
                     Icons.Filled.Share,
-                    AttendoColors.Green,
-                    AttendoColors.Cream,
+                    AttendoColors.GreenFill,
+                    AttendoColors.OnAccent,
                     Modifier.weight(1f),
                     enabled = !state.busy,
                     onClick = backup::backUpNow,
