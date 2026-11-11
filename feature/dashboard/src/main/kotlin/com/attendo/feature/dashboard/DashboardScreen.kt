@@ -1,5 +1,7 @@
 package com.attendo.feature.dashboard
 
+import com.attendo.core.data.HabitRepository
+import com.attendo.core.data.KanbanRepository
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -62,7 +64,6 @@ import com.attendo.core.model.AcademicCalendar
 import com.attendo.core.model.CalendarEvent
 import com.attendo.core.model.CourseCatalog
 import com.attendo.core.model.PomodoroKind
-import com.attendo.core.model.Todo
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -70,8 +71,8 @@ import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 
 /**
- * Home: a one-glance summary of every section (attendance, today's to-dos, upcoming reminders,
- * upcoming exams, the Pomodoro timer). Each card opens its section.
+ * Home: a one-glance summary of every section (attendance, the Pomodoro timer, today's checklist,
+ * the board, upcoming reminders, upcoming exams). Each card opens its section.
  */
 @Composable
 fun DashboardRoute(
@@ -79,17 +80,21 @@ fun DashboardRoute(
     subjects: SubjectRepository,
     attendance: AttendanceRepository,
     todos: TodoRepository,
+    habits: HabitRepository,
+    kanban: KanbanRepository,
     pomodoro: PomodoroRepository,
     timer: PomodoroTimer,
     calendar: AcademicCalendar,
     onOpenAttendance: () -> Unit,
-    onOpenTodo: () -> Unit,
+    onOpenChecklist: () -> Unit,
+    onOpenBoard: () -> Unit,
+    onOpenReminders: () -> Unit,
     onOpenPomodoro: () -> Unit,
     onOpenCalendar: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     val vm: DashboardViewModel = viewModel {
-        DashboardViewModel(settings, subjects, attendance, todos, pomodoro, timer, calendar)
+        DashboardViewModel(settings, subjects, attendance, todos, habits, kanban, pomodoro, timer, calendar)
     }
     val state by vm.uiState.collectAsStateWithLifecycle()
     val timerState by vm.timerState.collectAsStateWithLifecycle()
@@ -97,9 +102,11 @@ fun DashboardRoute(
         state = state,
         timer = timerState,
         onToggleTimer = vm::toggleTimer,
-        onToggleTodo = vm::toggleTodo,
+        onToggleChecklist = vm::toggleChecklist,
         onOpenAttendance = onOpenAttendance,
-        onOpenTodo = onOpenTodo,
+        onOpenChecklist = onOpenChecklist,
+        onOpenBoard = onOpenBoard,
+        onOpenReminders = onOpenReminders,
         onOpenPomodoro = onOpenPomodoro,
         onOpenCalendar = onOpenCalendar,
         onOpenSettings = onOpenSettings,
@@ -111,9 +118,11 @@ fun DashboardScreen(
     state: DashboardUiState,
     timer: PomodoroTimerState,
     onToggleTimer: () -> Unit,
-    onToggleTodo: (Todo) -> Unit,
+    onToggleChecklist: (ChecklistItem) -> Unit,
     onOpenAttendance: () -> Unit,
-    onOpenTodo: () -> Unit,
+    onOpenChecklist: () -> Unit,
+    onOpenBoard: () -> Unit,
+    onOpenReminders: () -> Unit,
     onOpenPomodoro: () -> Unit,
     onOpenCalendar: () -> Unit,
     onOpenSettings: () -> Unit,
@@ -135,8 +144,9 @@ fun DashboardScreen(
                 Header(state, onOpenSettings)
                 AttendanceCard(state, onOpenAttendance)
                 FocusCard(state, timer, onToggleTimer, onOpenPomodoro)
-                TodayTodosCard(state, onToggleTodo, onOpenTodo)
-                RemindersCard(state, onOpenTodo)
+                ChecklistCard(state, onToggleChecklist, onOpenChecklist)
+                BoardCard(state, onOpenBoard)
+                RemindersCard(state, onOpenReminders)
                 ExamsCard(state, onOpenCalendar)
                 Spacer(Modifier.height(TabBarClearance))
             }
@@ -306,35 +316,37 @@ private fun formatClock(millis: Long): String {
     return "%d:%02d".format(total / 60, total % 60)
 }
 
+/** Today's weekday-checklist tasks, tickable in place. */
 @Composable
-private fun TodayTodosCard(state: DashboardUiState, onToggle: (Todo) -> Unit, onOpen: () -> Unit) {
-    Card(onOpen, "Open to-do") {
-        val open = state.todayTodos.count { !it.done }
-        CardHeader("TODAY'S TO-DOS", if (state.todayTodos.isEmpty()) null else "$open left")
-        if (state.todayTodos.isEmpty()) {
-            EmptyLine("Nothing due today. Tap to add a to-do.")
+private fun ChecklistCard(state: DashboardUiState, onToggle: (ChecklistItem) -> Unit, onOpen: () -> Unit) {
+    Card(onOpen, "Open checklist") {
+        val done = state.checklist.count { it.checked }
+        CardHeader(
+            "TODAY'S CHECKLIST",
+            when {
+                state.checklist.isEmpty() -> null
+                done == state.checklist.size -> "All done"
+                else -> "$done of ${state.checklist.size}"
+            },
+        )
+        if (state.checklist.isEmpty()) {
+            EmptyLine("Nothing planned for today. Tap to plan your week.")
         } else {
-            state.todayTodos.take(4).forEach { todo -> TodoLine(todo, onToggle) }
-            if (state.todayTodos.size > 4) EmptyLine("+ ${state.todayTodos.size - 4} more")
-        }
-        if (state.overdueCount > 0) {
-            Text(
-                "${state.overdueCount} overdue from earlier days",
-                style = MaterialTheme.typography.labelMedium,
-                color = AttendoColors.Pink,
-                modifier = Modifier.padding(top = 6.dp),
-            )
+            state.checklist.take(5).forEach { item -> ChecklistLine(item, onToggle) }
+            if (state.checklist.size > 5) EmptyLine("+ ${state.checklist.size - 5} more")
         }
     }
 }
 
 @Composable
-private fun TodoLine(todo: Todo, onToggle: (Todo) -> Unit) {
+private fun ChecklistLine(item: ChecklistItem, onToggle: (ChecklistItem) -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .iosPress(PressStyle.Highlight, onClickLabel = if (todo.done) "Mark not done" else "Mark done") { onToggle(todo) }
+            .iosPress(PressStyle.Highlight, onClickLabel = if (item.checked) "Untick ${item.habit.title}" else "Tick ${item.habit.title}") {
+                onToggle(item)
+            }
             .padding(vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -342,23 +354,60 @@ private fun TodoLine(todo: Todo, onToggle: (Todo) -> Unit) {
             Modifier
                 .size(20.dp)
                 .clip(CircleShape)
-                .then(if (todo.done) Modifier.background(AttendoColors.Green) else Modifier.border(2.dp, AttendoColors.Green, CircleShape)),
+                .then(if (item.checked) Modifier.background(AttendoColors.GreenFill) else Modifier.border(2.dp, AttendoColors.Green, CircleShape)),
             contentAlignment = Alignment.Center,
         ) {
-            if (todo.done) Icon(Icons.Filled.Check, contentDescription = null, tint = AttendoColors.Cream, modifier = Modifier.size(14.dp))
+            if (item.checked) Icon(Icons.Filled.Check, contentDescription = null, tint = AttendoColors.OnAccent, modifier = Modifier.size(14.dp))
         }
         Spacer(Modifier.width(10.dp))
         Text(
-            todo.title,
+            item.habit.title,
             style = MaterialTheme.typography.bodyMedium,
-            color = if (todo.done) AttendoColors.Muted else AttendoColors.Ink,
-            textDecoration = if (todo.done) TextDecoration.LineThrough else null,
+            color = if (item.checked) AttendoColors.Muted else AttendoColors.Ink,
+            textDecoration = if (item.checked) TextDecoration.LineThrough else null,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
-        todo.remindAt?.let {
-            Text(it.format(TimeFormat), style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
+    }
+}
+
+/** Cards per column, and the open cards due soonest. */
+@Composable
+private fun BoardCard(state: DashboardUiState, onOpen: () -> Unit) {
+    val board = state.board ?: return
+    Card(onOpen, "Open board") {
+        CardHeader("BOARD", if (board.openCards == 0) null else "${board.openCards} open")
+        Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            board.columns.take(4).forEach { (title, count) ->
+                Column(
+                    Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(AttendoColors.Cream)
+                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                ) {
+                    Text("$count", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text(title, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+        }
+        board.due.forEach { card ->
+            val overdue = card.id in board.overdueIds
+            Row(Modifier.fillMaxWidth().padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    card.title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    card.due?.let { (if (overdue) "Overdue · " else "Due ") + relativeDay(it, state.today) }.orEmpty(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (overdue) AttendoColors.Pink else AttendoColors.Muted,
+                )
+            }
         }
     }
 }
@@ -368,7 +417,7 @@ private fun RemindersCard(state: DashboardUiState, onOpen: () -> Unit) {
     Card(onOpen, "Open reminders") {
         CardHeader("UPCOMING REMINDERS", null)
         if (state.reminders.isEmpty()) {
-            EmptyLine("No reminders set. Give a to-do a time to get one.")
+            EmptyLine("No reminders set. Add one in Tasks › Reminders.")
         }
         state.reminders.forEach { todo ->
             Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {

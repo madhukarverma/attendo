@@ -1,5 +1,7 @@
 package com.attendo.core.data
 
+import com.attendo.core.data.habit.CsvHabitRepository
+import kotlinx.coroutines.flow.first
 import com.attendo.core.data.kanban.CsvKanbanRepository
 import com.attendo.core.data.backup.CsvImportPlan
 import com.attendo.core.data.backup.CsvSchema
@@ -19,6 +21,8 @@ import java.io.File
  * - `attendance.csv` subject_id,date,status,updated_at,count
  * - `pomodoro.csv`   id,date,started_at,kind,subject_id,planned_seconds,actual_seconds,completed
  * - `todos.csv`      id,title,date,remind_at,done,created_at
+ * - `habits.csv`     id,title,days,position,created_at
+ * - `habit_log.csv`  habit_id,date
  * - `kanban_columns.csv` id,title,position,done
  * - `kanban_cards.csv`   id,column_id,title,notes,due,priority,position,created_at
  */
@@ -34,6 +38,7 @@ class AttendoData(
     private val pomodoroCsv = CsvPomodoroRepository(dir, scope, io)
     private val todosCsv = CsvTodoRepository(dir, scope, io, clock)
     private val kanbanCsv = CsvKanbanRepository(dir, scope, io, clock)
+    private val habitsCsv = CsvHabitRepository(dir, scope, io, clock)
 
     val settings: SettingsRepository = settingsCsv
     val subjects: SubjectRepository = subjectsCsv
@@ -41,6 +46,7 @@ class AttendoData(
     val pomodoro: PomodoroRepository = pomodoroCsv
     val todos: TodoRepository = todosCsv
     val kanban: KanbanRepository = kanbanCsv
+    val habits: HabitRepository = habitsCsv
 
     /** Every table by file name, for backup and restore. */
     private val stores: Map<String, CsvStore<*>>
@@ -52,14 +58,19 @@ class AttendoData(
             TODOS_FILE to todosCsv.store,
             KANBAN_COLUMNS_FILE to kanbanCsv.columnStore,
             KANBAN_CARDS_FILE to kanbanCsv.cardStore,
+            HABITS_FILE to habitsCsv.habitStore,
+            HABIT_LOG_FILE to habitsCsv.logStore,
         )
 
     /** Matches picked CSV files (display name to text) to tables; nothing is changed yet. */
     fun planCsvImport(files: List<Pair<String, String>>): CsvImportPlan = CsvSchema.plan(files)
 
     /** Replaces each planned table with the imported rows. Returns rows kept per file. */
-    suspend fun applyCsvImport(plan: CsvImportPlan): Map<String, Int> =
-        plan.tables.associate { t -> t.file to (stores[t.file]?.replaceRows(t.rows) ?: 0) }
+    suspend fun applyCsvImport(plan: CsvImportPlan): Map<String, Int> {
+        val kept = plan.tables.associate { t -> t.file to (stores[t.file]?.replaceRows(t.rows) ?: 0) }
+        migratePlainTodosToBoard()
+        return kept
+    }
 
     /** CSV text of every table file that exists on disk, by file name (for backups). */
     fun snapshot(): Map<String, String> =
@@ -69,15 +80,38 @@ class AttendoData(
      * Full restore from a backup snapshot: every table is replaced, and tables missing from
      * [files] are emptied, so the phone ends up exactly like the backup. Returns rows per file.
      */
-    suspend fun restoreSnapshot(files: Map<String, String>): Map<String, Int> =
-        stores.mapValues { (name, store) ->
+    suspend fun restoreSnapshot(files: Map<String, String>): Map<String, Int> {
+        val kept = stores.mapValues { (name, store) ->
             val rows = files[name]?.let { CsvSchema.read(it)?.second }.orEmpty()
             store.replaceRows(rows)
         }
+        migratePlainTodosToBoard()
+        return kept
+    }
+
+    /**
+     * v0.25 replaced the plain to-do list with the weekday checklist and the board, keeping only
+     * reminders (to-dos with a time) in todos.csv. To-dos without a time become board cards, due on
+     * their day: open ones in the first working column, finished ones in the "done" column. Runs at
+     * start-up and after a restore; does nothing once there are none left. Returns how many moved.
+     */
+    suspend fun migratePlainTodosToBoard(): Int {
+        val plain = todos.todos.first().filter { it.remindAt == null }
+        if (plain.isEmpty()) return 0
+        kanban.ensureDefaultColumns()
+        val columns = kanban.board.first().sortedColumns
+        val open = columns.firstOrNull { !it.done } ?: columns.first()
+        val done = columns.firstOrNull { it.done } ?: columns.last()
+        plain.sortedWith(compareBy({ it.date }, { it.createdAt })).forEach { todo ->
+            kanban.addCard(if (todo.done) done.id else open.id, todo.title, due = todo.date)
+        }
+        todosCsv.store.update { list -> list.filter { it.remindAt != null } }
+        return plain.size
+    }
 
     /** True when there's nothing worth keeping yet (no subjects, marks, sessions or to-dos). */
     fun hasNoUserData(): Boolean =
-        listOf(SUBJECTS_FILE, ATTENDANCE_FILE, POMODORO_FILE, TODOS_FILE, KANBAN_CARDS_FILE).all { name ->
+        listOf(SUBJECTS_FILE, ATTENDANCE_FILE, POMODORO_FILE, TODOS_FILE, KANBAN_CARDS_FILE, HABITS_FILE).all { name ->
             (stores[name]?.items?.value?.isEmpty()) ?: true
         }
 
@@ -90,9 +124,11 @@ class AttendoData(
         const val TODOS_FILE = "todos.csv"
         const val KANBAN_COLUMNS_FILE = "kanban_columns.csv"
         const val KANBAN_CARDS_FILE = "kanban_cards.csv"
+        const val HABITS_FILE = "habits.csv"
+        const val HABIT_LOG_FILE = "habit_log.csv"
         val ALL_FILES
             get() = listOf(
-                SUBJECTS_FILE, ATTENDANCE_FILE, POMODORO_FILE, TODOS_FILE,
+                SUBJECTS_FILE, ATTENDANCE_FILE, POMODORO_FILE, TODOS_FILE, HABITS_FILE, HABIT_LOG_FILE,
                 KANBAN_COLUMNS_FILE, KANBAN_CARDS_FILE, SETTINGS_FILE,
             )
         const val SETTINGS_FILE = "settings.csv"

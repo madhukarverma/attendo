@@ -1,5 +1,6 @@
 package com.attendo.feature.tasks
 
+import com.attendo.core.data.HabitRepository
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,29 +29,36 @@ import java.time.LocalDate
 
 /** Pages of the Tasks tab, in the order of its segmented control. */
 enum class TasksPage(val label: String) {
+    /** Weekday checklist (habit tracker). */
+    CHECKLIST("Checklist"),
     BOARD("Board"),
-    TODO("To-do"),
+
+    /** Dated reminders with notifications (what's left of the old to-do list). */
+    REMINDERS("Reminders"),
 }
 
 /**
- * The Tasks tab: a Kanban board and the to-do list with reminders.
+ * The Tasks tab: the weekday checklist, the Kanban board and reminders.
  *
  * @param bottomPadding room left under each page for the app's tab bar.
- * @param requestedPage a page to show now (a reminder notification opens the to-do page);
+ * @param requestedPage a page to show now (a reminder notification opens Reminders);
  * [onRequestedPageHandled] clears it.
  */
 @Composable
 fun TasksRoute(
     todos: TodoRepository,
     kanban: KanbanRepository,
+    habits: HabitRepository,
     bottomPadding: Dp = 24.dp,
     requestedPage: TasksPage? = null,
     onRequestedPageHandled: () -> Unit = {},
 ) {
     val boardVm: BoardViewModel = viewModel { BoardViewModel(kanban) }
     val todoVm: TodoViewModel = viewModel { TodoViewModel(todos) }
+    val habitsVm: HabitsViewModel = viewModel { HabitsViewModel(habits) }
     val board by boardVm.board.collectAsStateWithLifecycle()
-    var page by rememberSaveable { mutableStateOf(TasksPage.BOARD) }
+    val checklist by habitsVm.uiState.collectAsStateWithLifecycle()
+    var page by rememberSaveable { mutableStateOf(TasksPage.CHECKLIST) }
     LaunchedEffect(requestedPage) {
         if (requestedPage != null) {
             page = requestedPage
@@ -78,8 +86,18 @@ fun TasksRoute(
         )
         Box(Modifier.weight(1f)) {
             when (page) {
+                TasksPage.CHECKLIST -> HabitsPage(
+                    state = checklist,
+                    onSelect = habitsVm::select,
+                    onShiftWeek = habitsVm::shiftWeek,
+                    onToggle = habitsVm::toggle,
+                    onAdd = habitsVm::add,
+                    onUpdate = habitsVm::update,
+                    onDelete = habitsVm::delete,
+                    bottomPadding = bottomPadding,
+                )
                 TasksPage.BOARD -> BoardPage(board, LocalDate.now(), boardVm, bottomPadding)
-                TasksPage.TODO -> TodoPageHost(todoVm, bottomPadding)
+                TasksPage.REMINDERS -> TodoPageHost(todoVm, bottomPadding)
             }
         }
     }

@@ -48,6 +48,8 @@ class AttendoApplication : Application() {
         super.onCreate()
         container = AppContainer(this)
         ReminderNotifications.createChannel(this)
+        // v0.25: plain to-dos (no reminder time) become board cards, once.
+        container.appScope.launch { runCatching { container.data.migratePlainTodosToBoard() } }
         // Re-arm alarms whenever the to-do list changes (and once at start-up).
         container.appScope.launch {
             container.data.todos.todos.collect { container.reminders.sync(it) }
