@@ -1,5 +1,7 @@
 package com.attendo.core.data
 
+import com.attendo.core.model.HabitCheck
+import java.time.DayOfWeek
 import com.attendo.core.model.CardPriority
 import java.time.LocalTime
 import com.attendo.core.model.AnimationMode
@@ -139,6 +141,55 @@ class RepositoryTest {
         assertEquals(listOf("Doing", "Done"), after.sortedColumns.map { it.title })
         assertEquals(listOf(0, 1), after.sortedColumns.map { it.position })
         assertEquals(listOf(a.id), after.cards.map { it.id })
+        dir.deleteRecursively()
+    }
+
+    @Test
+    fun habitsAndTicksSurviveReload() = runTest {
+        val dir = Files.createTempDirectory("attendo").toFile()
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val data = AttendoData(dir, TestScope(dispatcher), dispatcher) { 3L }
+        advanceUntilIdle()
+        val gym = data.habits.add("Gym", setOf(DayOfWeek.MONDAY, DayOfWeek.FRIDAY))
+        val read = data.habits.add("Read 10 pages", DayOfWeek.entries.toSet())
+        val day = LocalDate.of(2026, 11, 9)
+        data.habits.setChecked(gym.id, day, true)
+        data.habits.setChecked(gym.id, day, true) // ticking twice keeps one row
+        data.habits.setChecked(read.id, day, true)
+        data.habits.setChecked(read.id, day, false)
+
+        val reloaded = AttendoData(dir, TestScope(dispatcher), dispatcher)
+        advanceUntilIdle()
+        assertEquals(setOf(DayOfWeek.MONDAY, DayOfWeek.FRIDAY), reloaded.habits.habits.first().first { it.id == gym.id }.days)
+        assertEquals(listOf(0, 1), reloaded.habits.habits.first().map { it.position })
+        assertEquals(listOf(HabitCheck(gym.id, day)), reloaded.habits.checks.first())
+
+        reloaded.habits.delete(gym.id)
+        assertEquals(emptyList<HabitCheck>(), reloaded.habits.checks.first())
+        assertEquals(listOf(read.id), reloaded.habits.habits.first().map { it.id })
+        dir.deleteRecursively()
+    }
+
+    @Test
+    fun plainTodosMoveToTheBoardOnce() = runTest {
+        val dir = Files.createTempDirectory("attendo").toFile()
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val data = AttendoData(dir, TestScope(dispatcher), dispatcher)
+        advanceUntilIdle()
+        val day = LocalDate.of(2026, 11, 12)
+        data.todos.add("Buy lab record", day)
+        val finished = data.todos.add("Submit form", day.minusDays(2))
+        data.todos.setDone(finished.id, true)
+        val reminder = data.todos.add("Call home", day, LocalTime.of(20, 0))
+
+        assertEquals(2, data.migratePlainTodosToBoard())
+        assertEquals(0, data.migratePlainTodosToBoard())
+        assertEquals(listOf(reminder.id), data.todos.todos.first().map { it.id })
+        val board = data.kanban.board.first()
+        val (todo, _, done) = board.sortedColumns
+        assertEquals(listOf("Buy lab record"), board.cardsIn(todo.id).map { it.title })
+        assertEquals(day, board.cardsIn(todo.id).single().due)
+        assertEquals(listOf("Submit form"), board.cardsIn(done.id).map { it.title })
         dir.deleteRecursively()
     }
 

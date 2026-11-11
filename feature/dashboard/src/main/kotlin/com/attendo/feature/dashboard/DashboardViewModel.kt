@@ -3,6 +3,8 @@ package com.attendo.feature.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.attendo.core.data.AttendanceRepository
+import com.attendo.core.data.HabitRepository
+import com.attendo.core.data.KanbanRepository
 import com.attendo.core.data.PomodoroRepository
 import com.attendo.core.data.SettingsRepository
 import com.attendo.core.data.SubjectRepository
@@ -13,6 +15,11 @@ import com.attendo.core.model.AcademicCalendar
 import com.attendo.core.model.AttendanceSummary
 import com.attendo.core.model.CalendarEvent
 import com.attendo.core.model.DayKind
+import com.attendo.core.model.Habit
+import com.attendo.core.model.HabitCheck
+import com.attendo.core.model.HabitWeek
+import com.attendo.core.model.KanbanBoard
+import com.attendo.core.model.KanbanCard
 import com.attendo.core.model.PomodoroStats
 import com.attendo.core.model.PomodoroSummary
 import com.attendo.core.model.Todo
@@ -28,6 +35,17 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+/** One line of today's checklist on Home. */
+data class ChecklistItem(val habit: Habit, val checked: Boolean)
+
+/** The board at a glance: cards per column, and the open cards due soonest. */
+data class BoardSummary(
+    val columns: List<Pair<String, Int>>,
+    val openCards: Int,
+    val due: List<KanbanCard>,
+    val overdueIds: Set<String>,
+)
+
 /** Everything the Home summary shows, one snapshot of every section. */
 data class DashboardUiState(
     val loaded: Boolean = false,
@@ -38,8 +56,9 @@ data class DashboardUiState(
     val markedToday: Int = 0,
     val todayEvents: List<CalendarEvent> = emptyList(),
     val isWeekend: Boolean = false,
-    val todayTodos: List<Todo> = emptyList(),
-    val overdueCount: Int = 0,
+    /** Checklist tasks scheduled for today. */
+    val checklist: List<ChecklistItem> = emptyList(),
+    val board: BoardSummary? = null,
     val reminders: List<Todo> = emptyList(),
     val exams: List<CalendarEvent> = emptyList(),
     val focus: PomodoroSummary? = null,
@@ -66,7 +85,9 @@ class DashboardViewModel(
     settings: SettingsRepository,
     subjects: SubjectRepository,
     attendance: AttendanceRepository,
-    private val todos: TodoRepository,
+    todos: TodoRepository,
+    private val habits: HabitRepository,
+    kanban: KanbanRepository,
     pomodoro: PomodoroRepository,
     private val timer: PomodoroTimer,
     private val calendar: AcademicCalendar,
@@ -84,15 +105,20 @@ class DashboardViewModel(
         list.map { AttendanceSummary.from(it, records) } to records
     }
 
+    private class Tasks(val reminders: List<Todo>, val habits: List<Habit>, val checks: List<HabitCheck>, val board: KanbanBoard)
+
+    private val tasksFlow = combine(todos.todos, habits.habits, habits.checks, kanban.board, ::Tasks)
+
     val uiState: StateFlow<DashboardUiState> = combine(
         settings.settings.filterNotNull(),
         attendanceFlow,
-        todos.todos,
+        tasksFlow,
         pomodoro.sessions,
         clock,
-    ) { s, (summaries, records), todoList, sessions, now ->
+    ) { s, (summaries, records), tasks, sessions, now ->
         val today = now.toLocalDate()
-        val agenda = TodoAgenda.group(todoList, today)
+        val ticked = HabitWeek.checkedDays(tasks.checks)
+        val board = tasks.board
         DashboardUiState(
             loaded = true,
             nickname = s.nickname,
@@ -101,9 +127,19 @@ class DashboardViewModel(
             markedToday = records.filter { it.date == today }.mapTo(HashSet()) { it.subjectId }.size,
             todayEvents = calendar.eventsOn(today),
             isWeekend = calendar.isWeekend(today),
-            todayTodos = agenda.today,
-            overdueCount = agenda.overdue.size,
-            reminders = TodoAgenda.upcomingReminders(todoList, now).take(MAX_ROWS),
+            checklist = HabitWeek.dueOn(tasks.habits, today).map { ChecklistItem(it, today in ticked[it.id].orEmpty()) },
+            board = if (board.columns.isEmpty()) {
+                null
+            } else {
+                val due = board.dueSoon().take(MAX_ROWS)
+                BoardSummary(
+                    columns = board.sortedColumns.map { it.title to board.cardsIn(it.id).size },
+                    openCards = board.openCards.size,
+                    due = due,
+                    overdueIds = due.filter { board.isOverdue(it, today) }.mapTo(HashSet()) { it.id },
+                )
+            },
+            reminders = TodoAgenda.upcomingReminders(tasks.reminders, now).take(MAX_ROWS),
             exams = calendar.events.filter { it.kind == DayKind.EXAM && !it.end.isBefore(today) }.take(MAX_ROWS),
             focus = PomodoroStats.summarize(sessions, summaries.map { it.subject }, today),
         )
@@ -114,8 +150,9 @@ class DashboardViewModel(
 
     fun toggleTimer() = timer.toggle()
 
-    fun toggleTodo(todo: Todo) {
-        viewModelScope.launch { todos.setDone(todo.id, !todo.done) }
+    /** Ticks or unticks one of today's checklist tasks. */
+    fun toggleChecklist(item: ChecklistItem) {
+        viewModelScope.launch { habits.setChecked(item.habit.id, LocalDate.now(), !item.checked) }
     }
 
     private companion object {

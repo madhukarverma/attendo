@@ -1,5 +1,8 @@
 package com.attendo.core.data
 
+import com.attendo.core.model.Habit
+import com.attendo.core.model.HabitCheck
+import java.time.DayOfWeek
 import com.attendo.core.model.CardPriority
 import com.attendo.core.model.KanbanBoard
 import com.attendo.core.model.KanbanCard
@@ -103,4 +106,16 @@ interface KanbanRepository {
     /** Moves a card to [toIndex] in [toColumnId] (also used to reorder within a column). */
     suspend fun moveCard(cardId: String, toColumnId: String, toIndex: Int)
     suspend fun deleteCard(cardId: String)
+}
+
+/** Weekday checklist ("habit tracker"): tasks that repeat on chosen weekdays, ticked per day. */
+interface HabitRepository {
+    val habits: Flow<List<Habit>>
+    val checks: Flow<List<HabitCheck>>
+    suspend fun add(title: String, days: Set<DayOfWeek>): Habit
+    suspend fun update(habit: Habit)
+
+    /** Deletes a habit and its ticks. */
+    suspend fun delete(habitId: String)
+    suspend fun setChecked(habitId: String, date: LocalDate, checked: Boolean)
 }
