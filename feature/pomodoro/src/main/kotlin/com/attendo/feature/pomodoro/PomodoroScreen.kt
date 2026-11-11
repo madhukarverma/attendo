@@ -1,5 +1,6 @@
 package com.attendo.feature.pomodoro
 
+import com.attendo.core.designsystem.component.SegmentedControl
 import com.attendo.core.designsystem.component.TabBarClearance
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
@@ -169,44 +170,6 @@ fun PomodoroScreen(
                     }
                 }
                 Spacer(Modifier.height(TabBarClearance))
-            }
-        }
-    }
-}
-
-/** iOS-style segmented control with a sliding thumb. */
-@Composable
-private fun SegmentedControl(items: List<String>, selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
-    BoxWithConstraints(
-        modifier
-            .fillMaxWidth()
-            .height(40.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(AttendoColors.CreamDeep)
-            .padding(3.dp),
-    ) {
-        val segment = maxWidth / items.size
-        val x by animateDpAsState(segment * selected, Motion.bouncy(), label = "thumb")
-        Box(
-            Modifier
-                .offset(x = x)
-                .width(segment)
-                .fillMaxHeight()
-                .clip(RoundedCornerShape(10.dp))
-                .background(AttendoColors.Ink),
-        )
-        Row(Modifier.fillMaxSize()) {
-            items.forEachIndexed { i, label ->
-                val color by animateColorAsState(if (i == selected) AttendoColors.Cream else AttendoColors.Ink, label = "seg")
-                Box(
-                    Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .iosPress(PressStyle.Dim, onClickLabel = label) { onSelect(i) },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(label, color = color, style = MaterialTheme.typography.labelLarge)
-                }
             }
         }
     }

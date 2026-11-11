@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.attendo.feature.todo"
+    namespace = "com.attendo.feature.tasks"
     compileSdk = 34
 
     defaultConfig {

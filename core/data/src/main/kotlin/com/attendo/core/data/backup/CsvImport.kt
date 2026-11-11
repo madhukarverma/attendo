@@ -33,6 +33,9 @@ internal object CsvSchema {
         AttendoData.ATTENDANCE_FILE to setOf("subject_id", "date", "status"),
         AttendoData.POMODORO_FILE to setOf("id", "kind", "planned_seconds"),
         AttendoData.TODOS_FILE to setOf("id", "title", "date"),
+        // Cards before columns: a cards file also has id, title and position.
+        AttendoData.KANBAN_CARDS_FILE to setOf("id", "column_id", "title"),
+        AttendoData.KANBAN_COLUMNS_FILE to setOf("id", "title", "position"),
         AttendoData.SETTINGS_FILE to setOf("key", "value"),
     )
 
@@ -41,6 +44,8 @@ internal object CsvSchema {
         AttendoData.ATTENDANCE_FILE -> "Attendance marks"
         AttendoData.POMODORO_FILE -> "Pomodoro sessions"
         AttendoData.TODOS_FILE -> "To-dos & reminders"
+        AttendoData.KANBAN_CARDS_FILE -> "Board cards"
+        AttendoData.KANBAN_COLUMNS_FILE -> "Board columns"
         AttendoData.SETTINGS_FILE -> "Settings"
         else -> file
     }
