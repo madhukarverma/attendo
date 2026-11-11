@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-11 — v0.24.0 Kanban board
+- The To-do tab is now **Tasks** (`:feature:todo` renamed `:feature:tasks`) with a segmented
+  control: Board · To-do.
+- Board: columns side by side (starts with To do / Doing / Done; add, rename, reorder, delete,
+  mark a column as "done"). Cards have a title, notes, due date and priority; tap to edit or
+  delete, long-press and drag to move within or between columns (the board scrolls near the
+  edges), or tap the arrow to send a card to the next column. Overdue cards are flagged unless
+  they sit in a done column.
+- Storage: `kanban_columns.csv` and `kanban_cards.csv`, included in export, CSV restore and the
+  Google backup. Ordering rules live in `KanbanOps` (core:model) with unit tests.
+- `SegmentedControl` moved to the design system (shared with the Pomodoro screen).
+
 ## 2026-11-11 — v0.23.0 double class
 - A mark can stand for two classes: `count` column in attendance.csv (missing = 1), summed by
   `AttendanceSummary.from`, so percentages and lectures left count a double class twice.

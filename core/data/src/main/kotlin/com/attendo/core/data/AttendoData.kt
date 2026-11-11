@@ -1,5 +1,6 @@
 package com.attendo.core.data
 
+import com.attendo.core.data.kanban.CsvKanbanRepository
 import com.attendo.core.data.backup.CsvImportPlan
 import com.attendo.core.data.backup.CsvSchema
 import com.attendo.core.data.csv.CsvStore
@@ -18,6 +19,8 @@ import java.io.File
  * - `attendance.csv` subject_id,date,status,updated_at,count
  * - `pomodoro.csv`   id,date,started_at,kind,subject_id,planned_seconds,actual_seconds,completed
  * - `todos.csv`      id,title,date,remind_at,done,created_at
+ * - `kanban_columns.csv` id,title,position,done
+ * - `kanban_cards.csv`   id,column_id,title,notes,due,priority,position,created_at
  */
 class AttendoData(
     val dir: File,
@@ -30,12 +33,14 @@ class AttendoData(
     private val attendanceCsv = CsvAttendanceRepository(dir, scope, io, clock)
     private val pomodoroCsv = CsvPomodoroRepository(dir, scope, io)
     private val todosCsv = CsvTodoRepository(dir, scope, io, clock)
+    private val kanbanCsv = CsvKanbanRepository(dir, scope, io, clock)
 
     val settings: SettingsRepository = settingsCsv
     val subjects: SubjectRepository = subjectsCsv
     val attendance: AttendanceRepository = attendanceCsv
     val pomodoro: PomodoroRepository = pomodoroCsv
     val todos: TodoRepository = todosCsv
+    val kanban: KanbanRepository = kanbanCsv
 
     /** Every table by file name, for backup and restore. */
     private val stores: Map<String, CsvStore<*>>
@@ -45,6 +50,8 @@ class AttendoData(
             ATTENDANCE_FILE to attendanceCsv.store,
             POMODORO_FILE to pomodoroCsv.store,
             TODOS_FILE to todosCsv.store,
+            KANBAN_COLUMNS_FILE to kanbanCsv.columnStore,
+            KANBAN_CARDS_FILE to kanbanCsv.cardStore,
         )
 
     /** Matches picked CSV files (display name to text) to tables; nothing is changed yet. */
@@ -70,7 +77,7 @@ class AttendoData(
 
     /** True when there's nothing worth keeping yet (no subjects, marks, sessions or to-dos). */
     fun hasNoUserData(): Boolean =
-        listOf(SUBJECTS_FILE, ATTENDANCE_FILE, POMODORO_FILE, TODOS_FILE).all { name ->
+        listOf(SUBJECTS_FILE, ATTENDANCE_FILE, POMODORO_FILE, TODOS_FILE, KANBAN_CARDS_FILE).all { name ->
             (stores[name]?.items?.value?.isEmpty()) ?: true
         }
 
@@ -81,7 +88,13 @@ class AttendoData(
     companion object {
         const val POMODORO_FILE = "pomodoro.csv"
         const val TODOS_FILE = "todos.csv"
-        val ALL_FILES get() = listOf(SUBJECTS_FILE, ATTENDANCE_FILE, POMODORO_FILE, TODOS_FILE, SETTINGS_FILE)
+        const val KANBAN_COLUMNS_FILE = "kanban_columns.csv"
+        const val KANBAN_CARDS_FILE = "kanban_cards.csv"
+        val ALL_FILES
+            get() = listOf(
+                SUBJECTS_FILE, ATTENDANCE_FILE, POMODORO_FILE, TODOS_FILE,
+                KANBAN_COLUMNS_FILE, KANBAN_CARDS_FILE, SETTINGS_FILE,
+            )
         const val SETTINGS_FILE = "settings.csv"
         const val SUBJECTS_FILE = "subjects.csv"
         const val ATTENDANCE_FILE = "attendance.csv"

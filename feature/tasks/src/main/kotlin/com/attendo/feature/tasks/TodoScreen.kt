@@ -1,4 +1,4 @@
-package com.attendo.feature.todo
+package com.attendo.feature.tasks
 
 import android.Manifest
 import android.content.Context
@@ -19,13 +19,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -70,15 +68,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.attendo.core.data.TodoRepository
 import com.attendo.core.designsystem.component.TriangleMascot
 import com.attendo.core.designsystem.motion.BounceContainer
-import com.attendo.core.designsystem.motion.CollapsingTopBar
-import com.attendo.core.designsystem.motion.LargeTitle
 import com.attendo.core.designsystem.motion.PressStyle
 import com.attendo.core.designsystem.motion.iosPress
-import com.attendo.core.designsystem.motion.rememberCollapseFraction
 import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.core.model.Todo
 import java.time.Instant
@@ -89,19 +82,13 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 /**
- * To-do & reminders. A to-do belongs to a day; giving it a time makes it a reminder that the app
- * notifies about (scheduled by the app module from todos.csv).
+ * The to-do page of the Tasks tab. A to-do belongs to a day; giving it a time makes it a reminder
+ * that the app notifies about (scheduled by the app module from todos.csv).
  *
- * @param onBack null when shown as a top-level tab (no back button).
  * @param bottomPadding room left under the list for a bottom bar.
  */
 @Composable
-fun TodoRoute(
-    todos: TodoRepository,
-    onBack: (() -> Unit)?,
-    bottomPadding: Dp = 24.dp,
-) {
-    val vm: TodoViewModel = viewModel { TodoViewModel(todos) }
+internal fun TodoPageHost(vm: TodoViewModel, bottomPadding: Dp = 24.dp) {
     val state by vm.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -114,7 +101,7 @@ fun TodoRoute(
     }
     val notificationsOff = remember(state, permissionTick) { !context.canPostNotifications() }
 
-    TodoScreen(
+    TodoPage(
         state = state,
         onAdd = { title, date, time ->
             vm.add(title, date, time)
@@ -125,7 +112,6 @@ fun TodoRoute(
         onToggle = vm::toggle,
         onDelete = vm::delete,
         onClearDone = vm::clearDone,
-        onBack = onBack,
         notificationsOff = notificationsOff,
         onEnableNotifications = {
             if (!askedOnce && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -153,36 +139,25 @@ private fun Context.openNotificationSettings() {
 }
 
 @Composable
-fun TodoScreen(
+internal fun TodoPage(
     state: TodoUiState,
     onAdd: (title: String, date: LocalDate, remindAt: LocalTime?) -> Unit,
     onToggle: (Todo) -> Unit,
     onDelete: (Todo) -> Unit,
     onClearDone: () -> Unit,
-    onBack: (() -> Unit)?,
     notificationsOff: Boolean = false,
     onEnableNotifications: () -> Unit = {},
     bottomPadding: Dp = 24.dp,
 ) {
-    val listState = rememberLazyListState()
-    val collapse by rememberCollapseFraction(listState)
     val groups = state.groups
     val hasReminders = (groups.today + groups.upcoming).any { it.hasPendingReminder(state.now) }
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(AttendoColors.Cream)
-            .safeDrawingPadding(),
-    ) {
-        CollapsingTopBar(title = "To-do", collapseFraction = { collapse }, onBack = onBack, backLabel = "Back")
+    Box(Modifier.fillMaxSize()) {
         BounceContainer(Modifier.fillMaxSize()) {
             LazyColumn(
                 Modifier.fillMaxSize().padding(horizontal = 20.dp),
-                state = listState,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                item(key = "title") { LargeTitle("To-do & reminders") }
                 item(key = "add") { AddTodoCard(today = state.today, now = state.now, onAdd = onAdd) }
                 if (notificationsOff && hasReminders) {
                     item(key = "notifications") { NotificationsBanner(onEnableNotifications, Modifier.animateItem()) }
@@ -316,7 +291,7 @@ private fun AddTodoCard(today: LocalDate, now: LocalDateTime, onAdd: (String, Lo
     }
 
     if (pickDate) {
-        TodoDatePicker(initial = date, onDismiss = { pickDate = false }, onPick = { date = it })
+        TaskDatePicker(initial = date, onDismiss = { pickDate = false }, onPick = { date = it })
     }
     if (pickTime) {
         TodoTimePicker(
@@ -476,7 +451,7 @@ private fun EmptyState(modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TodoDatePicker(initial: LocalDate, onDismiss: () -> Unit, onPick: (LocalDate) -> Unit) {
+internal fun TaskDatePicker(initial: LocalDate, onDismiss: () -> Unit, onPick: (LocalDate) -> Unit) {
     // The Material date picker works in UTC midnight millis.
     val state = rememberDatePickerState(
         initialSelectedDateMillis = initial.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),

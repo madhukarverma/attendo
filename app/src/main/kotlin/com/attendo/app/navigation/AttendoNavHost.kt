@@ -1,5 +1,7 @@
 package com.attendo.app.navigation
 
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.attendo.app.CsvImporter
 import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
@@ -64,7 +66,8 @@ import com.attendo.feature.settings.SettingsRoute
 import com.attendo.feature.stats.StatsRoute
 import com.attendo.feature.subjects.AddSubjectRoute
 import com.attendo.feature.subjects.SubjectDetailRoute
-import com.attendo.feature.todo.TodoRoute
+import com.attendo.feature.tasks.TasksPage
+import com.attendo.feature.tasks.TasksRoute
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -102,7 +105,7 @@ private val Tabs = listOf(
     TabItem(Routes.ATTENDANCE, "Classes") {
         Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = it, modifier = Modifier.size(TabIconSize))
     },
-    TabItem(Routes.TODO, "To-do") {
+    TabItem(Routes.TODO, "Tasks") {
         Icon(Icons.AutoMirrored.Filled.List, contentDescription = null, tint = it, modifier = Modifier.size(TabIconSize))
     },
     TabItem(Routes.POMODORO, "Timer") { TimerGlyph(color = it, size = TabIconSize) },
@@ -150,6 +153,7 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
     }
 
     val navController = rememberNavController()
+    var tasksPage by remember { mutableStateOf<TasksPage?>(null) }
     val start = remember { if (loaded.onboarded) Routes.HOME else Routes.ONBOARDING }
     val mode = loaded.animationMode
     val transitions = remember(mode) { NavTransitions(mode, Routes.MODAL, Routes.TABS.toSet()) }
@@ -164,7 +168,11 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
         activity?.preferHighRefreshRate(mode == AnimationMode.SMOOTH || mode == AnimationMode.IOS)
     }
     LaunchedEffect(openRequest) {
-        if (openRequest == Routes.TODO && loaded.onboarded) navController.switchTab(Routes.TODO)
+        if (openRequest == Routes.TODO && loaded.onboarded) {
+            // A reminder notification: open the Tasks tab on its to-do page.
+            tasksPage = TasksPage.TODO
+            navController.switchTab(Routes.TODO)
+        }
         if (openRequest != null) onOpenHandled()
     }
     val current by navController.currentBackStackEntryAsState()
@@ -236,7 +244,13 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                     )
                 }
                 composable(Routes.TODO) {
-                    TodoRoute(todos = data.todos, onBack = null, bottomPadding = TabBarClearance)
+                    TasksRoute(
+                        todos = data.todos,
+                        kanban = data.kanban,
+                        bottomPadding = TabBarClearance,
+                        requestedPage = tasksPage,
+                        onRequestedPageHandled = { tasksPage = null },
+                    )
                 }
                 composable(Routes.POMODORO) {
                     val context = LocalContext.current

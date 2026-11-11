@@ -1,5 +1,9 @@
 package com.attendo.core.data
 
+import com.attendo.core.model.CardPriority
+import com.attendo.core.model.KanbanBoard
+import com.attendo.core.model.KanbanCard
+import com.attendo.core.model.KanbanColumn
 import com.attendo.core.model.AnimationMode
 import com.attendo.core.model.AppSettings
 import com.attendo.core.model.ThemeMode
@@ -68,4 +72,35 @@ interface TodoRepository {
 
     /** Removes every completed to-do. */
     suspend fun clearDone()
+}
+
+interface KanbanRepository {
+    val board: Flow<KanbanBoard>
+
+    /** Creates the starting columns ("To do", "Doing", "Done") when the board has none. */
+    suspend fun ensureDefaultColumns()
+    suspend fun addColumn(title: String): KanbanColumn
+    suspend fun renameColumn(columnId: String, title: String)
+
+    /** Marks a column as holding finished cards (they stop counting as open or overdue). */
+    suspend fun setColumnDone(columnId: String, done: Boolean)
+    suspend fun moveColumn(columnId: String, toIndex: Int)
+
+    /** Deletes a column and every card in it. */
+    suspend fun deleteColumn(columnId: String)
+
+    suspend fun addCard(
+        columnId: String,
+        title: String,
+        notes: String = "",
+        due: LocalDate? = null,
+        priority: CardPriority = CardPriority.NONE,
+    ): KanbanCard
+
+    /** Saves a card's title, notes, due date and priority (not its place on the board). */
+    suspend fun updateCard(card: KanbanCard)
+
+    /** Moves a card to [toIndex] in [toColumnId] (also used to reorder within a column). */
+    suspend fun moveCard(cardId: String, toColumnId: String, toIndex: Int)
+    suspend fun deleteCard(cardId: String)
 }

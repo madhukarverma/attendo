@@ -1,5 +1,6 @@
 package com.attendo.core.data
 
+import com.attendo.core.model.CardPriority
 import java.time.LocalTime
 import com.attendo.core.model.AnimationMode
 import com.attendo.core.model.ThemeMode
@@ -102,6 +103,42 @@ class RepositoryTest {
         data.restoreSnapshot(snapshot)
         assertEquals(emptyList<Any>(), data.todos.todos.first())
         assertEquals(2, data.subjects.subjects.first().size)
+        dir.deleteRecursively()
+    }
+
+    @Test
+    fun kanbanBoardSurvivesReload() = runTest {
+        val dir = Files.createTempDirectory("attendo").toFile()
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val data = AttendoData(dir, TestScope(dispatcher), dispatcher) { 7L }
+        advanceUntilIdle()
+        data.kanban.ensureDefaultColumns()
+        data.kanban.ensureDefaultColumns() // second call must not duplicate
+        val (todo, doing, done) = data.kanban.board.first().sortedColumns
+        assertEquals(listOf("To do", "Doing", "Done"), listOf(todo.title, doing.title, done.title))
+        assertEquals(true, done.done)
+
+        val a = data.kanban.addCard(todo.id, "Write DSA notes", notes = "Unit II, \"hashing\"", due = LocalDate.of(2026, 11, 20), priority = CardPriority.HIGH)
+        val b = data.kanban.addCard(todo.id, "Lab record")
+        data.kanban.moveCard(a.id, doing.id, 0)
+        data.kanban.updateCard(b.copy(title = "Lab record (OS)", columnId = "ignored", position = 42))
+
+        val reloaded = AttendoData(dir, TestScope(dispatcher), dispatcher).kanban.let {
+            advanceUntilIdle()
+            it.board.first()
+        }
+        assertEquals(listOf(a.id), reloaded.cardsIn(doing.id).map { it.id })
+        assertEquals(CardPriority.HIGH, reloaded.cardsIn(doing.id).single().priority)
+        assertEquals("Unit II, \"hashing\"", reloaded.cardsIn(doing.id).single().notes)
+        val kept = reloaded.cardsIn(todo.id).single()
+        assertEquals("Lab record (OS)", kept.title)
+        assertEquals(0, kept.position)
+
+        data.kanban.deleteColumn(todo.id)
+        val after = data.kanban.board.first()
+        assertEquals(listOf("Doing", "Done"), after.sortedColumns.map { it.title })
+        assertEquals(listOf(0, 1), after.sortedColumns.map { it.position })
+        assertEquals(listOf(a.id), after.cards.map { it.id })
         dir.deleteRecursively()
     }
 

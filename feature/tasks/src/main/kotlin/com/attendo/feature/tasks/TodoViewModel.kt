@@ -1,4 +1,4 @@
-package com.attendo.feature.todo
+package com.attendo.feature.tasks
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
