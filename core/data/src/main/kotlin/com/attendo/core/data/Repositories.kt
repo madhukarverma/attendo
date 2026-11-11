@@ -1,5 +1,6 @@
 package com.attendo.core.data
 
+import com.attendo.core.model.UnitKey
 import com.attendo.core.model.AcademicCalendar
 import com.attendo.core.model.PersonalEvent
 import com.attendo.core.model.TimetableSlot
@@ -149,4 +150,10 @@ interface PlannerRepository {
     /** Adds an event (empty id) or replaces the one with the same id. */
     suspend fun saveEvent(event: PersonalEvent): PersonalEvent
     suspend fun deleteEvent(id: String)
+}
+
+/** Which curriculum units the student has covered (syllabus progress). */
+interface SyllabusRepository {
+    val covered: Flow<Set<UnitKey>>
+    suspend fun setCovered(code: String, unit: String, covered: Boolean)
 }

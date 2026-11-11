@@ -2,7 +2,6 @@ package com.attendo.feature.dashboard
 
 import androidx.compose.material.icons.filled.Person
 import com.attendo.core.data.PlannerRepository
-import com.attendo.core.model.Curriculum
 import com.attendo.core.data.HabitRepository
 import com.attendo.core.data.KanbanRepository
 import androidx.compose.foundation.background
@@ -89,8 +88,6 @@ fun DashboardRoute(
     timer: PomodoroTimer,
     calendar: AcademicCalendar,
     planner: PlannerRepository? = null,
-    curriculum: Curriculum = Curriculum.EMPTY,
-    onOpenCurriculum: () -> Unit = {},
     onOpenAttendance: () -> Unit,
     onOpenChecklist: () -> Unit,
     onOpenBoard: () -> Unit,
@@ -116,8 +113,6 @@ fun DashboardRoute(
         onOpenReminders = onOpenReminders,
         onOpenPomodoro = onOpenPomodoro,
         onOpenCalendar = onOpenCalendar,
-        curriculum = curriculum,
-        onOpenCurriculum = onOpenCurriculum,
         onOpenSettings = onOpenSettings,
         onOpenFriends = onOpenFriends,
     )
@@ -137,8 +132,6 @@ fun DashboardScreen(
     onOpenCalendar: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenFriends: () -> Unit = {},
-    curriculum: Curriculum = Curriculum.EMPTY,
-    onOpenCurriculum: () -> Unit = {},
 ) {
     Box(
         Modifier
@@ -161,7 +154,6 @@ fun DashboardScreen(
                 BoardCard(state, onOpenBoard)
                 RemindersCard(state, onOpenReminders)
                 ExamsCard(state, onOpenCalendar)
-                if (curriculum.courses.isNotEmpty()) CurriculumCard(curriculum, onOpenCurriculum)
                 Spacer(Modifier.height(TabBarClearance))
             }
         }
@@ -486,22 +478,6 @@ private fun ExamsCard(state: DashboardUiState, onOpen: () -> Unit) {
     }
 }
 
-@Composable
-private fun CurriculumCard(curriculum: Curriculum, onOpen: () -> Unit) {
-    Card(onOpen, "Open curriculum") {
-        CardHeader("CURRICULUM", curriculum.title)
-        Text(
-            "${curriculum.courses.size} courses · ${curriculum.totalHours} contact hours · units, topics and outcomes",
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        Spacer(Modifier.height(6.dp))
-        Text(
-            curriculum.courses.joinToString("  ·  ") { it.code },
-            style = MaterialTheme.typography.labelSmall,
-            color = AttendoColors.Muted,
-        )
-    }
-}
 
 @Composable
 private fun ExamLine(exam: CalendarEvent, today: LocalDate) {

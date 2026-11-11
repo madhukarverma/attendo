@@ -33,6 +33,7 @@ internal object CsvSchema {
         AttendoData.ATTENDANCE_FILE to setOf("subject_id", "date", "status"),
         AttendoData.GRADES_FILE to setOf("id", "subject_id", "scored", "max_marks"),
         AttendoData.TIMETABLE_FILE to setOf("id", "subject_id", "day", "start", "end"),
+        AttendoData.SYLLABUS_FILE to setOf("code", "unit", "covered_at"),
         // Before to-dos: an events file also has id, title and a date-like column.
         AttendoData.EVENTS_FILE to setOf("id", "title", "start", "kind"),
         AttendoData.POMODORO_FILE to setOf("id", "kind", "planned_seconds"),
@@ -50,6 +51,7 @@ internal object CsvSchema {
         AttendoData.ATTENDANCE_FILE -> "Attendance marks"
         AttendoData.GRADES_FILE -> "Grades"
         AttendoData.TIMETABLE_FILE -> "Timetable"
+        AttendoData.SYLLABUS_FILE -> "Syllabus progress"
         AttendoData.EVENTS_FILE -> "Your calendar events"
         AttendoData.POMODORO_FILE -> "Pomodoro sessions"
         AttendoData.TODOS_FILE -> "Reminders"

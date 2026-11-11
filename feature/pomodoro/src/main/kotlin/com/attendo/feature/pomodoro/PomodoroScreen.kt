@@ -1,5 +1,11 @@
 package com.attendo.feature.pomodoro
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Icon
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.mutableStateOf
 import com.attendo.core.designsystem.component.SegmentedControl
 import com.attendo.core.designsystem.component.TabBarClearance
 import androidx.compose.animation.AnimatedContent
@@ -84,6 +90,12 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.ceil
 
+/** Pages of the Focus tab, in segmented-control order. */
+enum class FocusPage(val label: String) { TIMER("Timer"), SYLLABUS("Syllabus"), STATS("Stats") }
+
+/** Opens the Focus tab on [page]; [code] picks the course to open on the Syllabus page. */
+data class FocusRequest(val page: FocusPage, val code: String? = null)
+
 @Composable
 fun PomodoroRoute(
     timer: PomodoroTimer,
@@ -91,6 +103,9 @@ fun PomodoroRoute(
     subjects: SubjectRepository,
     onExportCsv: () -> Unit,
     onClose: (() -> Unit)?,
+    syllabus: (@Composable (focusCode: String?, onFocusSubject: (code: String) -> Unit) -> Unit)? = null,
+    request: FocusRequest? = null,
+    onRequestHandled: () -> Unit = {},
 ) {
     val vm: PomodoroViewModel = viewModel { PomodoroViewModel(timer, pomodoro, subjects) }
     val state by vm.timerState.collectAsStateWithLifecycle()
@@ -118,6 +133,9 @@ fun PomodoroRoute(
         onFocusMinutes = timer::setFocusMinutes,
         onExportCsv = onExportCsv,
         onClose = onClose,
+        syllabus = syllabus,
+        request = request,
+        onRequestHandled = onRequestHandled,
     )
 }
 
@@ -133,8 +151,20 @@ fun PomodoroScreen(
     onFocusMinutes: (Int) -> Unit,
     onExportCsv: () -> Unit,
     onClose: (() -> Unit)?,
+    syllabus: (@Composable (focusCode: String?, onFocusSubject: (code: String) -> Unit) -> Unit)? = null,
+    request: FocusRequest? = null,
+    onRequestHandled: () -> Unit = {},
 ) {
-    var tab by rememberSaveable { mutableIntStateOf(0) }
+    val pages = FocusPage.entries.filter { it != FocusPage.SYLLABUS || syllabus != null }
+    var page by rememberSaveable { mutableStateOf(FocusPage.TIMER) }
+    var focusCode by rememberSaveable { mutableStateOf<String?>(null) }
+    LaunchedEffect(request) {
+        if (request != null) {
+            page = request.page
+            focusCode = request.code
+            onRequestHandled()
+        }
+    }
     val scroll = rememberScrollState()
     val collapse by rememberCollapseFraction(scroll)
 
@@ -153,20 +183,34 @@ fun PomodoroScreen(
                     .padding(horizontal = 20.dp),
             ) {
                 LargeTitle("Focus")
-                SegmentedControl(listOf("Timer", "Stats"), tab, { tab = it }, Modifier.padding(vertical = 8.dp))
+                SegmentedControl(pages.map { it.label }, pages.indexOf(page).coerceAtLeast(0), { page = pages[it] }, Modifier.padding(vertical = 8.dp))
                 AnimatedContent(
-                    targetState = tab,
+                    targetState = page,
                     transitionSpec = {
-                        val dir = if (targetState > initialState) 1 else -1
+                        val dir = if (targetState.ordinal > initialState.ordinal) 1 else -1
                         (slideInHorizontally(Motion.push()) { it / 4 * dir } + fadeIn(Motion.push()))
                             .togetherWith(slideOutHorizontally(Motion.push()) { -it / 4 * dir } + fadeOut(Motion.push()))
                     },
                     label = "tab",
-                ) { page ->
-                    if (page == 0) {
-                        TimerTab(state, subjects, onToggle, onReset, onSkip, onSelectSubject, onFocusMinutes)
-                    } else {
-                        StatsTab(stats, onExportCsv)
+                ) { shown ->
+                    when (shown) {
+                        FocusPage.TIMER -> TimerTab(
+                            state = state,
+                            subjects = subjects,
+                            todayMinutes = stats.summary?.todayFocusMinutes ?: 0,
+                            streakDays = stats.summary?.streakDays ?: 0,
+                            onToggle = onToggle,
+                            onReset = onReset,
+                            onSkip = onSkip,
+                            onSelectSubject = onSelectSubject,
+                            onFocusMinutes = onFocusMinutes,
+                        )
+                        FocusPage.SYLLABUS -> syllabus?.invoke(focusCode) { code ->
+                            // "Focus on DSA": pick that subject on the timer and go to it.
+                            subjects.firstOrNull { it.code.equals(code, ignoreCase = true) }?.let { onSelectSubject(it.id) }
+                            page = FocusPage.TIMER
+                        }
+                        FocusPage.STATS -> StatsTab(stats, onExportCsv)
                     }
                 }
                 Spacer(Modifier.height(TabBarClearance))
@@ -175,23 +219,15 @@ fun PomodoroScreen(
     }
 }
 
-private fun PomodoroKind.label() = when (this) {
-    PomodoroKind.FOCUS -> "FOCUS"
-    PomodoroKind.SHORT_BREAK -> "SHORT BREAK"
-    PomodoroKind.LONG_BREAK -> "LONG BREAK"
-}
 
-private fun PomodoroKind.color() = if (this == PomodoroKind.FOCUS) AttendoColors.Green else AttendoColors.Blue
 
-private fun formatClock(millis: Long): String {
-    val total = ceil(millis / 1000.0).toLong()
-    return "%02d:%02d".format(total / 60, total % 60)
-}
 
 @Composable
 private fun TimerTab(
     state: PomodoroTimerState,
     subjects: List<Subject>,
+    todayMinutes: Int,
+    streakDays: Int,
     onToggle: () -> Unit,
     onReset: () -> Unit,
     onSkip: () -> Unit,
@@ -199,22 +235,62 @@ private fun TimerTab(
     onFocusMinutes: (Int) -> Unit,
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Spacer(Modifier.height(12.dp))
-        TimerRing(state, Modifier.size(260.dp))
-        CycleDots(state)
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(6.dp))
+        FocusDial(state, Modifier.fillMaxWidth(0.86f))
+        Spacer(Modifier.height(10.dp))
+        SessionDots(state)
+        Spacer(Modifier.height(18.dp))
 
-        PrimaryButton(
-            text = when {
-                state.running -> "Pause"
-                state.isFresh -> "Start ${state.kind.label().lowercase().replaceFirstChar { it.uppercase() }}"
-                else -> "Resume"
+        // Controls: reset · play/pause · skip.
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(26.dp)) {
+            RoundControl("Reset", enabled = !state.isFresh, onClick = onReset) {
+                Icon(Icons.Filled.Refresh, contentDescription = null, tint = if (!state.isFresh) AttendoColors.Ink else AttendoColors.Muted)
+            }
+            Box(
+                Modifier
+                    .size(80.dp)
+                    .iosPress(PressStyle.Scale, onClickLabel = if (state.running) "Pause" else "Start", onClick = onToggle)
+                    .shadow(14.dp, CircleShape)
+                    .clip(CircleShape)
+                    .background(AttendoColors.Hero),
+                contentAlignment = Alignment.Center,
+            ) {
+                PlayPauseGlyph(playing = state.running, color = AttendoColors.OnHero, size = 26.dp)
+            }
+            RoundControl("Skip", enabled = true, onClick = onSkip) { SkipGlyph(AttendoColors.Ink) }
+        }
+        Text(
+            when {
+                state.running -> "Tap to pause"
+                state.isFresh -> "Start ${state.kind.label().lowercase()}"
+                else -> "Tap to resume"
             },
-            onClick = onToggle,
+            style = MaterialTheme.typography.labelMedium,
+            color = AttendoColors.Muted,
+            modifier = Modifier.padding(top = 8.dp),
         )
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            TextButton(onClick = onReset, enabled = !state.isFresh) { Text("Reset", color = AttendoColors.Pink) }
-            TextButton(onClick = onSkip) { Text("Skip", color = AttendoColors.Ink) }
+
+        Spacer(Modifier.height(18.dp))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            val next = nextKind(state)
+            InfoCard(
+                label = "UP NEXT",
+                value = when (next) {
+                    PomodoroKind.FOCUS -> "Focus"
+                    PomodoroKind.SHORT_BREAK -> "Short break"
+                    PomodoroKind.LONG_BREAK -> "Long break"
+                },
+                detail = "${state.config.minutesFor(next)} min",
+                accent = next.color(),
+                modifier = Modifier.weight(1f),
+            )
+            InfoCard(
+                label = "TODAY",
+                value = "$todayMinutes min",
+                detail = if (streakDays > 0) "$streakDays-day streak" else "focused",
+                accent = AttendoColors.Green,
+                modifier = Modifier.weight(1f),
+            )
         }
 
         SectionLabel("Studying")
@@ -235,46 +311,77 @@ private fun TimerTab(
     }
 }
 
+/** The session after this one: a break after focus (long every N focus sessions), focus after a break. */
+private fun nextKind(state: PomodoroTimerState): PomodoroKind = when (state.kind) {
+    PomodoroKind.FOCUS ->
+        if (state.focusDoneInCycle + 1 >= state.config.longBreakEvery) PomodoroKind.LONG_BREAK else PomodoroKind.SHORT_BREAK
+    else -> PomodoroKind.FOCUS
+}
+
+/** Focus sessions done in this cycle, as dots, with "2 of 4" beside them. */
 @Composable
-private fun TimerRing(state: PomodoroTimerState, modifier: Modifier) {
-    val color by animateColorAsState(state.kind.color(), label = "ring")
-    Box(modifier, contentAlignment = Alignment.Center) {
-        Canvas(Modifier.fillMaxSize().padding(14.dp)) {
-            val stroke = 18.dp.toPx()
-            val inset = stroke / 2
-            val arcSize = Size(size.width - stroke, size.height - stroke)
-            drawArc(AttendoColors.CreamDeep, 0f, 360f, false, Offset(inset, inset), arcSize, style = Stroke(stroke))
-            drawArc(
-                color,
-                -90f,
-                360f * (1f - state.progress),
-                false,
-                Offset(inset, inset),
-                arcSize,
-                style = Stroke(stroke, cap = StrokeCap.Round),
-            )
+private fun SessionDots(state: PomodoroTimerState) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        repeat(state.config.longBreakEvery) { i ->
+            val filled = i < state.focusDoneInCycle
+            val color by animateColorAsState(if (filled) AttendoColors.Green else AttendoColors.CreamDeep, label = "dot")
+            Box(Modifier.padding(horizontal = 3.dp).size(if (filled) 10.dp else 8.dp).clip(CircleShape).background(color))
         }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(state.kind.label(), style = MaterialTheme.typography.labelMedium, color = color, letterSpacing = 2.sp)
-            Text(
-                formatClock(state.remainingMillis),
-                style = MaterialTheme.typography.displayLarge.copy(fontSize = 60.sp),
-                fontWeight = FontWeight.Bold,
-            )
-        }
+        Spacer(Modifier.width(8.dp))
+        Text(
+            "${state.focusDoneInCycle} of ${state.config.longBreakEvery} before a long break",
+            style = MaterialTheme.typography.labelSmall,
+            color = AttendoColors.Muted,
+        )
     }
 }
 
 @Composable
-private fun CycleDots(state: PomodoroTimerState) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        repeat(state.config.longBreakEvery) { i ->
-            val filled = i < state.focusDoneInCycle
-            val color by animateColorAsState(if (filled) AttendoColors.Green else AttendoColors.CreamDeep, label = "dot")
-            Box(Modifier.size(10.dp).clip(CircleShape).background(color))
+private fun RoundControl(label: String, enabled: Boolean, onClick: () -> Unit, icon: @Composable () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            Modifier
+                .size(54.dp)
+                .iosPress(PressStyle.Scale, enabled = enabled, onClickLabel = label, onClick = onClick)
+                .clip(CircleShape)
+                .background(AttendoColors.CreamCard),
+            contentAlignment = Alignment.Center,
+        ) { icon() }
+        Text(label, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted, modifier = Modifier.padding(top = 4.dp))
+    }
+}
+
+/** "Skip": two chevrons. */
+@Composable
+private fun SkipGlyph(color: Color) {
+    Canvas(Modifier.size(20.dp)) {
+        val s = size.minDimension
+        val stroke = s * 0.12f
+        listOf(0.18f, 0.5f).forEach { x ->
+            drawLine(color, Offset(s * x, s * 0.22f), Offset(s * (x + 0.26f), s * 0.5f), stroke, StrokeCap.Round)
+            drawLine(color, Offset(s * (x + 0.26f), s * 0.5f), Offset(s * x, s * 0.78f), stroke, StrokeCap.Round)
         }
     }
 }
+
+/** Small white card like the "Isha / 25°c" cards of the reference. */
+@Composable
+private fun InfoCard(label: String, value: String, detail: String, accent: Color, modifier: Modifier = Modifier) {
+    Column(
+        modifier
+            .clip(RoundedCornerShape(22.dp))
+            .background(AttendoColors.CreamCard)
+            .padding(16.dp),
+    ) {
+        Box(Modifier.size(8.dp).clip(CircleShape).background(accent))
+        Spacer(Modifier.height(10.dp))
+        Text(label, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted, letterSpacing = 1.sp)
+        Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Text(detail, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
+    }
+}
+
+
 
 @Composable
 private fun SectionLabel(text: String) {

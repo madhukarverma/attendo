@@ -6,6 +6,16 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AttendanceSummaryTest {
+
+    @Test
+    fun syllabusProgressCountsKnownUnitsOnly() {
+        val course = CurriculumCourse("CA717", "DSA", 40, "Core", "", listOf("I", "II", "III").map { CurriculumUnit(it, "Unit $it", emptyList()) }, emptyList())
+        val curriculum = Curriculum("Sem I", listOf(course))
+        val covered = setOf(UnitKey("CA717", "I"), UnitKey("CA717", "III"), UnitKey("CA999", "I"))
+        assertEquals(CourseProgress(2, 3), curriculum.progress(course, covered))
+        assertEquals(2, curriculum.coveredUnits(covered))
+        assertEquals(3, curriculum.totalUnits)
+    }
     private val subject = Subject(id = "s1", name = "Maths", targetPercent = 75)
 
     @Test
