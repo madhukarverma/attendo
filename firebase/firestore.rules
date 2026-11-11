@@ -1,0 +1,89 @@
+rules_version = '2';
+
+// Attendo friends. Paste into Firebase console › Firestore Database › Rules and click Publish.
+//
+// - Profiles (name, friend code, programme) are visible to signed-in students, so they can search.
+// - A friend list is visible to its owner and to the owner's friends.
+// - Shared attendance / grades are visible to the owner and the owner's friends only; the app
+//   deletes the document when the student turns sharing off (grades are off by default).
+// - Friendships are created only by accepting a pending request, and either side can end them.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isUser(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function areFriends(a, b) {
+      return exists(/databases/$(database)/documents/users/$(a)/friends/$(b));
+    }
+
+    function pending(from, to) {
+      return exists(/databases/$(database)/documents/requests/$(from + '_' + to));
+    }
+
+    function shortText(v, max) {
+      return v is string && v.size() <= max;
+    }
+
+    function validProfile(d) {
+      return d.keys().hasOnly(['name', 'searchName', 'code', 'programme', 'updatedAt'])
+        && shortText(d.name, 40) && d.name.size() > 0
+        && shortText(d.searchName, 40)
+        && shortText(d.code, 12)
+        && shortText(d.programme, 40);
+    }
+
+    function validShared(d) {
+      return d.keys().hasOnly(['overall', 'subjects', 'updatedAt'])
+        && d.overall is number
+        && d.subjects is list && d.subjects.size() <= 20;
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create, update: if isUser(uid) && validProfile(request.resource.data);
+      allow delete: if isUser(uid);
+
+      match /friends/{fid} {
+        allow read: if isUser(uid) || areFriends(uid, request.auth.uid);
+        // Written by the student accepting a request, into both friend lists.
+        allow create: if signedIn()
+          && request.resource.data.keys().hasOnly(['name', 'since'])
+          && shortText(request.resource.data.name, 40)
+          && ((request.auth.uid == uid && pending(fid, uid))
+              || (request.auth.uid == fid && pending(uid, fid)));
+        allow update: if false;
+        allow delete: if isUser(uid) || isUser(fid);
+      }
+
+      match /shared/{doc} {
+        allow read: if isUser(uid) || areFriends(uid, request.auth.uid);
+        allow create, update: if isUser(uid) && doc in ['attendance', 'grades'] && validShared(request.resource.data);
+        allow delete: if isUser(uid);
+      }
+    }
+
+    match /requests/{id} {
+      allow read: if signedIn()
+        && (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['from', 'to', 'fromName', 'fromCode', 'toName', 'createdAt'])
+        && request.resource.data.from == request.auth.uid
+        && request.resource.data.to is string
+        && request.resource.data.to != request.auth.uid
+        && id == request.auth.uid + '_' + request.resource.data.to
+        && shortText(request.resource.data.fromName, 40)
+        && shortText(request.resource.data.toName, 40)
+        && shortText(request.resource.data.fromCode, 12)
+        && !areFriends(request.auth.uid, request.resource.data.to);
+      allow update: if false;
+      allow delete: if signedIn()
+        && (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid);
+    }
+  }
+}

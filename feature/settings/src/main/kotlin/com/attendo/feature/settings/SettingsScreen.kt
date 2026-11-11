@@ -90,6 +90,7 @@ fun SettingsRoute(
     onExportCsv: () -> Unit,
     onClose: () -> Unit,
     onPickLaunchImage: (Uri) -> Unit = {},
+    onOpenFriends: (() -> Unit)? = null,
     onRemoveLaunchImage: () -> Unit = {},
     onPlanCsvImport: suspend (List<Uri>) -> CsvImportPlan = { CsvImportPlan(emptyList(), emptyList()) },
     onApplyCsvImport: suspend (CsvImportPlan) -> Map<String, Int> = { emptyMap() },
@@ -118,6 +119,7 @@ fun SettingsRoute(
                 onRemove = onRemoveLaunchImage,
             )
         },
+        onOpenFriends = onOpenFriends,
         backupSection = {
             if (googleBackup != null) {
                 GoogleBackupSection(googleBackup)
@@ -143,6 +145,7 @@ fun SettingsScreen(
     onCustomColorsChange: (Map<String, String>) -> Unit = {},
     launchSection: @Composable () -> Unit = {},
     backupSection: @Composable () -> Unit = { PrimaryButton("Export CSV files", onClick = onExportCsv) },
+    onOpenFriends: (() -> Unit)? = null,
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     LaunchedEffect(savedName) { if (savedName != null && name.isEmpty()) name = savedName }
@@ -208,6 +211,18 @@ fun SettingsScreen(
 
                 SectionTitle("Backup")
                 backupSection()
+
+                if (onOpenFriends != null) {
+                    SectionTitle("Friends")
+                    PillButton(
+                        "Friends & what they can see",
+                        null,
+                        AttendoColors.CreamCard,
+                        AttendoColors.Ink,
+                        Modifier.fillMaxWidth(),
+                        onClick = onOpenFriends,
+                    )
+                }
 
                 SectionTitle("About")
                 Text("Attendo $appVersion", style = MaterialTheme.typography.bodyMedium, color = AttendoColors.Muted)

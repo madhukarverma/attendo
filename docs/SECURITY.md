@@ -18,6 +18,16 @@ only network traffic is the optional Google account backup. Review: 2026-11-11 (
 | Components | Only the launcher activity is exported. The reminder receiver is not exported; every `PendingIntent` is explicit and `FLAG_IMMUTABLE`. A notification tap can only open the Tasks tab. |
 | Release build | R8 minification and resource shrinking; not debuggable. |
 
+## Friends (Firebase)
+
+| Area | Measure |
+|---|---|
+| Who sees what | Server-side Firestore rules (`firebase/firestore.rules`): profiles (name, programme, friend code) readable by signed-in students; friend lists and shared attendance/grades only by the owner and the owner's friends. |
+| Friendships | Can only be created by the student accepting a pending request; either side can remove it. Requests can only be sent as yourself, never to yourself or an existing friend. |
+| Sharing | Attendance sharing is a visible toggle; grades are off by default. Turning a toggle off deletes the server copy. Emails are never stored. |
+| Validation | Rules allow only known fields with length limits (names ≤ 40 chars, ≤ 20 subjects per shared document). |
+| Config | Firebase client settings are public by design and restricted to this package + SHA-1; `google-services.json` / `firebase.properties` are git-ignored. |
+
 ## Known limitations
 
 - Release APKs are signed with the build PC's debug key (ISSUE-006). Anyone with that key could

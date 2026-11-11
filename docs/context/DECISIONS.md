@@ -111,3 +111,14 @@
 - Decision: see docs/SECURITY.md (CSV-injection neutralising on export, bounded archive and network
   reads, HTTPS-only config, private lock-screen notifications, atomic CSV writes with recovery).
 - Not done: data-at-rest encryption (CSV files must stay readable on export), release keystore.
+
+## DEC-017 — Friends on Firebase (Auth + Firestore), one project with the Drive backup
+- Date: 2026-11-12 · Status: Active
+- Decision: friends need a shared backend; Firebase's free Spark plan covers a class. Google
+  sign-in via Credential Manager (`GetSignInWithGoogleOption`) → Firebase Auth. Data model and
+  privacy live in `firebase/firestore.rules` (profiles public to signed-in users; friends' lists
+  and shared attendance/grades only to friends; friendships only via an accepted request).
+  Firebase is initialised in code from BuildConfig (no Google Services plugin), so the app builds
+  and runs without a project.
+- Consequence: the Drive backup must use the same project (one Android OAuth client per package +
+  SHA-1). Profiles expose name, programme and friend code to any signed-in student.

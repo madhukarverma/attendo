@@ -12,3 +12,7 @@ build/
 *.aab
 *.jks
 *.keystore
+
+# Firebase project settings for the friends feature (see docs/FRIENDS_SETUP.md)
+app/google-services.json
+firebase.properties

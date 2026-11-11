@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-11-12 — v0.30.0 friends
+- New `:core:social` (Firebase Auth + Cloud Firestore, Credential Manager "Sign in with Google")
+  and `:feature:friends` (Friends screen from the person icon on Home and Settings › Friends; a
+  student page per classmate).
+- LeetCode-style friends: search classmates by name prefix or 6-character friend code, send a
+  request, the other student accepts or declines; friends see each other's friend lists and, while
+  sharing is on, each other's attendance (overall + per subject). Attendance sharing is a toggle
+  (on at first sign-in); grades are shared only if that toggle is turned on (off by default).
+  Shared copies are refreshed 3 s after changes and deleted when a toggle is turned off.
+- `firebase/firestore.rules` enforces it server-side: profiles readable by signed-in users; friend
+  lists and shared data readable only by the owner and the owner's friends; friendships created
+  only by accepting a pending request; field and size validation.
+- Config: `app/google-services.json` (as downloaded from Firebase) or `firebase.properties` is read
+  at build time into BuildConfig; both git-ignored. Without them Friends shows "Not set up yet".
+- docs/FRIENDS_SETUP.md: one Firebase project for friends and the Drive backup (one Android OAuth
+  client per package + SHA-1 can exist only once). APK grows from ~2 MB to ~3.3 MB.
+
 ## 2026-11-12 — v0.29.0 personalised MCA calendar
 - Weekly timetable (new Timetable screen from the calendar): subject, weekday, start/end time,
   room; overlap warning; weekend days appear when used. Stored in `timetable.csv`.

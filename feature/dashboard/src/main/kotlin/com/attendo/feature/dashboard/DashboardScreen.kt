@@ -1,5 +1,6 @@
 package com.attendo.feature.dashboard
 
+import androidx.compose.material.icons.filled.Person
 import com.attendo.core.data.PlannerRepository
 import com.attendo.core.model.Curriculum
 import com.attendo.core.data.HabitRepository
@@ -97,6 +98,7 @@ fun DashboardRoute(
     onOpenPomodoro: () -> Unit,
     onOpenCalendar: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenFriends: () -> Unit = {},
 ) {
     val vm: DashboardViewModel = viewModel {
         DashboardViewModel(settings, subjects, attendance, todos, habits, kanban, pomodoro, timer, calendar, planner)
@@ -117,6 +119,7 @@ fun DashboardRoute(
         curriculum = curriculum,
         onOpenCurriculum = onOpenCurriculum,
         onOpenSettings = onOpenSettings,
+        onOpenFriends = onOpenFriends,
     )
 }
 
@@ -133,6 +136,7 @@ fun DashboardScreen(
     onOpenPomodoro: () -> Unit,
     onOpenCalendar: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenFriends: () -> Unit = {},
     curriculum: Curriculum = Curriculum.EMPTY,
     onOpenCurriculum: () -> Unit = {},
 ) {
@@ -150,7 +154,7 @@ fun DashboardScreen(
                     .padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Header(state, onOpenSettings)
+                Header(state, onOpenSettings, onOpenFriends)
                 AttendanceCard(state, onOpenAttendance)
                 FocusCard(state, timer, onToggleTimer, onOpenPomodoro)
                 ChecklistCard(state, onToggleChecklist, onOpenChecklist)
@@ -176,7 +180,7 @@ private fun greeting(now: LocalDateTime): String = when (now.hour) {
 }
 
 @Composable
-private fun Header(state: DashboardUiState, onOpenSettings: () -> Unit) {
+private fun Header(state: DashboardUiState, onOpenSettings: () -> Unit, onOpenFriends: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(top = 14.dp), verticalAlignment = Alignment.Top) {
         Column(Modifier.weight(1f)) {
             Text("${greeting(state.now)},", style = MaterialTheme.typography.headlineLarge)
@@ -190,6 +194,17 @@ private fun Header(state: DashboardUiState, onOpenSettings: () -> Unit) {
             Spacer(Modifier.height(4.dp))
             Text(state.today.format(LongDate), style = MaterialTheme.typography.labelLarge, color = AttendoColors.Muted)
         }
+        Box(
+            Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .iosPress(PressStyle.Scale, onClickLabel = "Friends", onClick = onOpenFriends)
+                .background(AttendoColors.CreamDeep),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(Icons.Filled.Person, contentDescription = null, tint = AttendoColors.Ink, modifier = Modifier.size(20.dp))
+        }
+        Spacer(Modifier.width(8.dp))
         Box(
             Modifier
                 .size(40.dp)

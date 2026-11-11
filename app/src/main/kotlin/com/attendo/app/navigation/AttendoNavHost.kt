@@ -1,5 +1,7 @@
 package com.attendo.app.navigation
 
+import com.attendo.feature.friends.FriendsScreen
+import com.attendo.feature.friends.StudentScreen
 import com.attendo.feature.calendar.TimetableScreen
 import com.attendo.feature.curriculum.CurriculumScreen
 import androidx.navigation.NavType
@@ -94,6 +96,9 @@ object Routes {
     fun subjectDetail(id: String) = "subject/$id"
     const val SETTINGS = "settings"
     const val TIMETABLE = "timetable"
+    const val FRIENDS = "friends"
+    const val STUDENT = "student/{uid}"
+    fun student(uid: String) = "student/$uid"
     const val CURRICULUM = "curriculum?code={code}"
     fun curriculum(code: String? = null) = if (code == null) "curriculum" else "curriculum?code=$code"
     const val CALENDAR = "calendar/{date}"
@@ -248,6 +253,7 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                         onOpenPomodoro = { navController.switchTab(Routes.POMODORO) },
                         onOpenCalendar = { navController.push(Routes.calendar(LocalDate.now())) },
                         onOpenSettings = { navController.push(Routes.SETTINGS) },
+                        onOpenFriends = { navController.push(Routes.FRIENDS) },
                     )
                 }
                 composable(Routes.ATTENDANCE) { entry ->
@@ -323,6 +329,21 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                         onClose = { navController.back() },
                     )
                 }
+                composable(Routes.FRIENDS) {
+                    FriendsScreen(
+                        social = container.social,
+                        onOpenStudent = { uid -> navController.push(Routes.student(uid)) },
+                        onClose = { navController.back() },
+                    )
+                }
+                composable(Routes.STUDENT) { entry ->
+                    StudentScreen(
+                        social = container.social,
+                        uid = entry.arguments?.getString("uid").orEmpty(),
+                        onOpenStudent = { uid -> navController.push(Routes.student(uid)) },
+                        onClose = { navController.back() },
+                    )
+                }
                 composable(Routes.TIMETABLE) {
                     val slots by data.planner.slots.collectAsStateWithLifecycle(initialValue = emptyList())
                     val subjectList by data.subjects.subjects.collectAsStateWithLifecycle(initialValue = emptyList())
@@ -359,6 +380,7 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                             }
                         },
                         googleBackup = container.googleBackup,
+                        onOpenFriends = { navController.push(Routes.FRIENDS) },
                         onPlanCsvImport = { uris -> data.planCsvImport(CsvImporter.read(context, uris)) },
                         onApplyCsvImport = { plan -> data.applyCsvImport(plan) },
                     )
