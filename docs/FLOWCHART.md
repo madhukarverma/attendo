@@ -41,6 +41,8 @@ flowchart TD
         Stats[Statistics]
     end
 
+    Home -- person icon --> Friends[Friends<br/>search · requests · friend pages]
+    Friends --> Fire[(Firebase<br/>Auth + Firestore)]
     Home -- gear --> Settings[Settings<br/>profile · theme · animations · launch image<br/>Backup: Google account · CSV export / restore]
     Settings -- sign in --> Drive[(Google Drive<br/>app-data folder<br/>attendo-backup.zip)]
     Onb -- Restore from Google --> Drive

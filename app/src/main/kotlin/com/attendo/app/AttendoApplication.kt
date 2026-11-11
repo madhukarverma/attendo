@@ -1,5 +1,7 @@
 package com.attendo.app
 
+import com.attendo.core.social.FirebaseConfig
+import com.attendo.core.social.SocialService
 import com.attendo.core.data.curriculum.CurriculumLoader
 import com.attendo.core.backup.GoogleDriveBackup
 import com.attendo.app.reminders.ReminderNotifications
@@ -35,6 +37,20 @@ class AppContainer(application: Application) {
         scope = appScope,
         appVersion = BuildConfig.VERSION_NAME,
         extraFiles = mapOf(LaunchImageStore.FILE_NAME to LaunchImageStore.file(application)),
+    )
+
+    /** Friends (Firebase); "not set up" until firebase.properties is filled in at build time. */
+    val social = SocialService(
+        context = application,
+        config = FirebaseConfig(
+            projectId = BuildConfig.FIREBASE_PROJECT_ID,
+            appId = BuildConfig.FIREBASE_APP_ID,
+            apiKey = BuildConfig.FIREBASE_API_KEY,
+            webClientId = BuildConfig.FIREBASE_WEB_CLIENT_ID,
+        ),
+        scope = appScope,
+        data = data,
+        programme = "MCA 2026-29",
     )
 
     /** One alarm per pending reminder in todos.csv. */

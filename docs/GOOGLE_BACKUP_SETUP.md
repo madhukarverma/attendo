@@ -1,5 +1,8 @@
 # Google account backup — one-time setup
 
+> Since v0.30 the backup and the friends feature share one Firebase project. Follow
+> [FRIENDS_SETUP.md](FRIENDS_SETUP.md), which covers both; this page explains the backup itself.
+
 Settings › Backup › **Sign in with Google** stores all of Attendo's data in the user's own Google
 Drive, in the hidden *app data* folder (scope `https://www.googleapis.com/auth/drive.appdata`).
 Only Attendo can read that folder; it doesn't show up in the Drive file list.

@@ -1,0 +1,8 @@
+# Copy to firebase.properties (same folder) and fill in from your Firebase project.
+# These are public client settings (the same values every Firebase app ships), not secrets.
+# Firebase console > Project settings > General > Your apps > Android app (com.attendo.app):
+projectId=
+appId=
+apiKey=
+# Firebase console > Authentication > Sign-in method > Google > Web SDK configuration > Web client ID:
+webClientId=

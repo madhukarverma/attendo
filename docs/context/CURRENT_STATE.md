@@ -1,6 +1,11 @@
 # Current State
 
-## Active task
+## Update 2026-11-12
+v0.28.0 grades, v0.29.0 personalised calendar (timetable, own events, day agenda), v0.30.0
+friends on Firebase. Friends and the Drive backup need the Firebase project
+(docs/FRIENDS_SETUP.md); 60 unit tests pass; nothing run on a phone yet.
+
+## Active task (2026-11-11)
 v0.27.0 released (themes, double class, Kanban board, weekday checklist, curriculum, security
 sweep). Next: install on a phone and test; the deferred items are at the end of OPEN_ISSUES.md.
 
