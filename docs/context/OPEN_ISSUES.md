@@ -1,6 +1,6 @@
 # Open Issues / Room for Future Work
 
-- ISSUE-001 — Multiple lectures of one subject on the same day (add `count`/`slot` column to attendance.csv).
+- ISSUE-001 — Mixed double class (present for one, absent for the other); today a ×2 mark is all present or all absent.
 - ISSUE-002 — Weekly timetable so the home screen only shows subjects scheduled that day.
 - ISSUE-003 — Daily "mark today's attendance" reminder (to-do reminders exist since v0.18).
 - ISSUE-006 — Release signing keystore + CI build (GitHub Actions). Also gives Google sign-in a

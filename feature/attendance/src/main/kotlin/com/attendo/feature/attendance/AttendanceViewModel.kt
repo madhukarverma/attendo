@@ -24,6 +24,8 @@ import java.time.LocalDate
 data class SubjectDayItem(
     val summary: AttendanceSummary,
     val statusOnDay: AttendanceStatus?,
+    /** 2 when the selected day's mark is a double class. */
+    val countOnDay: Int = 1,
 )
 
 data class AttendanceUiState(
@@ -78,10 +80,18 @@ class AttendanceViewModel(
     }
 
     /** A card swipe: sets the status directly (no toggle) and remembers it for undo. */
-    fun swipe(subjectId: String, status: AttendanceStatus) {
+    fun swipe(subjectId: String, status: AttendanceStatus, count: Int = 1) {
         val date = selectedDate.value
         swipeHistory.value = swipeHistory.value + (subjectId to date)
-        viewModelScope.launch { attendance.mark(subjectId, date, status) }
+        viewModelScope.launch { attendance.mark(subjectId, date, status, count) }
+    }
+
+    /** Switches the selected day's present/absent mark between one class and a double class. */
+    fun toggleDouble(subjectId: String) {
+        val item = uiState.value.items.firstOrNull { it.summary.subject.id == subjectId } ?: return
+        val status = item.statusOnDay?.takeIf { it != AttendanceStatus.CANCELLED } ?: return
+        val date = selectedDate.value
+        viewModelScope.launch { attendance.mark(subjectId, date, status, if (item.countOnDay >= 2) 1 else 2) }
     }
 
     fun undoSwipe() {
@@ -109,7 +119,7 @@ class AttendanceViewModel(
             userName = s.nickname,
             selectedDate = date,
             items = subjectList.map { subject ->
-                SubjectDayItem(AttendanceSummary.from(subject, records), onDay[subject.id]?.status)
+                SubjectDayItem(AttendanceSummary.from(subject, records), onDay[subject.id]?.status, onDay[subject.id]?.count ?: 1)
             },
             markedDays = records.mapTo(HashSet()) { it.date },
             tinderMode = s.tinderMode,

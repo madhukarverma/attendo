@@ -182,7 +182,7 @@ internal class CsvAttendanceRepository(
     internal val store = CsvStore(
         table = CsvTable(
             File(dir, AttendoData.ATTENDANCE_FILE),
-            listOf("subject_id", "date", "status", "updated_at"),
+            listOf("subject_id", "date", "status", "updated_at", "count"),
         ),
         scope = scope,
         io = io,
@@ -193,6 +193,8 @@ internal class CsvAttendanceRepository(
                     date = LocalDate.parse(r.getValue("date")),
                     status = AttendanceStatus.valueOf(r.getValue("status")),
                     updatedAt = r["updated_at"]?.toLongOrNull() ?: 0L,
+                    // Files from before v0.23 have no count column: one class per mark.
+                    count = (r["count"]?.toIntOrNull() ?: 1).coerceIn(1, AttendanceRecord.MAX_COUNT),
                 )
             }.getOrNull()
         },
@@ -202,16 +204,21 @@ internal class CsvAttendanceRepository(
                 "date" to a.date.toString(),
                 "status" to a.status.name,
                 "updated_at" to a.updatedAt.toString(),
+                "count" to a.count.toString(),
             )
         },
     )
 
     override val records: Flow<List<AttendanceRecord>> = store.items.filterNotNull()
 
-    override suspend fun mark(subjectId: String, date: LocalDate, status: AttendanceStatus?) =
+    override suspend fun mark(subjectId: String, date: LocalDate, status: AttendanceStatus?, count: Int) =
         store.update { list ->
             val others = list.filterNot { it.subjectId == subjectId && it.date == date }
-            if (status == null) others else others + AttendanceRecord(subjectId, date, status, clock())
+            if (status == null) {
+                others
+            } else {
+                others + AttendanceRecord(subjectId, date, status, clock(), count.coerceIn(1, AttendanceRecord.MAX_COUNT))
+            }
         }
 
     override suspend fun deleteForSubject(subjectId: String) =

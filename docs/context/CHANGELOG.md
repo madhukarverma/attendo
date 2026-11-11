@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-11 — v0.23.0 double class
+- A mark can stand for two classes: `count` column in attendance.csv (missing = 1), summed by
+  `AttendanceSummary.from`, so percentages and lectures left count a double class twice.
+- Tinder mode: swipe up (or the ×2 button) = present for a double class, with a "PRESENT ×2" stamp.
+- List mode: an "×2" chip on each row doubles the day's present/absent mark. Status and history
+  show "Present ×2". Closes ISSUE-001 for the two-classes case.
+
 ## 2026-11-11 — v0.22.0 theme dropdown and four new themes
 - Settings › Theme is one dropdown of every theme (with colour swatches) plus Custom.
 - New themes: Ledger (paper, black ink, magenta; Android's typewriter face "serif-monospace"),

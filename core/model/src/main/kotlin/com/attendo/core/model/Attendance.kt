@@ -10,10 +10,20 @@ enum class AttendanceStatus {
     CANCELLED,
 }
 
-/** One subject's attendance on one day. v0.1 supports a single class per subject per day. */
+/**
+ * One subject's attendance on one day.
+ *
+ * @property count how many classes the mark stands for: 2 when the teacher took a double class
+ * (both present or both absent). Ignored for [AttendanceStatus.CANCELLED].
+ */
 data class AttendanceRecord(
     val subjectId: String,
     val date: LocalDate,
     val status: AttendanceStatus,
     val updatedAt: Long = 0L,
-)
+    val count: Int = 1,
+) {
+    companion object {
+        const val MAX_COUNT = 4
+    }
+}

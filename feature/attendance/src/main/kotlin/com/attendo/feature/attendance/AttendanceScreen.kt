@@ -105,6 +105,7 @@ fun AttendanceRoute(
         onAddCourseSubjects = vm::addCourseSubjects,
         onTinderModeChange = vm::setTinderMode,
         onSwipe = vm::swipe,
+        onToggleDouble = vm::toggleDouble,
         onUndoSwipe = vm::undoSwipe,
         onOpenCalendar = onOpenCalendar,
         onAddSubject = onAddSubject,
@@ -121,7 +122,8 @@ fun AttendanceScreen(
     onOpenSubject: (String) -> Unit,
     onAddCourseSubjects: () -> Unit = {},
     onTinderModeChange: (Boolean) -> Unit = {},
-    onSwipe: (subjectId: String, status: AttendanceStatus) -> Unit = { _, _ -> },
+    onSwipe: (subjectId: String, status: AttendanceStatus, count: Int) -> Unit = { _, _, _ -> },
+    onToggleDouble: (subjectId: String) -> Unit = {},
     onUndoSwipe: () -> Unit = {},
     onOpenCalendar: (LocalDate) -> Unit = {},
 ) {
@@ -194,6 +196,7 @@ fun AttendanceScreen(
                     SubjectDayRow(
                         item = item,
                         onMark = { status -> onMark(item.summary.subject.id, status) },
+                        onToggleDouble = { onToggleDouble(item.summary.subject.id) },
                         onClick = { onOpenSubject(item.summary.subject.id) },
                         modifier = Modifier.animateItem().padding(horizontal = 20.dp),
                     )
@@ -379,6 +382,7 @@ internal fun SubjectDayRow(
     onMark: (AttendanceStatus) -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onToggleDouble: () -> Unit = {},
 ) {
     val subject = item.summary.subject
     Column(
@@ -400,7 +404,7 @@ internal fun SubjectDayRow(
                     textDecoration = if (item.statusOnDay == AttendanceStatus.CANCELLED) TextDecoration.LineThrough else null,
                 )
                 val (text, color, symbol) = item.statusOnDay.label()
-                StatusLabel(text = text, color = color, symbol = symbol)
+                StatusLabel(text = if (item.countOnDay > 1) "$text ×${item.countOnDay}" else text, color = color, symbol = symbol)
             }
             Box(Modifier.width(1.dp).height(40.dp).background(AttendoColors.CreamDeep))
             PercentColumn(item.summary)
@@ -416,6 +420,16 @@ internal fun SubjectDayRow(
             MarkChip("No class", AttendoColors.Blue, item.statusOnDay == AttendanceStatus.CANCELLED, Modifier.weight(1f), AttendoColors.BlueFill) {
                 onMark(AttendanceStatus.CANCELLED)
             }
+            // Double class: the mark counts as two classes. Only for present/absent marks.
+            val canDouble = item.statusOnDay == AttendanceStatus.PRESENT || item.statusOnDay == AttendanceStatus.ABSENT
+            MarkChip(
+                "×2",
+                if (canDouble) AttendoColors.Ink else AttendoColors.CreamDeep,
+                selected = canDouble && item.countOnDay > 1,
+                modifier = Modifier.width(46.dp),
+                fill = AttendoColors.Ink,
+                onClickLabel = "Double class",
+            ) { if (canDouble) onToggleDouble() }
         }
     }
 }
@@ -456,6 +470,7 @@ private fun MarkChip(
     modifier: Modifier,
     /** Chip colour while selected. */
     fill: Color = color,
+    onClickLabel: String = "Mark $text",
     onClick: () -> Unit,
 ) {
     val haptics = LocalHapticFeedback.current
@@ -467,7 +482,7 @@ private fun MarkChip(
     val content by animateColorAsState(if (selected) AttendoColors.on(fill) else color, label = "chipFg")
     Box(
         modifier
-            .iosPress(PressStyle.Scale, onClickLabel = "Mark $text") {
+            .iosPress(PressStyle.Scale, onClickLabel = onClickLabel) {
                 haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             }
