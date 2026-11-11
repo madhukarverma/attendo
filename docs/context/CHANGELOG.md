@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-11-12 — v0.29.0 personalised MCA calendar
+- Weekly timetable (new Timetable screen from the calendar): subject, weekday, start/end time,
+  room; overlap warning; weekend days appear when used. Stored in `timetable.csv`.
+- Your own calendar events (exam/test, deadline, event, holiday; one or more days, note), stored in
+  `events.csv` and merged into the academic calendar everywhere it's used: calendar grid and lists
+  (marked "Yours", tap to edit), the Classes day strip and Penta's lines, Home's upcoming exams.
+- Calendar: tapping a day opens its agenda (timetable classes, calendar entries, reminders) with
+  "Add event" and "Mark attendance"; "Set timetable" / "Add event" buttons at the top.
+- Classes tab: with a timetable, the selected day's scheduled subjects come first in class order
+  with their times and rooms; other subjects fold under "Not on this day's timetable"; Tinder mode
+  swipes through the scheduled ones. Home shows "Now: …" / "Next: …" from the timetable.
+- Deleting a subject removes its timetable slots. Planner maths in `Timetable` (core:model).
+
 ## 2026-11-12 — v0.28.0 grades (private)
 - Each subject page has a Grades section: add marks per assessment (title with one-tap
   suggestions, scored / out of, date), edit or delete, and see the subject's total, percentage and

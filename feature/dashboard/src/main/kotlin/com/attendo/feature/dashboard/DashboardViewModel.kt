@@ -1,5 +1,12 @@
 package com.attendo.feature.dashboard
 
+import com.attendo.core.data.PlannerRepository
+import com.attendo.core.model.AttendanceRecord
+import com.attendo.core.model.CourseCatalog
+import com.attendo.core.model.Timetable
+import com.attendo.core.model.TimetableSlot
+import java.time.LocalTime
+import kotlinx.coroutines.flow.flowOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.attendo.core.data.AttendanceRepository
@@ -35,6 +42,9 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+/** The class happening now or next today, from the timetable. */
+data class NextClass(val subject: String, val start: LocalTime, val end: LocalTime, val room: String, val inProgress: Boolean)
+
 /** One line of today's checklist on Home. */
 data class ChecklistItem(val habit: Habit, val checked: Boolean)
 
@@ -62,6 +72,9 @@ data class DashboardUiState(
     val reminders: List<Todo> = emptyList(),
     val exams: List<CalendarEvent> = emptyList(),
     val focus: PomodoroSummary? = null,
+    val nextClass: NextClass? = null,
+    /** Classes on today's timetable (0 without a timetable). */
+    val classesToday: Int = 0,
 ) {
     val today: LocalDate get() = now.toLocalDate()
 
@@ -91,7 +104,13 @@ class DashboardViewModel(
     pomodoro: PomodoroRepository,
     private val timer: PomodoroTimer,
     private val calendar: AcademicCalendar,
+    planner: PlannerRepository? = null,
 ) : ViewModel() {
+
+    private val plan = combine(
+        planner?.calendar(calendar) ?: flowOf(calendar),
+        planner?.slots ?: flowOf(emptyList()),
+    ) { cal, slots -> cal to slots }
 
     /** Ticks every minute so the day, reminders and countdowns stay current while open. */
     private val clock = flow {
@@ -101,8 +120,10 @@ class DashboardViewModel(
         }
     }
 
-    private val attendanceFlow = combine(subjects.subjects, attendance.records) { list, records ->
-        list.map { AttendanceSummary.from(it, records) } to records
+    private class AttendanceData(val summaries: List<AttendanceSummary>, val records: List<AttendanceRecord>, val calendar: AcademicCalendar, val slots: List<TimetableSlot>)
+
+    private val attendanceFlow = combine(subjects.subjects, attendance.records, plan) { list, records, (cal, slots) ->
+        AttendanceData(list.map { AttendanceSummary.from(it, records) }, records, cal, slots)
     }
 
     private class Tasks(val reminders: List<Todo>, val habits: List<Habit>, val checks: List<HabitCheck>, val board: KanbanBoard)
@@ -115,8 +136,13 @@ class DashboardViewModel(
         tasksFlow,
         pomodoro.sessions,
         clock,
-    ) { s, (summaries, records), tasks, sessions, now ->
+    ) { s, att, tasks, sessions, now ->
         val today = now.toLocalDate()
+        val summaries = att.summaries
+        val records = att.records
+        val calendar = att.calendar
+        val names = summaries.associate { it.subject.id to CourseCatalog.shortName(it.subject) }
+        val next = Timetable.next(att.slots, now)
         val ticked = HabitWeek.checkedDays(tasks.checks)
         val board = tasks.board
         DashboardUiState(
@@ -142,6 +168,10 @@ class DashboardViewModel(
             reminders = TodoAgenda.upcomingReminders(tasks.reminders, now).take(MAX_ROWS),
             exams = calendar.events.filter { it.kind == DayKind.EXAM && !it.end.isBefore(today) }.take(MAX_ROWS),
             focus = PomodoroStats.summarize(sessions, summaries.map { it.subject }, today),
+            nextClass = next?.let {
+                NextClass(names[it.subjectId] ?: "Class", it.start, it.end, it.room, inProgress = now.toLocalTime() >= it.start)
+            },
+            classesToday = Timetable.on(att.slots, today).size,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardUiState())
 

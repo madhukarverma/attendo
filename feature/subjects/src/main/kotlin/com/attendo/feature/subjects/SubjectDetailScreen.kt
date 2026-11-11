@@ -1,5 +1,6 @@
 package com.attendo.feature.subjects
 
+import com.attendo.core.data.PlannerRepository
 import com.attendo.core.data.GradeRepository
 import com.attendo.core.model.Assessment
 import com.attendo.core.model.Grades
@@ -93,6 +94,7 @@ class SubjectDetailViewModel(
     private val subjects: SubjectRepository,
     private val attendance: AttendanceRepository,
     private val grades: GradeRepository? = null,
+    private val planner: PlannerRepository? = null,
 ) : ViewModel() {
 
     val uiState: StateFlow<SubjectDetailUiState> =
@@ -130,6 +132,7 @@ class SubjectDetailViewModel(
         viewModelScope.launch {
             attendance.deleteForSubject(subjectId)
             grades?.deleteForSubject(subjectId)
+            planner?.deleteSlotsForSubject(subjectId)
             subjects.delete(subjectId)
             onDeleted()
         }
@@ -143,11 +146,12 @@ fun SubjectDetailRoute(
     attendance: AttendanceRepository,
     onClose: () -> Unit,
     grades: GradeRepository? = null,
+    planner: PlannerRepository? = null,
     curriculum: Curriculum = Curriculum.EMPTY,
     onOpenCurriculum: (code: String) -> Unit = {},
 ) {
     val vm: SubjectDetailViewModel = viewModel(key = subjectId) {
-        SubjectDetailViewModel(subjectId, subjects, attendance, grades)
+        SubjectDetailViewModel(subjectId, subjects, attendance, grades, planner)
     }
     val state by vm.uiState.collectAsStateWithLifecycle()
     SubjectDetailScreen(

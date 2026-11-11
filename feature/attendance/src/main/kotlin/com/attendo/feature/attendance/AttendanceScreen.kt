@@ -1,5 +1,8 @@
 package com.attendo.feature.attendance
 
+import com.attendo.core.data.PlannerRepository
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.attendo.core.designsystem.component.TabBarClearance
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.animation.animateColorAsState
@@ -85,12 +88,13 @@ fun AttendanceRoute(
     onAddSubject: () -> Unit,
     onOpenSubject: (String) -> Unit,
     calendar: AcademicCalendar = AcademicCalendar.EMPTY,
+    planner: PlannerRepository? = null,
     onOpenCalendar: (LocalDate) -> Unit = {},
     /** A date picked on the calendar screen; selected once, then [onRequestedDateHandled] clears it. */
     requestedDate: LocalDate? = null,
     onRequestedDateHandled: () -> Unit = {},
 ) {
-    val vm: AttendanceViewModel = viewModel { AttendanceViewModel(settings, subjects, attendance, calendar) }
+    val vm: AttendanceViewModel = viewModel { AttendanceViewModel(settings, subjects, attendance, calendar, planner) }
     val state by vm.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(requestedDate) {
         if (requestedDate != null) {
@@ -127,6 +131,8 @@ fun AttendanceScreen(
     onUndoSwipe: () -> Unit = {},
     onOpenCalendar: (LocalDate) -> Unit = {},
 ) {
+    // Subjects not on the selected day's timetable stay folded away until asked for.
+    var showOthers by rememberSaveable { mutableStateOf(false) }
     Box(
         Modifier
             .fillMaxSize()
@@ -183,7 +189,7 @@ fun AttendanceScreen(
                 item(key = "deck") {
                     SwipeDeck(
                         cards = state.unmarked,
-                        totalToday = state.items.size,
+                        totalToday = state.deck.size,
                         canUndo = state.canUndoSwipe,
                         onSwipe = onSwipe,
                         onUndo = onUndoSwipe,
@@ -192,7 +198,17 @@ fun AttendanceScreen(
                     )
                 }
             } else {
-                items(state.items, key = { it.summary.subject.id }) { item ->
+                if (state.hasTimetable && state.scheduled.isEmpty() && state.items.isNotEmpty()) {
+                    item(key = "noClasses") {
+                        Text(
+                            "No classes on your timetable this day.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = AttendoColors.Muted,
+                            modifier = Modifier.animateItem().padding(horizontal = 24.dp, vertical = 4.dp),
+                        )
+                    }
+                }
+                items(state.scheduled, key = { it.summary.subject.id }) { item ->
                     SubjectDayRow(
                         item = item,
                         onMark = { status -> onMark(item.summary.subject.id, status) },
@@ -200,6 +216,39 @@ fun AttendanceScreen(
                         onClick = { onOpenSubject(item.summary.subject.id) },
                         modifier = Modifier.animateItem().padding(horizontal = 20.dp),
                     )
+                }
+                if (state.others.isNotEmpty()) {
+                    item(key = "othersHeader") {
+                        Row(
+                            Modifier
+                                .animateItem()
+                                .fillMaxWidth()
+                                .iosPress(PressStyle.Dim, onClickLabel = if (showOthers) "Hide other subjects" else "Show other subjects") {
+                                    showOthers = !showOthers
+                                }
+                                .padding(horizontal = 24.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                "Not on this day's timetable (${state.others.size})",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = AttendoColors.Muted,
+                                modifier = Modifier.weight(1f),
+                            )
+                            Text(if (showOthers) "Hide" else "Show", style = MaterialTheme.typography.labelLarge, color = AttendoColors.Green)
+                        }
+                    }
+                    if (showOthers) {
+                        items(state.others, key = { it.summary.subject.id }) { item ->
+                            SubjectDayRow(
+                                item = item,
+                                onMark = { status -> onMark(item.summary.subject.id, status) },
+                                onToggleDouble = { onToggleDouble(item.summary.subject.id) },
+                                onClick = { onOpenSubject(item.summary.subject.id) },
+                                modifier = Modifier.animateItem().padding(horizontal = 20.dp),
+                            )
+                        }
+                    }
                 }
                 // "New subject" used to be the bar's main button; it now lives under the list.
                 item(key = "addSubject") {
@@ -376,6 +425,8 @@ private fun AttendanceStatus?.label(): Triple<String, Color, String> = when (thi
     null -> Triple("Not marked", AttendoColors.Muted, "✱")
 }
 
+private val SlotTime = java.time.format.DateTimeFormatter.ofPattern("H:mm")
+
 @Composable
 internal fun SubjectDayRow(
     item: SubjectDayItem,
@@ -403,6 +454,15 @@ internal fun SubjectDayRow(
                     color = if (item.statusOnDay == AttendanceStatus.CANCELLED) AttendoColors.Muted else AttendoColors.Ink,
                     textDecoration = if (item.statusOnDay == AttendanceStatus.CANCELLED) TextDecoration.LineThrough else null,
                 )
+                if (item.slots.isNotEmpty()) {
+                    Text(
+                        item.slots.joinToString("  ·  ") { s ->
+                            "${s.start.format(SlotTime)}–${s.end.format(SlotTime)}" + if (s.room.isNotBlank()) " ${s.room}" else ""
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AttendoColors.Muted,
+                    )
+                }
                 val (text, color, symbol) = item.statusOnDay.label()
                 StatusLabel(text = if (item.countOnDay > 1) "$text ×${item.countOnDay}" else text, color = color, symbol = symbol)
             }
