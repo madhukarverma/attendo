@@ -211,7 +211,11 @@ fun SubjectDetailScreen(
                 }
                 Row(Modifier.fillMaxWidth().padding(vertical = 6.dp, horizontal = 4.dp)) {
                     Text(record.date.format(DateFormat), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-                    Text(label, style = MaterialTheme.typography.labelLarge, color = color)
+                    Text(
+                        if (record.count > 1 && record.status != AttendanceStatus.CANCELLED) "$label ×${record.count}" else label,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = color,
+                    )
                 }
             }
         }

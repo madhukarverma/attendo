@@ -9,6 +9,21 @@ class AttendanceSummaryTest {
     private val subject = Subject(id = "s1", name = "Maths", targetPercent = 75)
 
     @Test
+    fun doubleClassCountsAsTwo() {
+        val day = java.time.LocalDate.of(2026, 11, 9)
+        val records = listOf(
+            AttendanceRecord("s1", day, AttendanceStatus.PRESENT, count = 2),
+            AttendanceRecord("s1", day.plusDays(1), AttendanceStatus.ABSENT),
+            AttendanceRecord("s1", day.plusDays(2), AttendanceStatus.CANCELLED, count = 2),
+            AttendanceRecord("other", day, AttendanceStatus.ABSENT, count = 2),
+        )
+        val s = AttendanceSummary.from(subject, records)
+        assertEquals(2, s.present)
+        assertEquals(1, s.absent)
+        assertEquals(3, s.held)
+    }
+
+    @Test
     fun lecturesLeftNeedsCourseHours() {
         val s = AttendanceSummary(subject, present = 8, absent = 2)
         assertEquals(null, s.lecturesLeft)

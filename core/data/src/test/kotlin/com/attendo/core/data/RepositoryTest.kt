@@ -128,6 +128,11 @@ class RepositoryTest {
         data.attendance.mark("s", day, AttendanceStatus.ABSENT)
         data.attendance.mark("s", day, AttendanceStatus.PRESENT)
         assertEquals(1, data.attendance.records.first().size)
+        // A double class is stored with count 2 and survives a reload.
+        data.attendance.mark("s", day, AttendanceStatus.PRESENT, count = 2)
+        val reloaded = AttendoData(dir, TestScope(dispatcher), dispatcher)
+        advanceUntilIdle()
+        assertEquals(2, reloaded.attendance.records.first().single().count)
         data.attendance.mark("s", day, null)
         assertEquals(0, data.attendance.records.first().size)
         dir.deleteRecursively()

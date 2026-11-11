@@ -60,22 +60,33 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
+/** What a swipe (or its button) records. */
+internal enum class SwipeAction(val status: AttendanceStatus, val count: Int = 1) {
+    PRESENT(AttendanceStatus.PRESENT),
+    ABSENT(AttendanceStatus.ABSENT),
+    NO_CLASS(AttendanceStatus.CANCELLED),
+
+    /** Swipe up: the teacher took two classes back to back and both were attended. */
+    PRESENT_DOUBLE(AttendanceStatus.PRESENT, 2),
+}
+
 /**
  * Dating-app style card stack for the selected day:
- * swipe right = Present, left = Absent, down = No class. Buttons do the same, plus undo.
+ * swipe right = Present, left = Absent, down = No class, up = Present ×2 (a double class).
+ * Buttons do the same, plus undo.
  */
 @Composable
 internal fun SwipeDeck(
     cards: List<SubjectDayItem>,
     totalToday: Int,
     canUndo: Boolean,
-    onSwipe: (subjectId: String, status: AttendanceStatus) -> Unit,
+    onSwipe: (subjectId: String, status: AttendanceStatus, count: Int) -> Unit,
     onUndo: () -> Unit,
     colorFor: (subjectId: String) -> Color,
     modifier: Modifier = Modifier,
 ) {
     val haptics = LocalHapticFeedback.current
-    var requested by remember { mutableStateOf<AttendanceStatus?>(null) }
+    var requested by remember { mutableStateOf<SwipeAction?>(null) }
 
     Column(modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         BoxWithConstraints(Modifier.fillMaxWidth().height(430.dp), contentAlignment = Alignment.Center) {
@@ -91,17 +102,18 @@ internal fun SwipeDeck(
                     val scope = rememberCoroutineScope()
                     val thresholdX = widthPx * 0.28f
                     val thresholdY = heightPx * 0.2f
-                    val progress = maxOf(abs(x.value) / thresholdX, y.value.coerceAtLeast(0f) / thresholdY).coerceIn(0f, 1f)
+                    val progress = maxOf(abs(x.value) / thresholdX, abs(y.value) / thresholdY).coerceIn(0f, 1f)
 
-                    suspend fun commit(status: AttendanceStatus) {
+                    suspend fun commit(action: SwipeAction) {
                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                         val spec = tween<Float>(260, easing = Motion.Easing)
-                        when (status) {
-                            AttendanceStatus.PRESENT -> x.animateTo(widthPx * 1.6f, spec)
-                            AttendanceStatus.ABSENT -> x.animateTo(-widthPx * 1.6f, spec)
-                            AttendanceStatus.CANCELLED -> y.animateTo(heightPx * 1.6f, spec)
+                        when (action) {
+                            SwipeAction.PRESENT -> x.animateTo(widthPx * 1.6f, spec)
+                            SwipeAction.ABSENT -> x.animateTo(-widthPx * 1.6f, spec)
+                            SwipeAction.NO_CLASS -> y.animateTo(heightPx * 1.6f, spec)
+                            SwipeAction.PRESENT_DOUBLE -> y.animateTo(-heightPx * 1.6f, spec)
                         }
-                        onSwipe(top.summary.subject.id, status)
+                        onSwipe(top.summary.subject.id, action.status, action.count)
                     }
 
                     LaunchedEffect(requested) {
@@ -139,15 +151,16 @@ internal fun SwipeDeck(
                                         change.consume()
                                         scope.launch {
                                             x.snapTo(x.value + drag.x)
-                                            y.snapTo((y.value + drag.y).coerceAtLeast(-heightPx * 0.15f))
+                                            y.snapTo(y.value + drag.y)
                                         }
                                     },
                                     onDragEnd = {
                                         scope.launch {
                                             when {
-                                                x.value > thresholdX -> commit(AttendanceStatus.PRESENT)
-                                                x.value < -thresholdX -> commit(AttendanceStatus.ABSENT)
-                                                y.value > thresholdY -> commit(AttendanceStatus.CANCELLED)
+                                                x.value > thresholdX -> commit(SwipeAction.PRESENT)
+                                                x.value < -thresholdX -> commit(SwipeAction.ABSENT)
+                                                y.value > thresholdY -> commit(SwipeAction.NO_CLASS)
+                                                y.value < -thresholdY -> commit(SwipeAction.PRESENT_DOUBLE)
                                                 else -> {
                                                     launch { x.animateTo(0f, Motion.bouncy()) }
                                                     y.animateTo(0f, Motion.bouncy())
@@ -167,6 +180,7 @@ internal fun SwipeDeck(
                             Stamp("PRESENT", AttendoColors.Green, -14f, (x.value / thresholdX).coerceIn(0f, 1f), Alignment.TopStart)
                             Stamp("ABSENT", AttendoColors.Pink, 14f, (-x.value / thresholdX).coerceIn(0f, 1f), Alignment.TopEnd)
                             Stamp("NO CLASS", AttendoColors.Blue, 0f, (y.value / thresholdY).coerceIn(0f, 1f), Alignment.Center)
+                            Stamp("PRESENT ×2", AttendoColors.Green, 0f, (-y.value / thresholdY).coerceIn(0f, 1f), Alignment.BottomCenter)
                         },
                     )
                 }
@@ -174,21 +188,24 @@ internal fun SwipeDeck(
         }
 
         Text(
-            if (cards.isEmpty()) " " else "${cards.size} of $totalToday left  ·  ← absent   ↓ no class   present →",
+            if (cards.isEmpty()) " " else "${cards.size} of $totalToday left  ·  ← absent  ↓ no class  ↑ ×2  present →",
             style = MaterialTheme.typography.labelSmall,
             color = AttendoColors.Muted,
             modifier = Modifier.padding(top = 10.dp, bottom = 12.dp),
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(18.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             RoundAction("↺", AttendoColors.Yellow, 46.dp, enabled = canUndo, label = "Undo last swipe", onClick = onUndo)
             RoundAction("✕", AttendoColors.Pink, 62.dp, enabled = cards.isNotEmpty(), label = "Absent") {
-                requested = AttendanceStatus.ABSENT
+                requested = SwipeAction.ABSENT
             }
             RoundAction("↓", AttendoColors.Blue, 50.dp, enabled = cards.isNotEmpty(), label = "No class") {
-                requested = AttendanceStatus.CANCELLED
+                requested = SwipeAction.NO_CLASS
             }
             RoundAction("✓", AttendoColors.Green, 62.dp, enabled = cards.isNotEmpty(), label = "Present") {
-                requested = AttendanceStatus.PRESENT
+                requested = SwipeAction.PRESENT
+            }
+            RoundAction("×2", AttendoColors.Green, 50.dp, enabled = cards.isNotEmpty(), label = "Present for a double class") {
+                requested = SwipeAction.PRESENT_DOUBLE
             }
         }
     }

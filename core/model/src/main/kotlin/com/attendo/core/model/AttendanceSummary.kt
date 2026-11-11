@@ -67,8 +67,8 @@ data class AttendanceSummary(
             val own = records.filter { it.subjectId == subject.id }
             return AttendanceSummary(
                 subject = subject,
-                present = own.count { it.status == AttendanceStatus.PRESENT },
-                absent = own.count { it.status == AttendanceStatus.ABSENT },
+                present = own.filter { it.status == AttendanceStatus.PRESENT }.sumOf { it.count },
+                absent = own.filter { it.status == AttendanceStatus.ABSENT }.sumOf { it.count },
             )
         }
     }

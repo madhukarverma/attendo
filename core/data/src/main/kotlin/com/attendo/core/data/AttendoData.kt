@@ -15,7 +15,7 @@ import java.io.File
  *
  * - `settings.csv`   key,value
  * - `subjects.csv`   id,name,code,target_percent,created_at,lecture_hours
- * - `attendance.csv` subject_id,date,status,updated_at
+ * - `attendance.csv` subject_id,date,status,updated_at,count
  * - `pomodoro.csv`   id,date,started_at,kind,subject_id,planned_seconds,actual_seconds,completed
  * - `todos.csv`      id,title,date,remind_at,done,created_at
  */

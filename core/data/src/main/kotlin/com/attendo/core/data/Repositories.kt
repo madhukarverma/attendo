@@ -52,8 +52,8 @@ interface PomodoroRepository {
 interface AttendanceRepository {
     val records: Flow<List<AttendanceRecord>>
 
-    /** Sets the status for a subject on a date; `null` clears the mark. */
-    suspend fun mark(subjectId: String, date: LocalDate, status: AttendanceStatus?)
+    /** Sets the status for a subject on a date; `null` clears the mark. [count] = 2 for a double class. */
+    suspend fun mark(subjectId: String, date: LocalDate, status: AttendanceStatus?, count: Int = 1)
     suspend fun deleteForSubject(subjectId: String)
 }
 
