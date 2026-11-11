@@ -96,7 +96,7 @@ private fun DrawScope.drawShadow(centerX: Float, y: Float, width: Float) {
 
 /** Body colour per mood: brand green when happy, olive when neutral, light red when attendance is too low. */
 fun moodColor(mood: Mood): Color = when (mood) {
-    Mood.Happy -> AttendoColors.Green
+    Mood.Happy -> AttendoColors.GreenFill
     Mood.Neutral -> Color(0xFF9DB35A)
     Mood.Sad -> Color(0xFFF08080)
 }
@@ -193,7 +193,7 @@ private fun AnimatedPentagon(modifier: Modifier, mood: Mood, color: Color?) {
 
 /** Green rounded triangle with legs (celebration / detail mascot). */
 @Composable
-fun TriangleMascot(modifier: Modifier = Modifier, mood: Mood = Mood.Happy, color: Color = AttendoColors.Green) {
+fun TriangleMascot(modifier: Modifier = Modifier, mood: Mood = Mood.Happy, color: Color = AttendoColors.GreenFill) {
     Canvas(modifier) {
         val s = size.minDimension
         val cx = size.width / 2
@@ -212,7 +212,7 @@ fun TriangleMascot(modifier: Modifier = Modifier, mood: Mood = Mood.Happy, color
 
 /** Big tilted capsule mascot used on the dark onboarding screen. */
 @Composable
-fun BlobMascot(modifier: Modifier = Modifier, mood: Mood = Mood.Happy, color: Color = AttendoColors.Green) {
+fun BlobMascot(modifier: Modifier = Modifier, mood: Mood = Mood.Happy, color: Color = AttendoColors.GreenFill) {
     Canvas(modifier) {
         val h = size.height * 0.62f
         rotate(degrees = 22f, pivot = Offset(size.width * 0.5f, size.height * 0.5f)) {

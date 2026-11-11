@@ -1,5 +1,6 @@
 package com.attendo.core.designsystem.theme
 
+import android.graphics.Typeface
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -12,6 +13,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
@@ -23,7 +25,42 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.attendo.core.model.ThemeMode
 
-/** Every colour the app uses. Light is the original brand palette (#232323 / #50A65C / #F8FAED). */
+/** The typefaces a theme uses. All are fonts that ship with Android, so nothing is bundled. */
+@Immutable
+data class AttendoFonts(
+    val body: FontFamily = FontFamily.SansSerif,
+    /** Speech bubbles. */
+    val hand: FontFamily = FontFamily.Cursive,
+    val handItalic: Boolean = true,
+    /** Text size multiplier (monospace faces run wide). */
+    val scale: Float = 1f,
+) {
+    companion object {
+        /** System sans with handwritten bubbles (Light, Dark, Custom). */
+        val Default = AttendoFonts()
+
+        /** System sans everywhere. */
+        val Sans = AttendoFonts(hand = FontFamily.SansSerif, handItalic = false)
+
+        /** The system's code font. */
+        val Mono = AttendoFonts(body = FontFamily.Monospace, hand = FontFamily.Monospace, handItalic = false, scale = 0.92f)
+
+        /** Android's typewriter-style slab monospace ("serif-monospace"). */
+        val Typewriter: AttendoFonts by lazy {
+            val face = FontFamily(Typeface.create("serif-monospace", Typeface.NORMAL))
+            AttendoFonts(body = face, hand = face, handItalic = false, scale = 0.94f)
+        }
+    }
+}
+
+/**
+ * Every colour the app uses, plus its fonts. Light is the original brand palette
+ * (#232323 / #50A65C / #F8FAED).
+ *
+ * [accent], [pink], [blue] and [yellow] must be readable as text on [background]. Themes with
+ * soft, pale accents (Pastel) also set the `*Fill` colours, used for large filled shapes such as
+ * buttons and the selected tab; text on a fill comes from [AttendoColors.on].
+ */
 @Immutable
 data class AttendoPalette(
     val background: Color,
@@ -40,6 +77,10 @@ data class AttendoPalette(
     val blue: Color,
     val yellow: Color,
     val water: Color,
+    val accentFill: Color = accent,
+    val pinkFill: Color = pink,
+    val blueFill: Color = blue,
+    val fonts: AttendoFonts = AttendoFonts.Default,
 ) {
     val isDark: Boolean get() = background.luminance() < 0.4f
 
@@ -77,6 +118,93 @@ data class AttendoPalette(
             water = Color(0xFF7FC8EE),
         )
 
+        /** Paper, black ink and magenta in a typewriter face (after the "reading ledger" reference). */
+        val Ledger: AttendoPalette by lazy {
+            AttendoPalette(
+                background = Color(0xFFF4F1E8),
+                card = Color(0xFFECE8DC),
+                cardDeep = Color(0xFFDAD5C6),
+                text = Color(0xFF141414),
+                muted = Color(0xFF7B776C),
+                accent = Color(0xFFD6247F),
+                accentDark = Color(0xFFB01A66),
+                hero = Color(0xFF1B1B1B),
+                onHero = Color(0xFFF4F1E8),
+                pink = Color(0xFFC2511F), // "absent": rust, so it stays apart from the magenta accent
+                blue = Color(0xFF3E5C76),
+                yellow = Color(0xFFB98E12),
+                water = Color(0xFFBFD3D9),
+                fonts = AttendoFonts.Typewriter,
+            )
+        }
+
+        /** Near-black with lime and orange (after the dark fitness-app reference). */
+        val Neon = AttendoPalette(
+            background = Color(0xFF0A0A0A),
+            card = Color(0xFF151515),
+            cardDeep = Color(0xFF262626),
+            text = Color(0xFFF4F4F4),
+            muted = Color(0xFF8B8B8B),
+            accent = Color(0xFFC6F432),
+            accentDark = Color(0xFFA5D11C),
+            hero = Color(0xFF1A1A1A),
+            onHero = Color(0xFFF4F4F4),
+            pink = Color(0xFFEA5A2F),
+            blue = Color(0xFF58B4F0),
+            yellow = Color(0xFFF2C14E),
+            water = Color(0xFFEA5A2F),
+            fonts = AttendoFonts.Sans,
+        )
+
+        /** White with sky blue, mint and butter yellow (after the pastel reference). */
+        val Pastel = AttendoPalette(
+            background = Color(0xFFFFFFFF),
+            card = Color(0xFFF5F6F6),
+            cardDeep = Color(0xFFE2F0D6),
+            text = Color(0xFF101214),
+            muted = Color(0xFF7C7F84),
+            accent = Color(0xFF2E8B57),
+            accentDark = Color(0xFF226B43),
+            hero = Color(0xFFBFE6EE),
+            onHero = Color(0xFF101214),
+            pink = Color(0xFFD9534A),
+            blue = Color(0xFF2F87A8),
+            yellow = Color(0xFFB8960C),
+            water = Color(0xFFBFE6EE),
+            accentFill = Color(0xFFFBEF8A),
+            pinkFill = Color(0xFFF9C2BB),
+            blueFill = Color(0xFFBFE6EE),
+            fonts = AttendoFonts.Sans,
+        )
+
+        /** Colours of VS Code's "Dark 2026" theme (1.145), in the system code font. */
+        val VsCode = AttendoPalette(
+            background = Color(0xFF121314), // editor.background
+            card = Color(0xFF191A1B), // sideBar / panel background
+            cardDeep = Color(0xFF2A2B2C), // borders
+            text = Color(0xFFBFBFBF), // foreground
+            muted = Color(0xFF8C8C8C), // descriptionForeground
+            accent = Color(0xFF48A0C7), // textLink.foreground
+            accentDark = Color(0xFF297AA0), // button.background
+            hero = Color(0xFF202122), // editorWidget.background
+            onHero = Color(0xFFBFBFBF),
+            pink = Color(0xFFF48771), // errorForeground
+            blue = Color(0xFFD2A8FF), // function token
+            yellow = Color(0xFFE5BA7D), // modified
+            water = Color(0xFFA5D6FF), // string token
+            fonts = AttendoFonts.Mono,
+        )
+
+        /** Built-in themes in menu order, with the name and one-line description shown in Settings. */
+        val PRESETS: List<Triple<ThemeMode, String, String>> = listOf(
+            Triple(ThemeMode.LIGHT, "Light", "The original cream, ink and green."),
+            Triple(ThemeMode.DARK, "Dark", "Pitch-black base with dark-grey cards."),
+            Triple(ThemeMode.LEDGER, "Ledger", "Paper, black ink and magenta in a typewriter font."),
+            Triple(ThemeMode.NEON, "Neon", "Near-black with lime and orange accents."),
+            Triple(ThemeMode.PASTEL, "Pastel", "White with sky blue, mint and butter yellow."),
+            Triple(ThemeMode.VSCODE, "VS Code", "VS Code's Dark 2026 colours in a code font."),
+        )
+
         /** Colours a user can override in the Custom theme, in display order. */
         val CUSTOM_KEYS: List<Pair<String, String>> = listOf(
             "background" to "Background",
@@ -96,6 +224,8 @@ data class AttendoPalette(
         fun custom(hex: Map<String, String>, base: AttendoPalette = Light): AttendoPalette {
             fun pick(key: String, fallback: Color) = hex[key]?.let(::parseHexColor) ?: fallback
             val accent = pick("accent", base.accent)
+            val pink = pick("pink", base.pink)
+            val blue = pick("blue", base.blue)
             return base.copy(
                 background = pick("background", base.background),
                 card = pick("card", base.card),
@@ -106,15 +236,22 @@ data class AttendoPalette(
                 accentDark = accent.copy(red = accent.red * 0.8f, green = accent.green * 0.8f, blue = accent.blue * 0.8f),
                 hero = pick("hero", base.hero),
                 onHero = pick("on_hero", base.onHero),
-                pink = pick("pink", base.pink),
-                blue = pick("blue", base.blue),
+                pink = pink,
+                blue = blue,
                 yellow = pick("yellow", base.yellow),
+                accentFill = accent,
+                pinkFill = pink,
+                blueFill = blue,
             )
         }
 
         fun forMode(mode: ThemeMode, customHex: Map<String, String>) = when (mode) {
             ThemeMode.LIGHT -> Light
             ThemeMode.DARK -> Dark
+            ThemeMode.LEDGER -> Ledger
+            ThemeMode.NEON -> Neon
+            ThemeMode.PASTEL -> Pastel
+            ThemeMode.VSCODE -> VsCode
             ThemeMode.CUSTOM -> custom(customHex)
         }
     }
@@ -142,6 +279,13 @@ fun Color.toHex(): String {
     return "#%02X%02X%02X".format(r, g, b)
 }
 
+/** WCAG contrast ratio between two opaque colours (1 = none, 21 = black on white). */
+fun contrastRatio(a: Color, b: Color): Float {
+    val la = a.luminance() + 0.05f
+    val lb = b.luminance() + 0.05f
+    return if (la > lb) la / lb else lb / la
+}
+
 /**
  * App colours. Backed by snapshot state, so switching theme recolours every screen (composition
  * and Canvas drawing alike) without each call site having to change.
@@ -162,35 +306,60 @@ object AttendoColors {
     val Water: Color get() = palette.water
     val Hero: Color get() = palette.hero
     val OnHero: Color get() = palette.onHero
+
+    /** Fill for primary buttons, the selected tab and "present" chips (may be paler than [Green]). */
+    val GreenFill: Color get() = palette.accentFill
+    val PinkFill: Color get() = palette.pinkFill
+    val BlueFill: Color get() = palette.blueFill
+
+    /** Text/icon colour on top of [GreenFill]. */
+    val OnAccent: Color get() = on(palette.accentFill)
+
+    /**
+     * Text/icon colour for content drawn on [fill]: the background colour when that is readable
+     * (the look every theme had so far), otherwise the text colour (pale fills, as in Pastel).
+     */
+    fun on(fill: Color): Color {
+        val onBackground = contrastRatio(palette.background, fill)
+        return if (onBackground >= 2f || onBackground >= contrastRatio(palette.text, fill)) palette.background else palette.text
+    }
 }
 
-private val Grotesk = FontFamily.SansSerif
+/** Handwritten style used in speech bubbles (kept for callers that set the family directly). */
+val HandFont: FontFamily get() = AttendoColors.palette.fonts.hand
 
-/** Handwritten style used in speech bubbles. */
-val HandFont = FontFamily.Cursive
-
-private val AttendoTypography = Typography(
-    displayLarge = TextStyle(fontFamily = Grotesk, fontWeight = FontWeight.Bold, fontSize = 54.sp, lineHeight = 54.sp, letterSpacing = (-1.5).sp),
-    headlineLarge = TextStyle(fontFamily = Grotesk, fontWeight = FontWeight.Normal, fontSize = 30.sp, lineHeight = 36.sp, letterSpacing = (-0.5).sp),
-    headlineSmall = TextStyle(fontFamily = Grotesk, fontWeight = FontWeight.SemiBold, fontSize = 22.sp, lineHeight = 28.sp),
-    titleMedium = TextStyle(fontFamily = Grotesk, fontWeight = FontWeight.Medium, fontSize = 17.sp, lineHeight = 22.sp),
-    bodyLarge = TextStyle(fontFamily = Grotesk, fontSize = 16.sp, lineHeight = 22.sp),
-    bodyMedium = TextStyle(fontFamily = Grotesk, fontSize = 14.sp, lineHeight = 20.sp),
-    labelLarge = TextStyle(fontFamily = Grotesk, fontWeight = FontWeight.Medium, fontSize = 15.sp),
-    labelMedium = TextStyle(fontFamily = Grotesk, fontWeight = FontWeight.Medium, fontSize = 12.sp),
-    labelSmall = TextStyle(fontFamily = Grotesk, fontSize = 11.sp),
-)
-
-/** Bubble/handwritten text style (re-read each time so it follows the theme). */
-val HandTextStyle: TextStyle
-    get() = TextStyle(
-        fontFamily = HandFont,
-        fontStyle = FontStyle.Italic,
-        fontWeight = FontWeight.Medium,
-        fontSize = 16.sp,
-        lineHeight = 19.sp,
-        color = AttendoColors.Ink,
+private fun typographyFor(fonts: AttendoFonts): Typography {
+    val f = fonts.body
+    val s = fonts.scale
+    return Typography(
+        displayLarge = TextStyle(fontFamily = f, fontWeight = FontWeight.Bold, fontSize = (54 * s).sp, lineHeight = (54 * s).sp, letterSpacing = (-1.5).sp),
+        headlineLarge = TextStyle(fontFamily = f, fontWeight = FontWeight.Normal, fontSize = (30 * s).sp, lineHeight = (36 * s).sp, letterSpacing = (-0.5).sp),
+        headlineSmall = TextStyle(fontFamily = f, fontWeight = FontWeight.SemiBold, fontSize = (22 * s).sp, lineHeight = (28 * s).sp),
+        titleLarge = TextStyle(fontFamily = f, fontWeight = FontWeight.SemiBold, fontSize = (20 * s).sp, lineHeight = (26 * s).sp),
+        titleMedium = TextStyle(fontFamily = f, fontWeight = FontWeight.Medium, fontSize = (17 * s).sp, lineHeight = (22 * s).sp),
+        titleSmall = TextStyle(fontFamily = f, fontWeight = FontWeight.Medium, fontSize = (14 * s).sp, lineHeight = (20 * s).sp),
+        bodyLarge = TextStyle(fontFamily = f, fontSize = (16 * s).sp, lineHeight = (22 * s).sp),
+        bodyMedium = TextStyle(fontFamily = f, fontSize = (14 * s).sp, lineHeight = (20 * s).sp),
+        bodySmall = TextStyle(fontFamily = f, fontSize = (12 * s).sp, lineHeight = (16 * s).sp),
+        labelLarge = TextStyle(fontFamily = f, fontWeight = FontWeight.Medium, fontSize = (15 * s).sp),
+        labelMedium = TextStyle(fontFamily = f, fontWeight = FontWeight.Medium, fontSize = (12 * s).sp),
+        labelSmall = TextStyle(fontFamily = f, fontSize = (11 * s).sp),
     )
+}
+
+/** Bubble text style (re-read each time so it follows the theme). */
+val HandTextStyle: TextStyle
+    get() {
+        val fonts = AttendoColors.palette.fonts
+        return TextStyle(
+            fontFamily = fonts.hand,
+            fontStyle = if (fonts.handItalic) FontStyle.Italic else FontStyle.Normal,
+            fontWeight = FontWeight.Medium,
+            fontSize = (if (fonts.handItalic) 16f else 13.5f * fonts.scale).sp,
+            lineHeight = 19.sp,
+            color = AttendoColors.Ink,
+        )
+    }
 
 private val AttendoShapes = Shapes(
     small = RoundedCornerShape(12.dp),
@@ -222,7 +391,8 @@ fun AttendoTheme(content: @Composable () -> Unit) {
         outline = p.cardDeep, outlineVariant = p.cardDeep,
         error = p.pink, onError = p.background,
     )
-    MaterialTheme(colorScheme = scheme, typography = AttendoTypography, shapes = AttendoShapes) {
+    val typography = remember(p.fonts) { typographyFor(p.fonts) }
+    MaterialTheme(colorScheme = scheme, typography = typography, shapes = AttendoShapes) {
         // Material 3 only sets the content colour inside a Surface; without this, every Text and
         // Icon that doesn't pass a colour falls back to black, which vanished on the dark theme.
         CompositionLocalProvider(LocalContentColor provides p.text, content = content)

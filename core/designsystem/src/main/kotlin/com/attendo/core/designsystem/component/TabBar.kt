@@ -71,8 +71,8 @@ fun AttendoTabBar(
 
 @Composable
 private fun TabButton(tab: TabItem, selected: Boolean, onClick: () -> Unit) {
-    val background by animateColorAsState(if (selected) AttendoColors.Green else Color.Transparent, Motion.settle(), label = "tabBg")
-    val content by animateColorAsState(if (selected) AttendoColors.Cream else AttendoColors.OnHero, Motion.settle(), label = "tabFg")
+    val background by animateColorAsState(if (selected) AttendoColors.GreenFill else Color.Transparent, Motion.settle(), label = "tabBg")
+    val content by animateColorAsState(if (selected) AttendoColors.OnAccent else AttendoColors.OnHero, Motion.settle(), label = "tabFg")
     Row(
         Modifier
             .height(44.dp)

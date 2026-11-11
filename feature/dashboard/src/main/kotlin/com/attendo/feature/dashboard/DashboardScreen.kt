@@ -285,11 +285,11 @@ private fun FocusCard(state: DashboardUiState, timer: PomodoroTimerState, onTogg
                     .size(44.dp)
                     .iosPress(PressStyle.Scale, onClickLabel = if (timer.running) "Pause" else "Start", onClick = onToggle)
                     .clip(CircleShape)
-                    .background(AttendoColors.Green),
+                    .background(AttendoColors.GreenFill),
                 contentAlignment = Alignment.Center,
             ) {
-                if (timer.running) PauseGlyph(AttendoColors.Cream)
-                else Icon(Icons.Filled.PlayArrow, contentDescription = null, tint = AttendoColors.Cream)
+                if (timer.running) PauseGlyph(AttendoColors.OnAccent)
+                else Icon(Icons.Filled.PlayArrow, contentDescription = null, tint = AttendoColors.OnAccent)
             }
         }
     }

@@ -279,10 +279,10 @@ internal fun Header(selectedDate: LocalDate, onOpenCalendar: () -> Unit = {}) {
         Text(
             selectedDate.format(HeaderDate),
             style = MaterialTheme.typography.labelLarge,
-            color = if (selectedDate == LocalDate.now()) AttendoColors.Cream else AttendoColors.Ink,
+            color = if (selectedDate == LocalDate.now()) AttendoColors.OnAccent else AttendoColors.Ink,
             modifier = Modifier
                 .clip(CircleShape)
-                .background(if (selectedDate == LocalDate.now()) AttendoColors.Green else AttendoColors.CreamDeep)
+                .background(if (selectedDate == LocalDate.now()) AttendoColors.GreenFill else AttendoColors.CreamDeep)
                 .padding(horizontal = 12.dp, vertical = 6.dp),
         )
     }
@@ -407,13 +407,13 @@ internal fun SubjectDayRow(
         }
         Spacer(Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MarkChip("Present", AttendoColors.Green, item.statusOnDay == AttendanceStatus.PRESENT, Modifier.weight(1f)) {
+            MarkChip("Present", AttendoColors.Green, item.statusOnDay == AttendanceStatus.PRESENT, Modifier.weight(1f), AttendoColors.GreenFill) {
                 onMark(AttendanceStatus.PRESENT)
             }
-            MarkChip("Absent", AttendoColors.Pink, item.statusOnDay == AttendanceStatus.ABSENT, Modifier.weight(1f)) {
+            MarkChip("Absent", AttendoColors.Pink, item.statusOnDay == AttendanceStatus.ABSENT, Modifier.weight(1f), AttendoColors.PinkFill) {
                 onMark(AttendanceStatus.ABSENT)
             }
-            MarkChip("No class", AttendoColors.Blue, item.statusOnDay == AttendanceStatus.CANCELLED, Modifier.weight(1f)) {
+            MarkChip("No class", AttendoColors.Blue, item.statusOnDay == AttendanceStatus.CANCELLED, Modifier.weight(1f), AttendoColors.BlueFill) {
                 onMark(AttendanceStatus.CANCELLED)
             }
         }
@@ -448,14 +448,23 @@ private fun PercentColumn(summary: AttendanceSummary) {
 }
 
 @Composable
-private fun MarkChip(text: String, color: Color, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+private fun MarkChip(
+    text: String,
+    /** Label colour while unselected. */
+    color: Color,
+    selected: Boolean,
+    modifier: Modifier,
+    /** Chip colour while selected. */
+    fill: Color = color,
+    onClick: () -> Unit,
+) {
     val haptics = LocalHapticFeedback.current
     val background by animateColorAsState(
-        if (selected) color else AttendoColors.Cream,
+        if (selected) fill else AttendoColors.Cream,
         animationSpec = Motion.bouncy(),
         label = "chipBg",
     )
-    val content by animateColorAsState(if (selected) AttendoColors.Cream else color, label = "chipFg")
+    val content by animateColorAsState(if (selected) AttendoColors.on(fill) else color, label = "chipFg")
     Box(
         modifier
             .iosPress(PressStyle.Scale, onClickLabel = "Mark $text") {

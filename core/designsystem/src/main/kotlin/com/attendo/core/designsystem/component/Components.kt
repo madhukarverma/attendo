@@ -127,7 +127,7 @@ fun AttendoCard(
 /** Full-width green call-to-action button ("Finish" in the designs). */
 @Composable
 fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
-    val container by animateColorAsState(if (enabled) AttendoColors.Green else AttendoColors.CreamDeep, label = "btn")
+    val container by animateColorAsState(if (enabled) AttendoColors.GreenFill else AttendoColors.CreamDeep, label = "btn")
     Box(
         modifier
             .fillMaxWidth()
@@ -140,7 +140,7 @@ fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifi
         Text(
             text,
             style = MaterialTheme.typography.labelLarge,
-            color = if (enabled) AttendoColors.Cream else AttendoColors.Muted,
+            color = if (enabled) AttendoColors.OnAccent else AttendoColors.Muted,
         )
     }
 }

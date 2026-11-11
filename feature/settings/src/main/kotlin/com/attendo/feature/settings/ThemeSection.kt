@@ -2,6 +2,7 @@ package com.attendo.feature.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,9 +13,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -40,9 +48,12 @@ import com.attendo.core.designsystem.theme.parseHexColor
 import com.attendo.core.designsystem.theme.toHex
 import com.attendo.core.model.ThemeMode
 
+private const val CUSTOM_LABEL = "Custom"
+private const val CUSTOM_DESCRIPTION = "Set any colour with a hex code (#RRGGBB). Changes apply instantly."
+
 /**
- * Theme picker: Light (default), Dark (pitch black with dark-grey layers) or Custom, where every
- * colour of the app can be set with a hex code.
+ * Theme picker: one dropdown listing every built-in theme (Light, Dark, Ledger, Neon, Pastel,
+ * VS Code) plus Custom, where each colour of the app can be set with a hex code.
  */
 @Composable
 internal fun ThemeSection(
@@ -51,6 +62,10 @@ internal fun ThemeSection(
     onThemeChange: (ThemeMode) -> Unit,
     onCustomColorsChange: (Map<String, String>) -> Unit,
 ) {
+    var open by remember { mutableStateOf(false) }
+    val preset = AttendoPalette.PRESETS.firstOrNull { it.first == theme }
+    val label = preset?.second ?: CUSTOM_LABEL
+
     Column(
         Modifier
             .fillMaxWidth()
@@ -58,34 +73,60 @@ internal fun ThemeSection(
             .background(AttendoColors.CreamCard)
             .padding(14.dp),
     ) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ThemeChip("Light", AttendoPalette.Light, theme == ThemeMode.LIGHT, Modifier.weight(1f)) { onThemeChange(ThemeMode.LIGHT) }
-            ThemeChip("Dark", AttendoPalette.Dark, theme == ThemeMode.DARK, Modifier.weight(1f)) { onThemeChange(ThemeMode.DARK) }
-            ThemeChip("Custom", AttendoPalette.custom(customColors), theme == ThemeMode.CUSTOM, Modifier.weight(1f)) {
-                onThemeChange(ThemeMode.CUSTOM)
+        Box {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .iosPress(PressStyle.Highlight, onClickLabel = "Choose theme") { open = true }
+                    .background(AttendoColors.Cream)
+                    .border(1.dp, AttendoColors.CreamDeep, RoundedCornerShape(16.dp))
+                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Swatches(AttendoPalette.forMode(theme, customColors))
+                Spacer(Modifier.width(12.dp))
+                Text(label, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = AttendoColors.Muted)
+            }
+            DropdownMenu(
+                expanded = open,
+                onDismissRequest = { open = false },
+                containerColor = AttendoColors.CreamCard,
+            ) {
+                AttendoPalette.PRESETS.forEach { (mode, name, _) ->
+                    ThemeMenuItem(name, AttendoPalette.forMode(mode, customColors), selected = mode == theme) {
+                        open = false
+                        onThemeChange(mode)
+                    }
+                }
+                ThemeMenuItem(CUSTOM_LABEL, AttendoPalette.custom(customColors), selected = theme == ThemeMode.CUSTOM) {
+                    open = false
+                    onThemeChange(ThemeMode.CUSTOM)
+                }
             }
         }
         Spacer(Modifier.height(8.dp))
         Text(
-            when (theme) {
-                ThemeMode.LIGHT -> "Light: the original cream, ink and green."
-                ThemeMode.DARK -> "Dark: pitch-black base with dark-grey cards for texture."
-                ThemeMode.CUSTOM -> "Custom: set any colour with a hex code (#RRGGBB). Changes apply instantly."
-            },
+            preset?.third ?: CUSTOM_DESCRIPTION,
             style = MaterialTheme.typography.labelSmall,
             color = AttendoColors.Muted,
         )
 
         if (theme == ThemeMode.CUSTOM) {
             Spacer(Modifier.height(10.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Text("Start from:", style = MaterialTheme.typography.labelMedium, color = AttendoColors.Muted)
-                TextButton(onClick = { onCustomColorsChange(AttendoPalette.Light.toHex()) }) { Text("Light") }
-                TextButton(onClick = { onCustomColorsChange(AttendoPalette.Dark.toHex()) }) { Text("Dark") }
+                AttendoPalette.PRESETS.forEach { (mode, name, _) ->
+                    TextButton(onClick = { onCustomColorsChange(AttendoPalette.forMode(mode, emptyMap()).toHex()) }) { Text(name) }
+                }
             }
             val effective = AttendoPalette.custom(customColors).toHex()
-            AttendoPalette.CUSTOM_KEYS.forEach { (key, label) ->
-                HexColorRow(label = label, hex = effective.getValue(key)) { newHex ->
+            AttendoPalette.CUSTOM_KEYS.forEach { (key, keyLabel) ->
+                HexColorRow(label = keyLabel, hex = effective.getValue(key)) { newHex ->
                     onCustomColorsChange(mapOf(key to newHex))
                 }
             }
@@ -93,30 +134,39 @@ internal fun ThemeSection(
     }
 }
 
+/** Background, accent fill, text-colour accent and hero colour of a theme, as overlapping dots. */
 @Composable
-private fun ThemeChip(label: String, preview: AttendoPalette, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    Column(
-        modifier
-            .iosPress(PressStyle.Scale, onClickLabel = "$label theme", onClick = onClick)
-            .clip(RoundedCornerShape(16.dp))
-            .background(preview.background)
-            .border(if (selected) 2.dp else 1.dp, if (selected) AttendoColors.Green else AttendoColors.CreamDeep, RoundedCornerShape(16.dp))
-            .padding(10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            listOf(preview.card, preview.accent, preview.hero).forEach {
-                Box(Modifier.size(12.dp).clip(CircleShape).background(it))
-            }
+private fun Swatches(palette: AttendoPalette) {
+    Row(horizontalArrangement = Arrangement.spacedBy((-6).dp)) {
+        listOf(palette.background, palette.accentFill, palette.accent, palette.hero).forEach {
+            Box(
+                Modifier
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(it)
+                    .border(1.dp, AttendoColors.Muted.copy(alpha = 0.5f), CircleShape),
+            )
         }
-        Spacer(Modifier.height(6.dp))
-        Text(
-            label,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-            color = preview.text,
-        )
     }
+}
+
+@Composable
+private fun ThemeMenuItem(name: String, palette: AttendoPalette, selected: Boolean, onClick: () -> Unit) {
+    DropdownMenuItem(
+        text = {
+            Text(
+                name,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                color = AttendoColors.Ink,
+            )
+        },
+        leadingIcon = { Swatches(palette) },
+        trailingIcon = {
+            if (selected) Icon(Icons.Filled.Check, contentDescription = "Selected", tint = AttendoColors.Green, modifier = Modifier.size(18.dp))
+        },
+        onClick = onClick,
+    )
 }
 
 @Composable
