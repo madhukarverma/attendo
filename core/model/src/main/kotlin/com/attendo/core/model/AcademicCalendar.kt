@@ -6,12 +6,20 @@ import java.time.temporal.ChronoUnit
 
 enum class DayKind { CLASSES_START, CLASSES_END, HOLIDAY, EXAM, DEADLINE, EVENT }
 
-/** One calendar entry; multi-day entries (assessments, fests) span [start]..[end]. */
+/**
+ * One calendar entry; multi-day entries (assessments, fests) span [start]..[end].
+ *
+ * @property personal added by the student (see [PersonalEvent]), not from the official calendar.
+ * @property id the personal event's id, so it can be edited or deleted.
+ */
 data class CalendarEvent(
     val start: LocalDate,
     val end: LocalDate,
     val kind: DayKind,
     val title: String,
+    val personal: Boolean = false,
+    val id: String? = null,
+    val note: String = "",
 ) {
     operator fun contains(date: LocalDate) = !date.isBefore(start) && !date.isAfter(end)
 }

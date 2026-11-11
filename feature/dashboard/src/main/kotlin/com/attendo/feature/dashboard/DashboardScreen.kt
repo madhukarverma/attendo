@@ -1,5 +1,6 @@
 package com.attendo.feature.dashboard
 
+import com.attendo.core.data.PlannerRepository
 import com.attendo.core.model.Curriculum
 import com.attendo.core.data.HabitRepository
 import com.attendo.core.data.KanbanRepository
@@ -86,6 +87,7 @@ fun DashboardRoute(
     pomodoro: PomodoroRepository,
     timer: PomodoroTimer,
     calendar: AcademicCalendar,
+    planner: PlannerRepository? = null,
     curriculum: Curriculum = Curriculum.EMPTY,
     onOpenCurriculum: () -> Unit = {},
     onOpenAttendance: () -> Unit,
@@ -97,7 +99,7 @@ fun DashboardRoute(
     onOpenSettings: () -> Unit,
 ) {
     val vm: DashboardViewModel = viewModel {
-        DashboardViewModel(settings, subjects, attendance, todos, habits, kanban, pomodoro, timer, calendar)
+        DashboardViewModel(settings, subjects, attendance, todos, habits, kanban, pomodoro, timer, calendar, planner)
     }
     val state by vm.uiState.collectAsStateWithLifecycle()
     val timerState by vm.timerState.collectAsStateWithLifecycle()
@@ -254,9 +256,16 @@ private fun AttendanceCard(state: DashboardUiState, onOpen: () -> Unit) {
     }
 }
 
+private val ClassTime = DateTimeFormatter.ofPattern("H:mm")
+
 private fun todayLine(state: DashboardUiState): String {
     val holiday = state.holiday
+    val next = state.nextClass
     return when {
+        next != null && next.inProgress ->
+            "Now: ${next.subject} until ${next.end.format(ClassTime)}" + if (next.room.isNotBlank()) " · ${next.room}" else ""
+        next != null ->
+            "Next: ${next.subject} at ${next.start.format(ClassTime)}" + if (next.room.isNotBlank()) " · ${next.room}" else ""
         holiday != null -> "Today: holiday (${holiday.title})"
         state.isWeekend -> "Today: weekend, no classes"
         state.summaries.isEmpty() -> "Today: nothing to mark yet"

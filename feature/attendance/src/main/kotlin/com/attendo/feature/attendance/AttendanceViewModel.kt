@@ -1,5 +1,9 @@
 package com.attendo.feature.attendance
 
+import com.attendo.core.data.PlannerRepository
+import com.attendo.core.model.Timetable
+import com.attendo.core.model.TimetableSlot
+import kotlinx.coroutines.flow.flowOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.attendo.core.data.AttendanceRepository
@@ -26,6 +30,8 @@ data class SubjectDayItem(
     val statusOnDay: AttendanceStatus?,
     /** 2 when the selected day's mark is a double class. */
     val countOnDay: Int = 1,
+    /** This subject's classes on the selected day's timetable, earliest first. */
+    val slots: List<TimetableSlot> = emptyList(),
 )
 
 data class AttendanceUiState(
@@ -37,9 +43,21 @@ data class AttendanceUiState(
     val tinderMode: Boolean = false,
     val canUndoSwipe: Boolean = false,
     val calendar: AcademicCalendar = AcademicCalendar.EMPTY,
+    /** The student has entered a weekly timetable. */
+    val hasTimetable: Boolean = false,
 ) {
+    /** Subjects on the selected day's timetable, in class order (every subject without a timetable). */
+    val scheduled: List<SubjectDayItem>
+        get() = if (!hasTimetable) items else items.filter { it.slots.isNotEmpty() }.sortedBy { it.slots.first().start }
+
+    /** Subjects not on the selected day's timetable (empty without a timetable). */
+    val others: List<SubjectDayItem> get() = if (!hasTimetable) emptyList() else items.filter { it.slots.isEmpty() }
+
+    /** What Tinder mode swipes through: the day's scheduled subjects, or all when none are scheduled. */
+    val deck: List<SubjectDayItem> get() = scheduled.ifEmpty { items }
+
     /** Cards still to swipe for the selected day. */
-    val unmarked: List<SubjectDayItem> get() = items.filter { it.statusOnDay == null }
+    val unmarked: List<SubjectDayItem> get() = deck.filter { it.statusOnDay == null }
 
     /** The whole semester from the academic calendar (falls back to ±2 weeks around today). */
     val days: List<LocalDate>
@@ -70,7 +88,14 @@ class AttendanceViewModel(
     private val subjects: SubjectRepository,
     private val attendance: AttendanceRepository,
     private val calendar: AcademicCalendar = AcademicCalendar.EMPTY,
+    planner: PlannerRepository? = null,
 ) : ViewModel() {
+
+    /** Official calendar plus the student's own events, and the weekly timetable. */
+    private val plan = combine(
+        planner?.calendar(calendar) ?: flowOf(calendar),
+        planner?.slots ?: flowOf(emptyList()),
+    ) { cal, slots -> cal to slots }
 
     /** Swipes made in this session, newest last, for the Tinder-style undo button. */
     private val swipeHistory = MutableStateFlow<List<Pair<String, LocalDate>>>(emptyList())
@@ -112,19 +137,27 @@ class AttendanceViewModel(
         subjects.subjects,
         attendance.records,
         selectedDate,
-        swipeHistory,
-    ) { s, subjectList, records, date, history ->
+        combine(swipeHistory, plan) { history, p -> history to p },
+    ) { s, subjectList, records, date, (history, p) ->
+        val (cal, slots) = p
         val onDay = records.filter { it.date == date }.associateBy { it.subjectId }
+        val slotsToday = Timetable.bySubjectOn(slots, date)
         AttendanceUiState(
             userName = s.nickname,
             selectedDate = date,
             items = subjectList.map { subject ->
-                SubjectDayItem(AttendanceSummary.from(subject, records), onDay[subject.id]?.status, onDay[subject.id]?.count ?: 1)
+                SubjectDayItem(
+                    AttendanceSummary.from(subject, records),
+                    onDay[subject.id]?.status,
+                    onDay[subject.id]?.count ?: 1,
+                    slotsToday[subject.id].orEmpty(),
+                )
             },
             markedDays = records.mapTo(HashSet()) { it.date },
             tinderMode = s.tinderMode,
             canUndoSwipe = history.isNotEmpty(),
-            calendar = calendar,
+            calendar = cal,
+            hasTimetable = slots.isNotEmpty(),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AttendanceUiState())
 

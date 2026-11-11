@@ -1,7 +1,7 @@
 # Open Issues / Room for Future Work
 
 - ISSUE-001 — Mixed double class (present for one, absent for the other); today a ×2 mark is all present or all absent.
-- ISSUE-002 — Weekly timetable so the home screen only shows subjects scheduled that day.
+- ~~ISSUE-002 — Weekly timetable.~~ Done in v0.29.0.
 - ISSUE-003 — Daily "mark today's attendance" reminder (to-do reminders exist since v0.18).
 - ISSUE-006 — Release signing keystore + CI build (GitHub Actions). Also gives Google sign-in a
   stable SHA-1 (today it's the debug key of the build PC, DEC-012).
@@ -24,4 +24,4 @@
   attendance. Attendance visibility to friends is a toggle. Needs a shared backend (accounts,
   profiles, friend graph, privacy rules) — Drive app-data is per user and can't be shared.
 - ~~ISSUE-017 — Grades in previous assessments, private by default.~~ Done in v0.28.0.
-- ISSUE-018 — Personalised MCA calendar.
+- ~~ISSUE-018 — Personalised MCA calendar.~~ Done in v0.29.0 (timetable, own events, day agenda).

@@ -1,5 +1,13 @@
 package com.attendo.feature.calendar
 
+import com.attendo.core.model.PersonalEvent
+import com.attendo.core.model.Subject
+import com.attendo.core.model.TimetableSlot
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.attendo.core.model.Todo
 import com.attendo.core.model.TodoAgenda
 import androidx.compose.ui.text.style.TextDecoration
@@ -88,7 +96,14 @@ fun CalendarScreen(
     today: LocalDate = LocalDate.now(),
     /** The user's to-dos and reminders, marked on their days and listed per month. */
     todos: List<Todo> = emptyList(),
+    slots: List<TimetableSlot> = emptyList(),
+    subjects: List<Subject> = emptyList(),
+    onSaveEvent: (PersonalEvent) -> Unit = {},
+    onDeleteEvent: (id: String) -> Unit = {},
+    onOpenTimetable: () -> Unit = {},
 ) {
+    var agendaDay by remember { mutableStateOf<LocalDate?>(null) }
+    var eventDraft by remember { mutableStateOf<PersonalEvent?>(null) }
     val months = remember(calendar) { monthsOf(calendar, today) }
     val todoDays = remember(todos) { TodoAgenda.openDays(todos) }
     val listState = rememberLazyListState()
@@ -105,7 +120,7 @@ fun CalendarScreen(
             .background(AttendoColors.Cream)
             .safeDrawingPadding(),
     ) {
-        CollapsingTopBar(title = "Academic Calendar", collapseFraction = { collapse }, onBack = onClose, backLabel = "Back")
+        CollapsingTopBar(title = "Calendar", collapseFraction = { collapse }, onBack = onClose, backLabel = "Back")
         BounceContainer(Modifier.fillMaxSize()) {
             LazyColumn(
                 Modifier.fillMaxSize().padding(horizontal = 20.dp),
@@ -113,16 +128,30 @@ fun CalendarScreen(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 item { LargeTitle("Calendar") }
+                item {
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        ActionPill(
+                            if (slots.isEmpty()) "Set timetable" else "Timetable",
+                            Icons.Filled.DateRange,
+                            Modifier.weight(1f),
+                            onOpenTimetable,
+                        )
+                        ActionPill("Add event", Icons.Filled.Add, Modifier.weight(1f), { eventDraft = PersonalEvent("", "", today) }, primary = true)
+                    }
+                }
                 item { SemesterCard(calendar, today) }
                 item { Legend() }
                 item { ComingUp(calendar, today) }
                 item { YourTodos(todos, today) }
                 items(months, key = { it.toString() }) { month ->
-                    MonthCard(month, calendar, today, selected, onPickDate, todos, todoDays)
+                    MonthCard(month, calendar, today, selected, { agendaDay = it }, todos, todoDays) { id ->
+                        eventDraft = personalEvent(calendar, id)
+                    }
                 }
                 item {
                     Text(
-                        "Saturdays and Sundays are holidays. Source: NIT Trichy academic calendar, July 2026 session.",
+                        "Tap a day to see its classes and events. Saturdays and Sundays are holidays. " +
+                            "Source: NIT Trichy academic calendar, July 2026 session; entries marked \u201cYours\u201d are your own.",
                         style = MaterialTheme.typography.labelSmall,
                         color = AttendoColors.Muted,
                         modifier = Modifier.padding(top = 4.dp, bottom = 32.dp),
@@ -131,9 +160,38 @@ fun CalendarScreen(
             }
         }
     }
+
+    agendaDay?.let { day ->
+        DayAgendaSheet(
+            day = day,
+            calendar = calendar,
+            slots = slots,
+            subjects = subjects,
+            todos = todos,
+            onDismiss = { agendaDay = null },
+            onAddEvent = { eventDraft = PersonalEvent("", "", day) },
+            onEditEvent = { id -> eventDraft = personalEvent(calendar, id) },
+            onMarkAttendance = { agendaDay = null; onPickDate(day) },
+            onOpenTimetable = { agendaDay = null; onOpenTimetable() },
+        )
+    }
+    eventDraft?.let { draft ->
+        EventDialog(
+            event = draft,
+            onDismiss = { eventDraft = null },
+            onSave = { eventDraft = null; onSaveEvent(it) },
+            onDelete = if (draft.id.isEmpty()) null else ({ eventDraft = null; onDeleteEvent(draft.id) }),
+        )
+    }
 }
 
-private const val HEADER_ITEMS = 5
+private const val HEADER_ITEMS = 6
+
+/** Rebuilds the editable event behind a personal calendar entry. */
+private fun personalEvent(calendar: AcademicCalendar, id: String): PersonalEvent? =
+    calendar.events.firstOrNull { it.personal && it.id == id }?.let {
+        PersonalEvent(id = id, title = it.title, start = it.start, end = it.end, kind = it.kind, note = it.note)
+    }
 
 private fun monthsOf(calendar: AcademicCalendar, today: LocalDate): List<YearMonth> {
     val first = calendar.events.minOfOrNull { it.start } ?: today
@@ -316,8 +374,15 @@ private fun TodoRow(todo: Todo) {
 }
 
 @Composable
-private fun EventRow(e: CalendarEvent, trailing: String? = null) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+private fun EventRow(e: CalendarEvent, trailing: String? = null, onEdit: ((String) -> Unit)? = null) {
+    val editable = e.personal && e.id != null && onEdit != null
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .then(if (editable) Modifier.iosPress(PressStyle.Highlight, onClickLabel = "Edit ${e.title}") { onEdit?.invoke(e.id!!) } else Modifier)
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Box(Modifier.size(10.dp).clip(CircleShape).background(e.kind.color()))
         Spacer(Modifier.width(10.dp))
         Text(
@@ -328,7 +393,11 @@ private fun EventRow(e: CalendarEvent, trailing: String? = null) {
         )
         Column(Modifier.weight(1f)) {
             Text(e.title, style = MaterialTheme.typography.bodyMedium)
-            Text(e.kind.label(), style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
+            Text(
+                if (e.personal) "${e.kind.label()} · Yours" else e.kind.label(),
+                style = MaterialTheme.typography.labelSmall,
+                color = if (e.personal) AttendoColors.Green else AttendoColors.Muted,
+            )
         }
         if (trailing != null) {
             Text(trailing, style = MaterialTheme.typography.labelMedium, color = AttendoColors.Green)
@@ -345,6 +414,7 @@ private fun MonthCard(
     onPickDate: (LocalDate) -> Unit,
     todos: List<Todo>,
     todoDays: Set<LocalDate>,
+    onEditEvent: (String) -> Unit = {},
 ) {
     Column(
         Modifier
@@ -397,7 +467,7 @@ private fun MonthCard(
             Spacer(Modifier.height(8.dp))
             Box(Modifier.fillMaxWidth().height(1.dp).background(AttendoColors.CreamDeep))
             Spacer(Modifier.height(6.dp))
-            monthEvents.forEach { EventRow(it) }
+            monthEvents.forEach { EventRow(it, onEdit = onEditEvent) }
             monthTodos.forEach { TodoRow(it) }
         }
     }

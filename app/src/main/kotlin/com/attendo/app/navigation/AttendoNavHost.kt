@@ -1,5 +1,6 @@
 package com.attendo.app.navigation
 
+import com.attendo.feature.calendar.TimetableScreen
 import com.attendo.feature.curriculum.CurriculumScreen
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -92,6 +93,7 @@ object Routes {
     const val SUBJECT_DETAIL = "subject/{id}"
     fun subjectDetail(id: String) = "subject/$id"
     const val SETTINGS = "settings"
+    const val TIMETABLE = "timetable"
     const val CURRICULUM = "curriculum?code={code}"
     fun curriculum(code: String? = null) = if (code == null) "curriculum" else "curriculum?code=$code"
     const val CALENDAR = "calendar/{date}"
@@ -227,6 +229,7 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                         pomodoro = data.pomodoro,
                         timer = container.pomodoroTimer,
                         calendar = container.academicCalendar,
+                        planner = data.planner,
                         curriculum = container.curriculum,
                         onOpenCurriculum = { navController.push(Routes.curriculum()) },
                         onOpenAttendance = { navController.switchTab(Routes.ATTENDANCE) },
@@ -258,6 +261,7 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                         onAddSubject = { navController.push(Routes.ADD_SUBJECT) },
                         onOpenSubject = { id -> navController.push(Routes.subjectDetail(id)) },
                         calendar = container.academicCalendar,
+                        planner = data.planner,
                         onOpenCalendar = { date -> navController.push(Routes.calendar(date)) },
                         requestedDate = requested?.let(LocalDate::parse),
                         onRequestedDateHandled = { entry.savedStateHandle[KEY_PICKED_DATE] = null },
@@ -289,10 +293,20 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                 composable(Routes.CALENDAR) { entry ->
                     val selected = entry.arguments?.getString("date")?.let(LocalDate::parse) ?: LocalDate.now()
                     val todos by data.todos.todos.collectAsStateWithLifecycle(initialValue = emptyList())
+                    val calendar by remember { data.planner.calendar(container.academicCalendar) }
+                        .collectAsStateWithLifecycle(initialValue = container.academicCalendar)
+                    val slots by data.planner.slots.collectAsStateWithLifecycle(initialValue = emptyList())
+                    val subjectList by data.subjects.subjects.collectAsStateWithLifecycle(initialValue = emptyList())
+                    val scope = rememberCoroutineScope()
                     CalendarScreen(
-                        calendar = container.academicCalendar,
+                        calendar = calendar,
                         selected = selected,
                         todos = todos,
+                        slots = slots,
+                        subjects = subjectList,
+                        onSaveEvent = { event -> scope.launch { data.planner.saveEvent(event) } },
+                        onDeleteEvent = { id -> scope.launch { data.planner.deleteEvent(id) } },
+                        onOpenTimetable = { navController.push(Routes.TIMETABLE) },
                         onPickDate = { date ->
                             val previous = navController.previousBackStackEntry
                             if (previous?.destination?.route == Routes.ATTENDANCE) {
@@ -306,6 +320,18 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                                 navController.currentBackStackEntry?.savedStateHandle?.set(KEY_PICKED_DATE, date.toString())
                             }
                         },
+                        onClose = { navController.back() },
+                    )
+                }
+                composable(Routes.TIMETABLE) {
+                    val slots by data.planner.slots.collectAsStateWithLifecycle(initialValue = emptyList())
+                    val subjectList by data.subjects.subjects.collectAsStateWithLifecycle(initialValue = emptyList())
+                    val scope = rememberCoroutineScope()
+                    TimetableScreen(
+                        slots = slots,
+                        subjects = subjectList,
+                        onSave = { slot -> scope.launch { data.planner.saveSlot(slot) } },
+                        onDelete = { id -> scope.launch { data.planner.deleteSlot(id) } },
                         onClose = { navController.back() },
                     )
                 }
@@ -344,6 +370,7 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                         attendance = data.attendance,
                         onClose = { navController.back() },
                         grades = data.grades,
+                        planner = data.planner,
                         curriculum = container.curriculum,
                         onOpenCurriculum = { code -> navController.push(Routes.curriculum(code)) },
                     )

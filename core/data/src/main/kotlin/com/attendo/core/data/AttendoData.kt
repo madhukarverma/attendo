@@ -1,5 +1,6 @@
 package com.attendo.core.data
 
+import com.attendo.core.data.planner.CsvPlannerRepository
 import com.attendo.core.data.grades.CsvGradeRepository
 import com.attendo.core.model.CourseCatalog
 import com.attendo.core.data.habit.CsvHabitRepository
@@ -24,6 +25,8 @@ import java.io.File
  * - `pomodoro.csv`   id,date,started_at,kind,subject_id,planned_seconds,actual_seconds,completed
  * - `todos.csv`      id,title,date,remind_at,done,created_at
  * - `grades.csv`     id,subject_id,title,scored,max_marks,date,created_at
+ * - `timetable.csv`  id,subject_id,day,start,end,room
+ * - `events.csv`     id,title,start,end,kind,note,created_at
  * - `habits.csv`     id,title,days,position,created_at
  * - `habit_log.csv`  habit_id,date
  * - `kanban_columns.csv` id,title,position,done
@@ -43,6 +46,7 @@ class AttendoData(
     private val kanbanCsv = CsvKanbanRepository(dir, scope, io, clock)
     private val habitsCsv = CsvHabitRepository(dir, scope, io, clock)
     private val gradesCsv = CsvGradeRepository(dir, scope, io, clock)
+    private val plannerCsv = CsvPlannerRepository(dir, scope, io, clock)
 
     val settings: SettingsRepository = settingsCsv
     val subjects: SubjectRepository = subjectsCsv
@@ -52,6 +56,7 @@ class AttendoData(
     val kanban: KanbanRepository = kanbanCsv
     val habits: HabitRepository = habitsCsv
     val grades: GradeRepository = gradesCsv
+    val planner: PlannerRepository = plannerCsv
 
     /** Every table by file name, for backup and restore. */
     private val stores: Map<String, CsvStore<*>>
@@ -66,6 +71,8 @@ class AttendoData(
             HABITS_FILE to habitsCsv.habitStore,
             HABIT_LOG_FILE to habitsCsv.logStore,
             GRADES_FILE to gradesCsv.store,
+            TIMETABLE_FILE to plannerCsv.slotStore,
+            EVENTS_FILE to plannerCsv.eventStore,
         )
 
     /** Matches picked CSV files (display name to text) to tables; nothing is changed yet. */
@@ -168,9 +175,12 @@ class AttendoData(
         const val HABITS_FILE = "habits.csv"
         const val HABIT_LOG_FILE = "habit_log.csv"
         const val GRADES_FILE = "grades.csv"
+        const val TIMETABLE_FILE = "timetable.csv"
+        const val EVENTS_FILE = "events.csv"
         val ALL_FILES
             get() = listOf(
-                SUBJECTS_FILE, ATTENDANCE_FILE, GRADES_FILE, POMODORO_FILE, TODOS_FILE, HABITS_FILE, HABIT_LOG_FILE,
+                SUBJECTS_FILE, ATTENDANCE_FILE, GRADES_FILE, TIMETABLE_FILE, EVENTS_FILE,
+                POMODORO_FILE, TODOS_FILE, HABITS_FILE, HABIT_LOG_FILE,
                 KANBAN_COLUMNS_FILE, KANBAN_CARDS_FILE, SETTINGS_FILE,
             )
         const val SETTINGS_FILE = "settings.csv"

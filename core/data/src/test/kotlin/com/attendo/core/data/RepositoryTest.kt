@@ -1,5 +1,9 @@
 package com.attendo.core.data
 
+import com.attendo.core.model.AcademicCalendar
+import com.attendo.core.model.DayKind
+import com.attendo.core.model.PersonalEvent
+import com.attendo.core.model.TimetableSlot
 import com.attendo.core.model.HabitCheck
 import java.time.DayOfWeek
 import com.attendo.core.model.CardPriority
@@ -234,6 +238,34 @@ class RepositoryTest {
         val plan = reloaded.planCsvImport(listOf("g.csv" to "id,subject_id,title,scored,max_marks\na,os,Quiz,8,10\nb,os,Bad,NaN,10\n"))
         assertEquals(listOf("grades.csv"), plan.tables.map { it.file })
         assertEquals(mapOf("grades.csv" to 1), reloaded.applyCsvImport(plan))
+        dir.deleteRecursively()
+    }
+
+    @Test
+    fun plannerSurvivesReloadAndMergesIntoTheCalendar() = runTest {
+        val dir = Files.createTempDirectory("attendo").toFile()
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val data = AttendoData(dir, TestScope(dispatcher), dispatcher) { 11L }
+        advanceUntilIdle()
+        val slot = data.planner.saveSlot(TimetableSlot("", "os", DayOfWeek.MONDAY, LocalTime.of(9, 0), LocalTime.of(9, 50), " LH-2 "))
+        data.planner.saveSlot(slot.copy(end = LocalTime.of(10, 0)))
+        val quiz = data.planner.saveEvent(PersonalEvent("", "  OS quiz ", LocalDate.of(2026, 11, 20), kind = DayKind.EXAM))
+        data.planner.saveEvent(PersonalEvent("", "Bad kind", LocalDate.of(2026, 11, 21), kind = DayKind.CLASSES_START))
+
+        val reloaded = AttendoData(dir, TestScope(dispatcher), dispatcher)
+        advanceUntilIdle()
+        val slots = reloaded.planner.slots.first()
+        assertEquals(1, slots.size)
+        assertEquals(LocalTime.of(10, 0), slots.single().end)
+        assertEquals("LH-2", slots.single().room)
+        val events = reloaded.planner.events.first()
+        assertEquals("OS quiz", events.first { it.id == quiz.id }.title)
+        assertEquals(DayKind.EVENT, events.first { it.title == "Bad kind" }.kind)
+
+        val calendar = reloaded.planner.calendar(AcademicCalendar.EMPTY).first()
+        assertEquals(listOf(true, true), calendar.events.map { it.personal })
+        reloaded.planner.deleteSlotsForSubject("os")
+        assertEquals(emptyList<TimetableSlot>(), reloaded.planner.slots.first())
         dir.deleteRecursively()
     }
 

@@ -1,5 +1,8 @@
 package com.attendo.core.data
 
+import com.attendo.core.model.AcademicCalendar
+import com.attendo.core.model.PersonalEvent
+import com.attendo.core.model.TimetableSlot
 import com.attendo.core.model.Assessment
 import com.attendo.core.model.Habit
 import com.attendo.core.model.HabitCheck
@@ -128,4 +131,22 @@ interface GradeRepository {
     suspend fun update(assessment: Assessment)
     suspend fun delete(id: String)
     suspend fun deleteForSubject(subjectId: String)
+}
+
+/** The student's own calendar: weekly timetable and personal events. */
+interface PlannerRepository {
+    val slots: Flow<List<TimetableSlot>>
+    val events: Flow<List<PersonalEvent>>
+
+    /** [base] (the official calendar) with the personal events merged in, kept up to date. */
+    fun calendar(base: AcademicCalendar): Flow<AcademicCalendar>
+
+    /** Adds a slot (empty id) or replaces the one with the same id. */
+    suspend fun saveSlot(slot: TimetableSlot): TimetableSlot
+    suspend fun deleteSlot(id: String)
+    suspend fun deleteSlotsForSubject(subjectId: String)
+
+    /** Adds an event (empty id) or replaces the one with the same id. */
+    suspend fun saveEvent(event: PersonalEvent): PersonalEvent
+    suspend fun deleteEvent(id: String)
 }
