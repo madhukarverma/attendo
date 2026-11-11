@@ -84,7 +84,7 @@ internal fun CsvBackupSection(
             Icon(Icons.Filled.Info, contentDescription = null, tint = AttendoColors.Ink, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(12.dp))
             Text(
-                "Everything is stored on this phone as CSV files: subjects, attendance, pomodoro, todos, " +
+                "Everything is stored on this phone as CSV files: subjects, attendance, grades, pomodoro, tasks, " +
                     "the board and settings. Export them to open in Excel or Google Sheets, and restore them here.",
                 style = MaterialTheme.typography.bodyMedium,
             )

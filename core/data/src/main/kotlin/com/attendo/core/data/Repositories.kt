@@ -1,5 +1,6 @@
 package com.attendo.core.data
 
+import com.attendo.core.model.Assessment
 import com.attendo.core.model.Habit
 import com.attendo.core.model.HabitCheck
 import java.time.DayOfWeek
@@ -118,4 +119,13 @@ interface HabitRepository {
     /** Deletes a habit and its ticks. */
     suspend fun delete(habitId: String)
     suspend fun setChecked(habitId: String, date: LocalDate, checked: Boolean)
+}
+
+/** Marks per assessment. Private: stays on this phone (and in the user's own backups). */
+interface GradeRepository {
+    val assessments: Flow<List<Assessment>>
+    suspend fun add(subjectId: String, title: String, scored: Double, maxMarks: Double, date: LocalDate?): Assessment
+    suspend fun update(assessment: Assessment)
+    suspend fun delete(id: String)
+    suspend fun deleteForSubject(subjectId: String)
 }

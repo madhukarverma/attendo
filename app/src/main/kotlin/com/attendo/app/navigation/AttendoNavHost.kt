@@ -284,7 +284,7 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                     )
                 }
                 composable(Routes.STATS) {
-                    StatsRoute(subjects = data.subjects, attendance = data.attendance, onClose = null)
+                    StatsRoute(subjects = data.subjects, attendance = data.attendance, onClose = null, grades = data.grades)
                 }
                 composable(Routes.CALENDAR) { entry ->
                     val selected = entry.arguments?.getString("date")?.let(LocalDate::parse) ?: LocalDate.now()
@@ -343,6 +343,7 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                         subjects = data.subjects,
                         attendance = data.attendance,
                         onClose = { navController.back() },
+                        grades = data.grades,
                         curriculum = container.curriculum,
                         onOpenCurriculum = { code -> navController.push(Routes.curriculum(code)) },
                     )

@@ -213,6 +213,31 @@ class RepositoryTest {
     }
 
     @Test
+    fun gradesSurviveReloadAndImport() = runTest {
+        val dir = Files.createTempDirectory("attendo").toFile()
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val data = AttendoData(dir, TestScope(dispatcher), dispatcher) { 9L }
+        advanceUntilIdle()
+        val first = data.grades.add("os", "1st Assessment", 18.5, 20.0, LocalDate.of(2026, 9, 17))
+        data.grades.add("dsa", "1st Assessment", 15.0, 20.0, null)
+        data.grades.update(first.copy(scored = 19.0))
+
+        val reloaded = AttendoData(dir, TestScope(dispatcher), dispatcher)
+        advanceUntilIdle()
+        val saved = reloaded.grades.assessments.first()
+        assertEquals(listOf(19.0, 15.0), saved.map { it.scored })
+        assertEquals(LocalDate.of(2026, 9, 17), saved.first().date)
+        reloaded.grades.deleteForSubject("dsa")
+        assertEquals(listOf(first.id), reloaded.grades.assessments.first().map { it.id })
+
+        // A grades export is recognised by its columns, and junk rows are dropped.
+        val plan = reloaded.planCsvImport(listOf("g.csv" to "id,subject_id,title,scored,max_marks\na,os,Quiz,8,10\nb,os,Bad,NaN,10\n"))
+        assertEquals(listOf("grades.csv"), plan.tables.map { it.file })
+        assertEquals(mapOf("grades.csv" to 1), reloaded.applyCsvImport(plan))
+        dir.deleteRecursively()
+    }
+
+    @Test
     fun addFromCatalogSkipsExistingCodes() = runTest {
         val dir = Files.createTempDirectory("attendo").toFile()
         val dispatcher = StandardTestDispatcher(testScheduler)
