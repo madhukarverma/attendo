@@ -6,7 +6,7 @@
 
 android {
     namespace = "com.attendo.feature.stats"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 26

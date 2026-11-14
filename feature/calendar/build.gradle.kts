@@ -6,7 +6,7 @@
 
 android {
     namespace = "com.attendo.feature.calendar"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 26

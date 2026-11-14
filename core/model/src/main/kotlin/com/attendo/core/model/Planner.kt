@@ -31,8 +31,6 @@ object Timetable {
 
     private val order = compareBy<TimetableSlot>({ it.day }, { it.start }, { it.end })
 
-    fun sorted(slots: List<TimetableSlot>): List<TimetableSlot> = slots.sortedWith(order)
-
     /** Classes on [date]'s weekday, earliest first. */
     fun on(slots: List<TimetableSlot>, date: LocalDate): List<TimetableSlot> =
         slots.filter { it.day == date.dayOfWeek }.sortedWith(order)

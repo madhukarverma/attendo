@@ -5,7 +5,12 @@ import com.attendo.core.data.planner.CsvPlannerRepository
 import com.attendo.core.data.grades.CsvGradeRepository
 import com.attendo.core.model.CourseCatalog
 import com.attendo.core.data.habit.CsvHabitRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import com.attendo.core.data.csv.StorageProblems
 import com.attendo.core.data.kanban.CsvKanbanRepository
 import com.attendo.core.data.backup.CsvImportPlan
 import com.attendo.core.data.backup.CsvSchema
@@ -80,6 +85,18 @@ class AttendoData(
             SYLLABUS_FILE to syllabusCsv.store,
         )
 
+    /**
+     * Emits once every table has loaded, then after every change to any table (used by the
+     * automatic Google backup). Built from [stores], so a new data file is covered automatically.
+     */
+    val changes: Flow<Unit>
+        get() = combine(stores.values.map { it.items }) { tables -> tables.toList() }
+            .filter { tables -> tables.all { it != null } }
+            .map { }
+
+    /** A data file that couldn't be read or saved, as a message for the user. */
+    val storageProblems: Flow<String> get() = StorageProblems.messages
+
     /** Matches picked CSV files (display name to text) to tables; nothing is changed yet. */
     fun planCsvImport(files: List<Pair<String, String>>): CsvImportPlan = CsvSchema.plan(files)
 
@@ -127,9 +144,15 @@ class AttendoData(
         return plain.size
     }
 
-    /** True when there's nothing worth keeping yet (no subjects, marks, sessions or to-dos). */
+    /**
+     * True when there's nothing worth keeping yet: no subjects, marks, grades, timetable, own events,
+     * syllabus ticks, focus sessions, checklist tasks, board cards or reminders.
+     */
     fun hasNoUserData(): Boolean =
-        listOf(SUBJECTS_FILE, ATTENDANCE_FILE, POMODORO_FILE, TODOS_FILE, KANBAN_CARDS_FILE, HABITS_FILE, GRADES_FILE).all { name ->
+        listOf(
+            SUBJECTS_FILE, ATTENDANCE_FILE, POMODORO_FILE, TODOS_FILE, KANBAN_CARDS_FILE, HABITS_FILE, GRADES_FILE,
+            TIMETABLE_FILE, EVENTS_FILE, SYLLABUS_FILE,
+        ).all { name ->
             (stores[name]?.items?.value?.isEmpty()) ?: true
         }
 

@@ -8,6 +8,7 @@ import com.attendo.app.reminders.ReminderNotifications
 import com.attendo.app.reminders.ReminderScheduler
 import kotlinx.coroutines.launch
 import android.app.Application
+import android.widget.Toast
 import com.attendo.core.data.AttendoData
 import com.attendo.core.data.pomodoro.PomodoroTimer
 import com.attendo.core.data.calendar.AcademicCalendarLoader
@@ -72,6 +73,12 @@ class AttendoApplication : Application() {
         container.appScope.launch { runCatching { container.data.migratePlainTodosToBoard() } }
         // Official lecture hours for catalog subjects that don't have any yet.
         container.appScope.launch { runCatching { container.data.fillCatalogLectureHours() } }
+        // A data file that couldn't be read or saved: say so instead of failing silently.
+        container.appScope.launch(Dispatchers.Main) {
+            container.data.storageProblems.collect { message ->
+                Toast.makeText(this@AttendoApplication, message, Toast.LENGTH_LONG).show()
+            }
+        }
         // Re-arm alarms whenever the to-do list changes (and once at start-up).
         container.appScope.launch {
             container.data.todos.todos.collect { container.reminders.sync(it) }

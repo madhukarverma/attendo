@@ -51,6 +51,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -94,7 +95,7 @@ internal fun TodoPageHost(vm: TodoViewModel, bottomPadding: Dp = 24.dp) {
 
     // Android 13+: reminders need the notification permission, asked for when the first one is set.
     var askedOnce by rememberSaveable { mutableStateOf(false) }
-    var permissionTick by remember { mutableStateOf(0) }
+    var permissionTick by remember { mutableIntStateOf(0) }
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         askedOnce = true
         permissionTick++

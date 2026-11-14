@@ -295,7 +295,6 @@ object AttendoColors {
 
     val Ink: Color get() = palette.text
     val Green: Color get() = palette.accent
-    val GreenDark: Color get() = palette.accentDark
     val Cream: Color get() = palette.background
     val CreamCard: Color get() = palette.card
     val CreamDeep: Color get() = palette.cardDeep
@@ -324,9 +323,6 @@ object AttendoColors {
         return if (onBackground >= 2f || onBackground >= contrastRatio(palette.text, fill)) palette.background else palette.text
     }
 }
-
-/** Handwritten style used in speech bubbles (kept for callers that set the family directly). */
-val HandFont: FontFamily get() = AttendoColors.palette.fonts.hand
 
 private fun typographyFor(fonts: AttendoFonts): Typography {
     val f = fonts.body

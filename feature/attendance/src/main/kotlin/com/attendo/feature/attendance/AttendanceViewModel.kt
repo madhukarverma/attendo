@@ -70,9 +70,6 @@ data class AttendanceUiState(
                 ?.let { d to it.kind }
         }.toMap()
 
-    /** Calendar entries on the selected day. */
-    val selectedDayEvents: List<CalendarEvent> get() = calendar.eventsOn(selectedDate)
-
     /** Overall percentage across all subjects, or null when nothing has been held yet. */
     val overallPercent: Double?
         get() {

@@ -122,3 +122,19 @@
   and runs without a project.
 - Consequence: the Drive backup must use the same project (one Android OAuth client per package +
   SHA-1). Profiles expose name, programme and friend code to any signed-in student.
+
+## DEC-018 — Storage problems never crash the app or lose data
+- Date: 2026-11-15 · Status: Active
+- Decision: `CsvStore` treats storage errors as expected. A file that can't be read is copied to
+  `<name>.unreadable-<time>` before the table starts empty (if even the copy fails, saving to that
+  table is refused until restart); a failed save keeps the previous data. Both are reported on
+  `StorageProblems` and shown as a toast by the app.
+- Consequence: repositories don't need their own error handling for disk problems, and the user
+  hears about them instead of losing a change silently.
+
+## DEC-019 — Target Android 15 (SDK 35) on AGP 8.5
+- Date: 2026-11-15 · Status: Active
+- Decision: compileSdk/targetSdk 35 with the existing AGP 8.5.2 (`android.suppressUnsupportedCompileSdk=35`
+  in `gradle.properties`) rather than a major AGP upgrade in the same release. The app was already
+  edge-to-edge, so Android 15's enforced edge-to-edge changes nothing.
+- Consequence: an AGP and library update remains a separate task.

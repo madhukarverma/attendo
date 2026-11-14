@@ -3,6 +3,7 @@ package com.attendo.core.data
 import com.attendo.core.data.csv.Csv
 import com.attendo.core.data.csv.CsvTable
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 import java.nio.file.Files
@@ -50,6 +51,19 @@ class CsvTest {
         // A newer schema with an extra column still reads old files.
         val newer = CsvTable(File(dir, "t.csv"), listOf("id", "name", "code"))
         assertEquals("", newer.read().single()["code"].orEmpty())
+        dir.deleteRecursively()
+    }
+
+    @Test
+    fun unreadableCopyKeepsTheOriginal() {
+        val dir = Files.createTempDirectory("attendo-csv").toFile()
+        val table = CsvTable(File(dir, "grades.csv"), listOf("id"))
+        assertEquals(null, table.keepUnreadableCopy())
+        table.file.writeText("id\n1\n")
+        val copy = table.keepUnreadableCopy()!!
+        assertTrue(copy.name.startsWith("grades.csv.unreadable-"))
+        assertEquals("id\n1\n", copy.readText())
+        assertEquals("id\n1\n", table.file.readText())
         dir.deleteRecursively()
     }
 }

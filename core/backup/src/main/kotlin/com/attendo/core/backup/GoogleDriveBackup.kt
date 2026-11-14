@@ -22,7 +22,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
@@ -221,13 +220,9 @@ class GoogleDriveBackup(
     @OptIn(FlowPreview::class)
     private fun watchForChanges() {
         scope.launch {
-            combine(
-                data.settings.settings,
-                data.subjects.subjects,
-                data.attendance.records,
-                data.pomodoro.sessions,
-                data.todos.todos,
-            ) { a, b, c, d, e -> listOf(a, b, c, d, e) }
+            // Every data file, not a hand-picked list (v0.32: grades, timetable, events, syllabus,
+            // checklist and board changes were missed before).
+            data.changes
                 .drop(1)
                 .debounce(AUTO_BACKUP_DELAY_MS)
                 .collect {

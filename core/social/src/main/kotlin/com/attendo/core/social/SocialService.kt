@@ -48,6 +48,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.coroutines.resume
@@ -100,6 +102,10 @@ class SocialService(
     private var listeners: Job? = null
     private var lastPublished: Map<String, Any?> = emptyMap()
 
+    /** Held while publishing shared documents, and while deleting the profile (so nothing is re-published). */
+    private val publishLock = Mutex()
+    @Volatile private var deleting = false
+
     init {
         scope.launch {
             val saved = withContext(Dispatchers.IO) {
@@ -142,14 +148,66 @@ class SocialService(
 
     fun signOut(activity: Activity) {
         scope.launch {
+            signOutNow(activity, "Signed out. What you shared stays visible to friends until you sign in and turn it off.")
+        }
+    }
+
+    private suspend fun signOutNow(activity: Activity, message: String) {
+        listeners?.cancel()
+        runCatching { auth?.signOut() }
+        runCatching { CredentialManager.create(activity).clearCredentialState(ClearCredentialStateRequest()) }
+        lastPublished = emptyMap()
+        _state.update {
+            it.copy(me = null, friends = emptyList(), incoming = emptyList(), outgoing = emptyList(), busy = false,
+                message = message, isError = false)
+        }
+    }
+
+    /**
+     * Removes this student from Friends: what they share, both sides of every friendship, pending
+     * requests and finally the public profile (so nobody can find them any more), then signs out.
+     * Nothing on the phone is touched; signing in again later creates a fresh profile.
+     */
+    fun deleteProfile(activity: Activity) {
+        val me = _state.value.me ?: return
+        val store = db ?: return
+        scope.launch {
+            deleting = true
             listeners?.cancel()
-            runCatching { auth?.signOut() }
-            runCatching { CredentialManager.create(activity).clearCredentialState(ClearCredentialStateRequest()) }
-            lastPublished = emptyMap()
-            _state.update {
-                it.copy(me = null, friends = emptyList(), incoming = emptyList(), outgoing = emptyList(), busy = false,
-                    message = "Signed out. What you shared stays visible to friends until you sign in and turn it off.", isError = false)
+            working("Deleting your friends profile…")
+            val result = publishLock.withLock {
+                runCatching {
+                    val mine = store.collection(USERS).document(me.uid)
+                    val friendIds = mine.collection(FRIENDS).get().await().documents.map { it.id }
+                    val requests = store.collection(REQUESTS).whereEqualTo("from", me.uid).get().await().documents +
+                        store.collection(REQUESTS).whereEqualTo("to", me.uid).get().await().documents
+                    val refs = buildList {
+                        add(mine.collection(SHARED).document(ATTENDANCE))
+                        add(mine.collection(SHARED).document(GRADES_DOC))
+                        friendIds.forEach { id ->
+                            add(store.collection(USERS).document(id).collection(FRIENDS).document(me.uid))
+                            add(mine.collection(FRIENDS).document(id))
+                        }
+                        requests.forEach { add(it.reference) }
+                    }
+                    refs.chunked(BATCH_LIMIT).forEach { chunk ->
+                        val batch = store.batch()
+                        chunk.forEach { batch.delete(it) }
+                        batch.commit().await()
+                    }
+                    // Last: the profile is what makes a student findable.
+                    mine.delete().await()
+                }
             }
+            result
+                .onSuccess {
+                    signOutNow(activity, "Your friends profile is deleted and you're signed out. Nothing on this phone was changed.")
+                }
+                .onFailure { e ->
+                    listen(me.uid)
+                    fail(e)
+                }
+            deleting = false
         }
     }
 
@@ -209,6 +267,8 @@ class SocialService(
                 .limit(SEARCH_LIMIT).get().await().documents
             val byCode = if (q.length in 4..8 && q.all(Char::isLetterOrDigit)) {
                 store.collection(USERS).whereEqualTo("code", q.uppercase()).limit(5).get().await().documents
+                    // A profile can only claim the code of its own account (the rules check this too).
+                    .filter { friendCode(it.id) == q.uppercase() }
             } else {
                 emptyList()
             }
@@ -309,6 +369,11 @@ class SocialService(
     }
 
     private suspend fun publishNow() {
+        if (deleting) return
+        publishLock.withLock { if (!deleting) publishLocked() }
+    }
+
+    private suspend fun publishLocked() {
         val s = _state.value
         val me = s.me ?: return
         val store = db ?: return
@@ -408,7 +473,8 @@ class SocialService(
 
     private fun DocumentSnapshot.toProfile(): StudentProfile? {
         val name = getString("name") ?: return null
-        return StudentProfile(id, name, getString("code") ?: friendCode(id), getString("programme").orEmpty())
+        // The code always comes from the account id, never from what the document claims.
+        return StudentProfile(id, name, friendCode(id), getString("programme").orEmpty())
     }
 
     private fun DocumentSnapshot.toFriend() = StudentProfile(id, getString("name") ?: "Friend", friendCode(id))
@@ -416,7 +482,7 @@ class SocialService(
     private fun DocumentSnapshot.toRequest(): FriendRequest? {
         val from = getString("from") ?: return null
         val to = getString("to") ?: return null
-        return FriendRequest(from, to, getString("fromName") ?: "Student", getString("fromCode") ?: friendCode(from), getString("toName") ?: "Student")
+        return FriendRequest(from, to, getString("fromName") ?: "Student", friendCode(from), getString("toName") ?: "Student")
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -471,6 +537,9 @@ class SocialService(
         const val MAX_SUBJECTS = 20
         const val SEARCH_LIMIT = 20L
         const val PUBLISH_DELAY_MS = 3_000L
+
+        /** Firestore allows 500 writes per batch. */
+        const val BATCH_LIMIT = 400
     }
 }
 

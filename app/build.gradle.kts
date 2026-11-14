@@ -46,7 +46,7 @@ fun firebaseValue(key: String): String = "\"" + firebaseValues[key].orEmpty().re
 
 android {
     namespace = "com.attendo.app"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.attendo.app"
@@ -55,9 +55,9 @@ android {
         buildConfigField("String", "FIREBASE_API_KEY", firebaseValue("apiKey"))
         buildConfigField("String", "FIREBASE_WEB_CLIENT_ID", firebaseValue("webClientId"))
         minSdk = 26
-        targetSdk = 34
-        versionCode = 32
-        versionName = "0.31.0"
+        targetSdk = 35
+        versionCode = 33
+        versionName = "0.32.0"
     }
 
     buildTypes {
@@ -82,6 +82,8 @@ android {
     }
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        // kotlinx-coroutines debugger data; only used by the IDE debugger.
+        resources.excludes += "DebugProbesKt.bin"
     }
 }
 

@@ -24,6 +24,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -79,6 +80,7 @@ fun FriendsScreen(social: SocialService, onOpenStudent: (uid: String) -> Unit, o
     var query by rememberSaveable { mutableStateOf("") }
     var results by remember { mutableStateOf<List<StudentProfile>>(emptyList()) }
     var searching by remember { mutableStateOf(false) }
+    var confirmDelete by rememberSaveable { mutableStateOf(false) }
 
     // Search as you type (after a short pause), once signed in.
     LaunchedEffect(query, state.me?.uid) {
@@ -114,7 +116,14 @@ fun FriendsScreen(social: SocialService, onOpenStudent: (uid: String) -> Unit, o
                         SignInCard(state) { activity?.let { a -> scope.launch { social.signIn(a) } } }
                     }
                     else -> {
-                        item { ProfileCard(me, state, onSignOut = { activity?.let(social::signOut) }) }
+                        item {
+                            ProfileCard(
+                                me,
+                                state,
+                                onSignOut = { activity?.let(social::signOut) },
+                                onDelete = { confirmDelete = true },
+                            )
+                        }
                         item { SharingCard(state, social::setShareAttendance, social::setShareGrades) }
                         item {
                             SearchField(query, searching) { query = it }
@@ -169,6 +178,26 @@ fun FriendsScreen(social: SocialService, onOpenStudent: (uid: String) -> Unit, o
             }
         }
     }
+
+    if (confirmDelete) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            title = { Text("Delete your friends profile?") },
+            text = {
+                Text(
+                    "Classmates won't be able to find you any more. Your friend list, requests and anything " +
+                        "you share are removed, and you're signed out. Nothing on this phone is deleted.",
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmDelete = false
+                    activity?.let(social::deleteProfile)
+                }) { Text("Delete", color = AttendoColors.Pink) }
+            },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Keep") } },
+        )
+    }
 }
 
 @Composable
@@ -205,7 +234,7 @@ private fun SignInCard(state: SocialState, onSignIn: () -> Unit) {
 }
 
 @Composable
-private fun ProfileCard(me: StudentProfile, state: SocialState, onSignOut: () -> Unit) {
+private fun ProfileCard(me: StudentProfile, state: SocialState, onSignOut: () -> Unit, onDelete: () -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()
@@ -224,7 +253,10 @@ private fun ProfileCard(me: StudentProfile, state: SocialState, onSignOut: () ->
             }
             Text("${state.friends.size} friend${if (state.friends.size == 1) "" else "s"}", style = MaterialTheme.typography.labelLarge, color = AttendoColors.OnHero)
         }
-        TextButton(onClick = onSignOut, modifier = Modifier.align(Alignment.End)) { Text("Sign out", color = AttendoColors.Pink) }
+        Row(Modifier.align(Alignment.End)) {
+            TextButton(onClick = onDelete, enabled = !state.busy) { Text("Delete profile", color = AttendoColors.Muted) }
+            TextButton(onClick = onSignOut, enabled = !state.busy) { Text("Sign out", color = AttendoColors.Pink) }
+        }
     }
 }
 
