@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -46,6 +48,9 @@ val TabBarClearance = 104.dp
 /**
  * The app's main navigation: the dark pill bar from the designs. The current tab is the green pill
  * with its label (the spot the "+ New subject" button used to have); the others are icons.
+ *
+ * With a [backdrop] the bar is frosted glass: content scrolls underneath and shows through,
+ * blurred, with a bright hairline on top where light catches the material.
  */
 @Composable
 fun AttendoTabBar(
@@ -53,12 +58,21 @@ fun AttendoTabBar(
     selectedRoute: String?,
     onSelect: (String) -> Unit,
     modifier: Modifier = Modifier,
+    backdrop: Backdrop? = null,
 ) {
     Row(
         modifier
             .fillMaxWidth()
             .clip(CircleShape)
-            .background(AttendoColors.Hero)
+            .then(
+                if (backdrop != null) Modifier.glass(backdrop, AttendoColors.Hero.copy(alpha = 0.72f))
+                else Modifier.background(AttendoColors.Hero),
+            )
+            .border(
+                0.75.dp,
+                Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.22f), Color.White.copy(alpha = 0.04f))),
+                CircleShape,
+            )
             .padding(6.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,

@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-11-15 — v0.33.0 Release key, cleanup, Apple-style motion
+- **Release signing (fix 8):** releases are signed with Attendo's own key, kept outside the
+  repository and read through a git-ignored `keystore.properties` (docs/RELEASE_SIGNING.md).
+  Phones on v0.32.0 or older must uninstall once, after a backup. The key's SHA-1 must be added
+  in Firebase for Google sign-in.
+- **Cleanup:** removed dead code (`openCount`, `classesToday`, `accentDark`), 66 unused imports and
+  three unused module dependencies. Shared controls moved to `component/Controls.kt` (pill
+  button, hero stat, text-field colours, date and time pickers: 20 copies before). Home and the
+  Focus dial now show the same countdown (`formatClock` in core:model).
+- **Apple-style motion and materials** (WWDC "Designing Fluid Interfaces" and related talks):
+  - Attendance cards follow the finger 1:1 from wherever they are, count a flick by where it is
+    heading (momentum projection), fly out or spring back at the finger's speed, and can be
+    caught mid-spring. A light tick marks the "let go to record" point; recording confirms.
+  - Springs are critically damped by default; the small bounce (`Motion.release`) is kept for
+    things the finger threw. Repositioning springs use Apple's 0.4 s response.
+  - Overscroll uses Apple's rubber-band formula, sized to the screen.
+  - The tab bar is frosted glass: screens scroll underneath and show through, blurred (Android
+    12+), with a bright hairline where light catches the edge.
+  - Top bars fade content out as it scrolls under them instead of drawing a hard divider.
+  - Type scale with size-specific tracking (tighter large text, slightly open small text) and
+    matching leading.
+  - Haptics through one helper (tick, confirm, grab): board drag ticks as the drop slot changes
+    and confirms the drop; the focus timer confirms when a session ends.
+- Tests: 70 (new: flick projection, rubber band and its inverse, countdown format).
+
 ## 2026-11-15 — v0.32.0 Fixes from the code scan
 - Google backup: the automatic backup now reacts to every data file (grades, timetable, events,
   syllabus, checklist and board changes were missed). It watches `AttendoData.changes`, built from

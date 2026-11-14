@@ -48,8 +48,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
+import com.attendo.core.designsystem.motion.rememberHaptics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -338,7 +337,7 @@ fun UnitTimeline(
 
 @Composable
 private fun UnitRow(unit: CurriculumUnit, done: Boolean, accent: Color, isLast: Boolean, onToggle: () -> Unit) {
-    val haptics = LocalHapticFeedback.current
+    val haptics = rememberHaptics()
     var open by remember { mutableStateOf(false) }
     val fill by animateColorAsState(if (done) accent else Color.Transparent, Motion.settle(), label = "unitFill")
     Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
@@ -348,7 +347,7 @@ private fun UnitRow(unit: CurriculumUnit, done: Boolean, accent: Color, isLast: 
                     .size(30.dp)
                     .clip(CircleShape)
                     .iosPress(PressStyle.Scale, onClickLabel = if (done) "Mark unit ${unit.number} not covered" else "Mark unit ${unit.number} covered") {
-                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        haptics.tick()
                         onToggle()
                     }
                     .background(fill)

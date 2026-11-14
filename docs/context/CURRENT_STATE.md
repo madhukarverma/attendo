@@ -1,5 +1,12 @@
 # Current State
 
+## Update 2026-11-15 (v0.33.0)
+Release-signed with the new key (SHA-1 33:0C:B7:CA:21:A3:03:F8:D8:42:B7:16:52:59:9E:FB:9E:2B:D9:FA;
+add it in Firebase). Dead code and duplicated controls removed. Apple-style motion: fluid card
+swipes, critically damped springs, Apple's rubber band, frosted-glass tab bar, scroll-edge fades,
+tuned type scale, shared haptics. 70 unit tests pass; nothing run on a phone yet, so the glass
+blur, gestures and haptics are unverified on hardware.
+
 ## Update 2026-11-15
 v0.31.0 moved the syllabus into the Focus tab and redesigned the timer. v0.32.0 fixes everything
 from the code scan except the release keystore (ISSUE-006): the automatic Google backup now

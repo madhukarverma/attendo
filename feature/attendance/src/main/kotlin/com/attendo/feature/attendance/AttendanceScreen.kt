@@ -7,8 +7,7 @@ import com.attendo.core.designsystem.component.TabBarClearance
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
+import com.attendo.core.designsystem.motion.rememberHaptics
 import com.attendo.core.designsystem.component.AnimatedNumber
 import com.attendo.core.designsystem.motion.BounceContainer
 import com.attendo.core.designsystem.motion.Motion
@@ -533,17 +532,17 @@ private fun MarkChip(
     onClickLabel: String = "Mark $text",
     onClick: () -> Unit,
 ) {
-    val haptics = LocalHapticFeedback.current
+    val haptics = rememberHaptics()
     val background by animateColorAsState(
         if (selected) fill else AttendoColors.Cream,
-        animationSpec = Motion.bouncy(),
+        animationSpec = Motion.snappy(),
         label = "chipBg",
     )
     val content by animateColorAsState(if (selected) AttendoColors.on(fill) else color, label = "chipFg")
     Box(
         modifier
             .iosPress(PressStyle.Scale, onClickLabel = onClickLabel) {
-                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                haptics.tick()
                 onClick()
             }
             .clip(CircleShape)

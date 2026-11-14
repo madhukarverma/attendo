@@ -16,15 +16,19 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.Velocity
 import com.attendo.core.model.AnimationMode
+import com.attendo.core.model.Physics
 import kotlin.math.abs
 
 /**
  * iOS "rubber band" overscroll: when a scrollable child reaches its edge, further drags move the
- * content with increasing resistance, and it springs back on release. Flings that hit an edge
- * bounce. Works for LazyColumn and verticalScroll children alike (via nested scroll), and even when
- * the content is too short to scroll — just like UIScrollView's alwaysBounceVertical.
+ * content with increasing resistance (Apple's formula, sized to this container, so it slows
+ * before it stops and never runs away), and it springs back on release with the finger's
+ * velocity. Flings that hit an edge bounce. Works for LazyColumn and verticalScroll children
+ * alike (via nested scroll), even when the content is too short to scroll, like UIScrollView's
+ * alwaysBounceVertical.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -36,8 +40,14 @@ fun BounceContainer(modifier: Modifier = Modifier, content: @Composable () -> Un
         return
     }
     val offset = remember { mutableFloatStateOf(0f) }
-    val connection = remember { RubberBandConnection(offset) }
-    Box(modifier.clipToBounds().nestedScroll(connection)) {
+    val height = remember { mutableFloatStateOf(0f) }
+    val connection = remember { RubberBandConnection(offset) { height.floatValue } }
+    Box(
+        modifier
+            .clipToBounds()
+            .onSizeChanged { height.floatValue = it.height.toFloat() }
+            .nestedScroll(connection),
+    ) {
         // Disable Android's stretch effect; the rubber band replaces it.
         CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
             Box(Modifier.graphicsLayer { translationY = offset.floatValue }) { content() }
@@ -45,7 +55,17 @@ fun BounceContainer(modifier: Modifier = Modifier, content: @Composable () -> Un
     }
 }
 
-private class RubberBandConnection(private val offset: MutableFloatState) : NestedScrollConnection {
+private class RubberBandConnection(
+    private val offset: MutableFloatState,
+    private val dimension: () -> Float,
+) : NestedScrollConnection {
+
+    /** How far past the edge the finger is, for the offset currently shown. */
+    private fun overshoot(): Float = Physics.rubberbandInverse(offset.floatValue, dimension())
+
+    private fun show(overshoot: Float) {
+        offset.floatValue = Physics.rubberband(overshoot, dimension())
+    }
 
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
         val current = offset.floatValue
@@ -53,18 +73,16 @@ private class RubberBandConnection(private val offset: MutableFloatState) : Nest
         // Dragging back towards rest first undoes the stretch before the list scrolls again.
         val movingBack = (current > 0f && available.y < 0f) || (current < 0f && available.y > 0f)
         if (!movingBack) return Offset.Zero
-        val next = current + available.y
-        val clamped = if (current > 0f) next.coerceAtLeast(0f) else next.coerceAtMost(0f)
-        offset.floatValue = clamped
-        return Offset(0f, clamped - current)
+        val before = overshoot()
+        val next = before + available.y
+        val clamped = if (before > 0f) next.coerceAtLeast(0f) else next.coerceAtMost(0f)
+        show(clamped)
+        return Offset(0f, clamped - before)
     }
 
     override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
         if (source != NestedScrollSource.UserInput || available.y == 0f) return Offset.Zero
-        val current = offset.floatValue
-        // Resistance grows with distance, like UIScrollView.
-        val resistance = 0.55f / (1f + abs(current) / RESISTANCE_DISTANCE)
-        offset.floatValue = current + available.y * resistance
+        show(overshoot() + available.y)
         return Offset(0f, available.y)
     }
 
@@ -81,6 +99,7 @@ private class RubberBandConnection(private val offset: MutableFloatState) : Nest
         return available
     }
 
+    /** Back to rest, continuing at the release [velocity] so there's no seam (velocity handoff). */
     private suspend fun settle(velocity: Float) {
         animate(
             initialValue = offset.floatValue,
@@ -91,7 +110,6 @@ private class RubberBandConnection(private val offset: MutableFloatState) : Nest
     }
 
     private companion object {
-        const val RESISTANCE_DISTANCE = 320f
         const val FLING_TRANSFER = 0.35f
     }
 }

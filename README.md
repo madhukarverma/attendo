@@ -48,4 +48,5 @@ Requires JDK 17 and the Android SDK (platform 35).
 ./gradlew test assembleRelease
 ```
 
-The APK is written to `app/build/outputs/apk/release/app-release.apk`.
+The APK is written to `app/build/outputs/apk/release/app-release.apk`. Release builds are signed
+with the key described in [docs/RELEASE_SIGNING.md](docs/RELEASE_SIGNING.md).

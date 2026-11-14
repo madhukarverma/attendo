@@ -44,7 +44,7 @@ fun SegmentedControl(items: List<String>, selected: Int, onSelect: (Int) -> Unit
             .padding(3.dp),
     ) {
         val segment = maxWidth / items.size.coerceAtLeast(1)
-        val x by animateDpAsState(segment * selected, Motion.bouncy(), label = "thumb")
+        val x by animateDpAsState(segment * selected, Motion.snappy(), label = "thumb")
         Box(
             Modifier
                 .offset { IntOffset(x.roundToPx(), 0) }

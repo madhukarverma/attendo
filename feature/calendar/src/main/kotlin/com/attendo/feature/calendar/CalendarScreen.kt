@@ -135,7 +135,9 @@ fun CalendarScreen(
                         PillButton(
                             if (slots.isEmpty()) "Set timetable" else "Timetable",
                             Icons.Filled.DateRange,
-                            modifier = Modifier.weight(1f),
+                            AttendoColors.CreamCard,
+                            AttendoColors.Ink,
+                            Modifier.weight(1f),
                             onClick = onOpenTimetable,
                         )
                         PillButton(

@@ -9,9 +9,9 @@ calendar and friends. All data is CSV. Private repo `madhukarverma/attendo`, bra
 |---|---|---|
 | `app/` | Start-up and app container, navigation and tabs, reminders, CSV export/import, launch image, manifest. See `app/CLAUDE.md` | wiring a screen in, notifications, permissions |
 | `app/build.gradle.kts` | Version number, release signing (from `keystore.properties`), Firebase settings read from `google-services.json` | releasing, changing build settings |
-| `core/model/` | Plain-Kotlin data types and maths: attendance, grades, habits, board, planner, curriculum. See `core/model/CLAUDE.md` | changing a calculation or a data type |
+| `core/model/` | Plain-Kotlin data types and maths: attendance, grades, habits, board, planner, curriculum, gesture physics. See `core/model/CLAUDE.md` | changing a calculation or a data type |
 | `core/data/` | CSV storage and repositories, bundled calendar and curriculum CSVs, backup format, CSV import, Pomodoro timer engine. See `core/data/CLAUDE.md` | changing what's saved, adding a column or file |
-| `core/designsystem/` | Themes, colours, fonts, motion, mascots, shared components, tab bar. See `core/designsystem/CLAUDE.md` | look and feel, animations |
+| `core/designsystem/` | Themes, type scale, colours, motion and haptics, frosted glass, mascots, shared controls, tab bar. See `core/designsystem/CLAUDE.md` | look and feel, animations |
 | `core/backup/` | Google Drive backup: `GoogleDriveBackup.kt` (sync, change watcher), `DriveAppDataClient.kt` (HTTP), `GoogleSignIn.kt` | backup problems |
 | `core/social/` | Friends backend on Firebase: `SocialService.kt` (sign-in, requests, sharing), `SocialModels.kt` | friends logic, what's shared |
 | `feature/` | One module per screen, 12 in all. See `feature/CLAUDE.md` | changing a screen |
@@ -68,7 +68,8 @@ and `core/model/src/test/…/X.kt` is the same path under `src/test`.
    → `app/build.gradle.kts` (dependency) → `app/…/navigation/AttendoNavHost.kt` (`Routes` and the composable).
 5. **Add or change a theme:** `core/designsystem/…/theme/Theme.kt` → `core/model/…/AppSettings.kt`
    → `feature/settings/…/ThemeSection.kt`.
-6. **Change animations:** `core/designsystem/…/motion/Motion.kt` → `motion/IosPress.kt` or `motion/BounceScroll.kt`
+6. **Change animations or gestures:** `core/designsystem/…/motion/Motion.kt` → `core/model/…/Physics.kt` (flick projection,
+   rubber band) → `motion/IosPress.kt`, `motion/BounceScroll.kt` or `motion/Haptics.kt`
    → `app/…/navigation/Transitions.kt`.
 7. **Change the tabs or navigation:** `app/…/navigation/AttendoNavHost.kt` → `core/designsystem/…/component/TabBar.kt`.
 8. **Change the timer:** `feature/pomodoro/…/FocusDial.kt` (the dial) or `PomodoroScreen.kt` (controls, pages)

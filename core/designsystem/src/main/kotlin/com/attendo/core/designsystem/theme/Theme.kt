@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.attendo.core.model.ThemeMode
 
@@ -316,22 +317,35 @@ object AttendoColors {
     }
 }
 
+/**
+ * Type scale after Apple's UI typography rules (WWDC20 "The Details of UI Typography"): tracking is
+ * size-specific (large text tightened, body at 0, small text opened up a little) and leading runs
+ * the other way (tight on big titles, roomier on body copy). Sizes are in sp, so the phone's
+ * font-size setting scales everything, spacing included.
+ */
 private fun typographyFor(fonts: AttendoFonts): Typography {
     val f = fonts.body
     val s = fonts.scale
+    fun style(size: Float, leading: Float, trackingEm: Float, weight: FontWeight = FontWeight.Normal) = TextStyle(
+        fontFamily = f,
+        fontWeight = weight,
+        fontSize = (size * s).sp,
+        lineHeight = (leading * s).sp,
+        letterSpacing = trackingEm.em,
+    )
     return Typography(
-        displayLarge = TextStyle(fontFamily = f, fontWeight = FontWeight.Bold, fontSize = (54 * s).sp, lineHeight = (54 * s).sp, letterSpacing = (-1.5).sp),
-        headlineLarge = TextStyle(fontFamily = f, fontWeight = FontWeight.Normal, fontSize = (30 * s).sp, lineHeight = (36 * s).sp, letterSpacing = (-0.5).sp),
-        headlineSmall = TextStyle(fontFamily = f, fontWeight = FontWeight.SemiBold, fontSize = (22 * s).sp, lineHeight = (28 * s).sp),
-        titleLarge = TextStyle(fontFamily = f, fontWeight = FontWeight.SemiBold, fontSize = (20 * s).sp, lineHeight = (26 * s).sp),
-        titleMedium = TextStyle(fontFamily = f, fontWeight = FontWeight.Medium, fontSize = (17 * s).sp, lineHeight = (22 * s).sp),
-        titleSmall = TextStyle(fontFamily = f, fontWeight = FontWeight.Medium, fontSize = (14 * s).sp, lineHeight = (20 * s).sp),
-        bodyLarge = TextStyle(fontFamily = f, fontSize = (16 * s).sp, lineHeight = (22 * s).sp),
-        bodyMedium = TextStyle(fontFamily = f, fontSize = (14 * s).sp, lineHeight = (20 * s).sp),
-        bodySmall = TextStyle(fontFamily = f, fontSize = (12 * s).sp, lineHeight = (16 * s).sp),
-        labelLarge = TextStyle(fontFamily = f, fontWeight = FontWeight.Medium, fontSize = (15 * s).sp),
-        labelMedium = TextStyle(fontFamily = f, fontWeight = FontWeight.Medium, fontSize = (12 * s).sp),
-        labelSmall = TextStyle(fontFamily = f, fontSize = (11 * s).sp),
+        displayLarge = style(54f, 56f, -0.028f, FontWeight.Bold),
+        headlineLarge = style(30f, 34f, -0.018f),
+        headlineSmall = style(22f, 27f, -0.012f, FontWeight.SemiBold),
+        titleLarge = style(20f, 25f, -0.008f, FontWeight.SemiBold),
+        titleMedium = style(17f, 22f, -0.004f, FontWeight.Medium),
+        titleSmall = style(14f, 19f, 0f, FontWeight.Medium),
+        bodyLarge = style(16f, 23f, 0f),
+        bodyMedium = style(14f, 20f, 0f),
+        bodySmall = style(12f, 17f, 0.004f),
+        labelLarge = style(15f, 20f, 0f, FontWeight.Medium),
+        labelMedium = style(12f, 16f, 0.008f, FontWeight.Medium),
+        labelSmall = style(11f, 15f, 0.012f),
     )
 }
 

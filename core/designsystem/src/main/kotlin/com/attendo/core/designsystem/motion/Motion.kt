@@ -17,8 +17,9 @@ import kotlin.math.PI
  * App motion tokens. Every curve depends on the user's [AnimationMode] (Settings › Animations):
  *
  * - SMOOTH: long, critically damped springs and gentle ease-in-out tweens; nothing overshoots.
- * - IOS: Apple's perceptual springs (duration + bounce, WWDC23 "Animate with springs"):
- *   smooth = (0.5 s, 0), snappy = (≈0.35 s, 0.15) for UI feedback, push/pop as a 0.5 s smooth spring.
+ * - IOS: Apple's springs (WWDC18 "Designing Fluid Interfaces", WWDC23 "Animate with springs"):
+ *   critically damped by default (no overshoot), bounce only after a gesture that carried
+ *   momentum ([release]); push/pop as a 0.5 s smooth spring, repositioning at 0.4 s.
  * - ANDROID: Material defaults (FastOutSlowIn tweens, default springs).
  * - NONE: snaps; [AppMotionScale] additionally zeroes every animation's duration.
  *
@@ -79,16 +80,30 @@ object Motion {
     /** Settling into place: rubber-band release, progress bars, counters. Never overshoots. */
     fun <T> settle(): FiniteAnimationSpec<T> = when (mode) {
         AnimationMode.SMOOTH -> appleSpring(0.8f)
-        AnimationMode.IOS -> appleSpring(0.5f)
+        AnimationMode.IOS -> appleSpring(0.4f)
         AnimationMode.ANDROID -> spring(stiffness = Spring.StiffnessMediumLow)
         AnimationMode.NONE -> snap()
     }
 
-    /** Selection / toggle / press feedback. A little bounce in iOS mode only. */
-    fun <T> bouncy(): FiniteAnimationSpec<T> = when (mode) {
+    /**
+     * Selection / toggle / press feedback: quick and critically damped. Something that merely
+     * changes state shouldn't overshoot; bounce is kept for [release].
+     */
+    fun <T> snappy(): FiniteAnimationSpec<T> = when (mode) {
         AnimationMode.SMOOTH -> appleSpring(0.6f)
-        AnimationMode.IOS -> appleSpring(0.35f, bounce = 0.15f)
+        AnimationMode.IOS -> appleSpring(0.3f)
         AnimationMode.ANDROID -> spring(stiffness = Spring.StiffnessMedium)
+        AnimationMode.NONE -> snap()
+    }
+
+    /**
+     * After a drag or flick is let go: Apple's drawer spring (damping 0.8, response 0.3), so the
+     * thing overshoots a little because the finger threw it. Start it with the finger's velocity.
+     */
+    fun <T> release(): FiniteAnimationSpec<T> = when (mode) {
+        AnimationMode.SMOOTH -> appleSpring(0.5f)
+        AnimationMode.IOS -> appleSpring(0.3f, bounce = 0.2f)
+        AnimationMode.ANDROID -> spring(stiffness = Spring.StiffnessMediumLow)
         AnimationMode.NONE -> snap()
     }
 

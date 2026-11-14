@@ -18,6 +18,7 @@ Plain-Kotlin data types and the maths on them. Sources are in
 | `Planner.kt` | Timetable slots, personal events, merging them into the calendar | timetable rules | `PlannerTest` |
 | `Curriculum.kt` | Syllabus courses and units, coverage progress | syllabus progress | (in `core/data`: `CurriculumTest`) |
 | `AppSettings.kt` | All settings, theme mode, animation mode | adding a setting | |
+| `Physics.kt` | Apple's flick projection and rubber band, in px | gesture maths | `PhysicsTest` |
 | `Nickname.kt` | The short name the app calls the user | greeting name | `NicknameTest` |
 
 ## Rules

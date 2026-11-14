@@ -51,8 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
+import com.attendo.core.designsystem.motion.rememberHaptics
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -105,8 +104,8 @@ fun PomodoroRoute(
     val subjectList by vm.subjects.collectAsStateWithLifecycle()
     val stats by vm.stats.collectAsStateWithLifecycle()
 
-    val haptics = LocalHapticFeedback.current
-    LaunchedEffect(timer) { timer.finished.collect { haptics.performHapticFeedback(HapticFeedbackType.LongPress) } }
+    val haptics = rememberHaptics()
+    LaunchedEffect(timer) { timer.finished.collect { haptics.confirm() } }
 
     // Keep the display on while a run is in progress.
     val view = LocalView.current
@@ -396,7 +395,7 @@ private fun ChipRow(content: @Composable () -> Unit) {
 
 @Composable
 private fun Chip(label: String, selected: Boolean, enabled: Boolean = true, onClick: () -> Unit) {
-    val bg by animateColorAsState(if (selected) AttendoColors.Ink else AttendoColors.CreamCard, Motion.bouncy(), label = "chip")
+    val bg by animateColorAsState(if (selected) AttendoColors.Ink else AttendoColors.CreamCard, Motion.snappy(), label = "chip")
     val fg by animateColorAsState(if (selected) AttendoColors.Cream else AttendoColors.Ink, label = "chipFg")
     Box(
         Modifier

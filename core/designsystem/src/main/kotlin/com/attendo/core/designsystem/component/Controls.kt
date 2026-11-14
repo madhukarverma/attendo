@@ -46,8 +46,8 @@ import java.time.ZoneOffset
 fun PillButton(
     text: String,
     icon: ImageVector?,
-    container: Color = AttendoColors.CreamCard,
-    content: Color = AttendoColors.Ink,
+    container: Color,
+    content: Color,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     onClick: () -> Unit,

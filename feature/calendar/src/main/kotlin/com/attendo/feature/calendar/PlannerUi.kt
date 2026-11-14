@@ -187,7 +187,7 @@ internal fun DayAgendaSheet(
 
             Spacer(Modifier.height(18.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                PillButton("Add event", Icons.Filled.Add, modifier = Modifier.weight(1f), onClick = onAddEvent)
+                PillButton("Add event", Icons.Filled.Add, AttendoColors.CreamCard, AttendoColors.Ink, Modifier.weight(1f), onClick = onAddEvent)
                 PillButton(
                     "Mark attendance",
                     Icons.Filled.DateRange,
@@ -395,6 +395,8 @@ fun TimetableScreen(
                                 PillButton(
                                     "Add ${day.getDisplayName(TextStyle.SHORT, Locale.getDefault())} class",
                                     Icons.Filled.Add,
+                                    AttendoColors.CreamCard,
+                                    AttendoColors.Ink,
                                     onClick = { editing = newSlot(day, slots, subjects) },
                                 )
                             }

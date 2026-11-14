@@ -1,10 +1,12 @@
 package com.attendo.feature.attendance
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -34,10 +36,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.util.VelocityTracker
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,9 +49,11 @@ import com.attendo.core.designsystem.component.TriangleMascot
 import com.attendo.core.designsystem.motion.Motion
 import com.attendo.core.designsystem.motion.PressStyle
 import com.attendo.core.designsystem.motion.iosPress
+import com.attendo.core.designsystem.motion.rememberHaptics
 import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.core.model.AttendanceStatus
 import com.attendo.core.model.CourseCatalog
+import com.attendo.core.model.Physics
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.style.TextAlign
 import kotlinx.coroutines.launch
@@ -69,6 +74,10 @@ internal enum class SwipeAction(val status: AttendanceStatus, val count: Int = 1
  * Dating-app style card stack for the selected day:
  * swipe right = Present, left = Absent, down = No class, up = Present ×2 (a double class).
  * Buttons do the same, plus undo.
+ *
+ * Fluid like iOS (WWDC18 "Designing Fluid Interfaces"): the card tracks the finger 1:1 from
+ * wherever it is, a flick counts by where it is heading (momentum projection), the throw or the
+ * spring back continues at the finger's speed, and a card springing back can be caught mid-way.
  */
 @Composable
 internal fun SwipeDeck(
@@ -80,7 +89,7 @@ internal fun SwipeDeck(
     colorFor: (subjectId: String) -> Color,
     modifier: Modifier = Modifier,
 ) {
-    val haptics = LocalHapticFeedback.current
+    val haptics = rememberHaptics()
     var requested by remember { mutableStateOf<SwipeAction?>(null) }
 
     Column(modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -92,23 +101,52 @@ internal fun SwipeDeck(
                 AllCaughtUp(totalToday)
             } else {
                 key(top.summary.subject.id) {
+                    // X and Y are separate springs so each keeps its own velocity (WWDC18).
                     val x = remember { Animatable(0f) }
                     val y = remember { Animatable(0f) }
                     val scope = rememberCoroutineScope()
                     val thresholdX = widthPx * 0.28f
                     val thresholdY = heightPx * 0.2f
                     val progress = maxOf(abs(x.value) / thresholdX, abs(y.value) / thresholdY).coerceIn(0f, 1f)
+                    var committing by remember { mutableStateOf(false) }
+                    var dragged by remember { mutableStateOf(false) }
 
-                    suspend fun commit(action: SwipeAction) {
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        val spec = tween<Float>(260, easing = Motion.Easing)
-                        when (action) {
-                            SwipeAction.PRESENT -> x.animateTo(widthPx * 1.6f, spec)
-                            SwipeAction.ABSENT -> x.animateTo(-widthPx * 1.6f, spec)
-                            SwipeAction.NO_CLASS -> y.animateTo(heightPx * 1.6f, spec)
-                            SwipeAction.PRESENT_DOUBLE -> y.animateTo(-heightPx * 1.6f, spec)
+                    /** The action a card resting at (px, py) stands for, along its dominant axis. */
+                    fun actionAt(px: Float, py: Float): SwipeAction? =
+                        if (abs(px) / thresholdX >= abs(py) / thresholdY) {
+                            when {
+                                px > thresholdX -> SwipeAction.PRESENT
+                                px < -thresholdX -> SwipeAction.ABSENT
+                                else -> null
+                            }
+                        } else {
+                            when {
+                                py > thresholdY -> SwipeAction.NO_CLASS
+                                py < -thresholdY -> SwipeAction.PRESENT_DOUBLE
+                                else -> null
+                            }
                         }
-                        onSwipe(top.summary.subject.id, action.status, action.count)
+
+                    /** Throws the card off-screen, continuing at the finger's [velocity] (no seam). */
+                    suspend fun commit(action: SwipeAction, velocity: Velocity = Velocity.Zero) {
+                        committing = true
+                        haptics.confirm()
+                        val horizontal = action == SwipeAction.PRESENT || action == SwipeAction.ABSENT
+                        val axis = if (horizontal) x else y
+                        val sign = if (action == SwipeAction.PRESENT || action == SwipeAction.NO_CLASS) 1f else -1f
+                        val target = sign * (if (horizontal) widthPx else heightPx) * 1.5f
+                        var reported = false
+                        fun report() {
+                            if (!reported) {
+                                reported = true
+                                onSwipe(top.summary.subject.id, action.status, action.count)
+                            }
+                        }
+                        // Hand over to the next card as soon as this one is out of view.
+                        axis.animateTo(target, Motion.settle(), initialVelocity = if (horizontal) velocity.x else velocity.y) {
+                            if (abs(value) >= abs(target) * 0.75f) report()
+                        }
+                        report()
                     }
 
                     LaunchedEffect(requested) {
@@ -140,33 +178,80 @@ internal fun SwipeDeck(
                                 translationY = y.value
                                 rotationZ = x.value / widthPx * 14f
                             }
+                            // Touching a card that is still springing back catches it where it is;
+                            // letting go without dragging lets it settle.
                             .pointerInput(Unit) {
-                                detectDragGestures(
-                                    onDrag = { change, drag ->
-                                        change.consume()
+                                awaitEachGesture {
+                                    awaitFirstDown(requireUnconsumed = false)
+                                    dragged = false
+                                    if (!committing) {
                                         scope.launch {
-                                            x.snapTo(x.value + drag.x)
-                                            y.snapTo(y.value + drag.y)
+                                            x.stop()
+                                            y.stop()
+                                        }
+                                    }
+                                    waitForUpOrCancellation()
+                                    if (!dragged && !committing && (x.value != 0f || y.value != 0f)) {
+                                        scope.launch {
+                                            launch { x.animateTo(0f, Motion.release()) }
+                                            y.animateTo(0f, Motion.release())
+                                        }
+                                    }
+                                }
+                            }
+                            .pointerInput(Unit) {
+                                val tracker = VelocityTracker()
+                                var dragX = 0f
+                                var dragY = 0f
+                                var armed: SwipeAction? = null
+                                detectDragGestures(
+                                    onDragStart = {
+                                        dragged = true
+                                        // Start from what's on screen, not from rest.
+                                        dragX = x.value
+                                        dragY = y.value
+                                        armed = actionAt(dragX, dragY)
+                                        tracker.resetTracking()
+                                    },
+                                    onDrag = { change, drag ->
+                                        if (committing) return@detectDragGestures
+                                        change.consume()
+                                        dragX += drag.x
+                                        dragY += drag.y
+                                        tracker.addPosition(change.uptimeMillis, Offset(dragX, dragY))
+                                        scope.launch {
+                                            x.snapTo(dragX)
+                                            y.snapTo(dragY)
+                                        }
+                                        // A tick when letting go here would start (or stop) counting.
+                                        val now = actionAt(dragX, dragY)
+                                        if (now != armed) {
+                                            armed = now
+                                            haptics.tick()
                                         }
                                     },
                                     onDragEnd = {
+                                        if (committing) return@detectDragGestures
+                                        val v = tracker.calculateVelocity()
+                                        // Decide by where the flick is heading, not where it stopped.
+                                        val action = actionAt(
+                                            dragX + Physics.project(v.x, Physics.FAST_DECELERATION),
+                                            dragY + Physics.project(v.y, Physics.FAST_DECELERATION),
+                                        )
                                         scope.launch {
-                                            when {
-                                                x.value > thresholdX -> commit(SwipeAction.PRESENT)
-                                                x.value < -thresholdX -> commit(SwipeAction.ABSENT)
-                                                y.value > thresholdY -> commit(SwipeAction.NO_CLASS)
-                                                y.value < -thresholdY -> commit(SwipeAction.PRESENT_DOUBLE)
-                                                else -> {
-                                                    launch { x.animateTo(0f, Motion.bouncy()) }
-                                                    y.animateTo(0f, Motion.bouncy())
-                                                }
+                                            if (action != null) {
+                                                commit(action, v)
+                                            } else {
+                                                launch { x.animateTo(0f, Motion.release(), initialVelocity = v.x) }
+                                                y.animateTo(0f, Motion.release(), initialVelocity = v.y)
                                             }
                                         }
                                     },
                                     onDragCancel = {
+                                        if (committing) return@detectDragGestures
                                         scope.launch {
-                                            launch { x.animateTo(0f, Motion.bouncy()) }
-                                            y.animateTo(0f, Motion.bouncy())
+                                            launch { x.animateTo(0f, Motion.release()) }
+                                            y.animateTo(0f, Motion.release())
                                         }
                                     },
                                 )
