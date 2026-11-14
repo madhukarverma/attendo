@@ -90,7 +90,7 @@ fun DayStrip(
             val isSelected = day == selected
             val pill by animateColorAsState(
                 if (isSelected) AttendoColors.Ink else AttendoColors.Cream,
-                animationSpec = Motion.bouncy(),
+                animationSpec = Motion.snappy(),
                 label = "dayPill",
             )
             Column(

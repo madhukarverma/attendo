@@ -50,13 +50,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalHapticFeedback
+import com.attendo.core.designsystem.motion.rememberHaptics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -103,7 +102,7 @@ internal fun BoardPage(board: KanbanBoard?, today: LocalDate, actions: BoardActi
         return
     }
     val density = LocalDensity.current
-    val haptics = LocalHapticFeedback.current
+    val haptics = rememberHaptics()
     val scroll = rememberScrollState()
     val currentBoard by rememberUpdatedState(board)
 
@@ -149,6 +148,15 @@ internal fun BoardPage(board: KanbanBoard?, today: LocalDate, actions: BoardActi
         return DropTarget(column.id, index)
     }
 
+    /** Follows the pointer to its drop slot, with a light tick each time the slot changes. */
+    fun retarget() {
+        val next = locate(pointer)
+        if (next != target) {
+            target = next
+            haptics.tick()
+        }
+    }
+
     fun finishDrag(commit: Boolean) {
         val card = dragging
         val drop = target
@@ -158,7 +166,10 @@ internal fun BoardPage(board: KanbanBoard?, today: LocalDate, actions: BoardActi
         // Dropping a card back where it was changes nothing.
         val sameSpot = drop.columnId == card.columnId &&
             currentBoard.cardsIn(card.columnId).indexOfFirst { it.id == card.id } == drop.index
-        if (!sameSpot) actions.moveCard(card.id, drop.columnId, drop.index)
+        if (!sameSpot) {
+            actions.moveCard(card.id, drop.columnId, drop.index)
+            haptics.confirm()
+        }
     }
 
     // While dragging near the left/right edge, scroll the board and keep the drop slot current.
@@ -176,7 +187,7 @@ internal fun BoardPage(board: KanbanBoard?, today: LocalDate, actions: BoardActi
                 pointer.x > right - edge -> step
                 else -> 0f
             }
-            if (delta != 0f && scroll.scrollBy(delta) != 0f) target = locate(pointer)
+            if (delta != 0f && scroll.scrollBy(delta) != 0f) retarget()
         }
     }
 
@@ -191,7 +202,7 @@ internal fun BoardPage(board: KanbanBoard?, today: LocalDate, actions: BoardActi
                     onDragStart = { offset ->
                         val coords = cardCoords[card.id]?.takeIf { it.isAttached }
                         if (coords != null) {
-                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            haptics.grab()
                             grab = offset
                             dragSize = coords.size
                             pointer = coords.localToRoot(offset)
@@ -205,7 +216,7 @@ internal fun BoardPage(board: KanbanBoard?, today: LocalDate, actions: BoardActi
                         if (dragging != null && coords != null) {
                             // Recomputed from the card's current place, so it's right even while scrolling.
                             pointer = coords.localToRoot(change.position)
-                            target = locate(pointer)
+                            retarget()
                         }
                     },
                     onDragEnd = { finishDrag(commit = true) },

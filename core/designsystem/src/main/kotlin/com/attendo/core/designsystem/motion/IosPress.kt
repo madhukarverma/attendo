@@ -84,7 +84,7 @@ fun Modifier.iosPress(
         PressStyle.Scale -> {
             val scale by animateFloatAsState(
                 targetValue = if (pressed) 0.95f else 1f,
-                animationSpec = Motion.bouncy(),
+                animationSpec = Motion.snappy(),
                 label = "scale",
             )
             graphicsLayer {

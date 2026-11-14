@@ -55,6 +55,8 @@ import com.attendo.app.LaunchImageStore
 import com.attendo.app.preferHighRefreshRate
 import com.attendo.core.data.AttendoData
 import com.attendo.core.designsystem.component.AttendoTabBar
+import com.attendo.core.designsystem.component.backdropSource
+import com.attendo.core.designsystem.component.rememberBackdrop
 import com.attendo.core.designsystem.component.StatsGlyph
 import com.attendo.core.designsystem.component.TabBarClearance
 import com.attendo.core.designsystem.component.TabItem
@@ -197,6 +199,8 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
         LocalOverscrollConfiguration provides
             if (mode == AnimationMode.ANDROID) LocalOverscrollConfiguration.current else null,
     ) {
+        // What the frosted tab bar shows through: the screens, recorded once per frame.
+        val backdrop = rememberBackdrop()
         Box(Modifier.fillMaxSize()) {
             NavHost(
                 navController = navController,
@@ -205,6 +209,7 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                 // background, so cross-fades never flash dark.
                 modifier = Modifier
                     .fillMaxSize()
+                    .backdropSource(backdrop)
                     .background(if (mode == AnimationMode.IOS) Color.Black else AttendoColors.Cream),
                 enterTransition = transitions.enter,
                 exitTransition = transitions.exit,
@@ -417,6 +422,7 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                     tabs = Tabs,
                     selectedRoute = currentRoute,
                     onSelect = navController::switchTab,
+                    backdrop = backdrop,
                     modifier = Modifier
                         .navigationBarsPadding()
                         .padding(horizontal = 20.dp, vertical = 12.dp),

@@ -31,6 +31,8 @@ designs (dark onboarding, cream home, green geometric mascots, handwritten speec
 ## Design tokens
 Ink `#232323`, Green `#50A65C`, Cream `#F8FAED` (from the reference), accents Pink `#E0399A`,
 Blue `#2B8FE0`, Yellow `#E2D646`. Reference font Founders Grotesk is commercial, so system sans is used.
+Motion and materials follow Apple's design talks (DEC-021): critically damped springs, velocity
+handoff, flick projection, rubber banding, frosted glass for floating chrome, size-specific tracking.
 
 ## Repository
 GitHub `madhukarverma/attendo` (private). `master` = always-buildable trunk; one branch per feature.

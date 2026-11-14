@@ -19,6 +19,10 @@
   AGP 8.5 (the launcher icon isn't found at link time). Retry after an AGP update.
 - ISSUE-020 — Before targeting Android 16 (SDK 36): check its stricter intent matching against
   `ReminderReceiver`, whose alarm actions aren't listed in its intent filter.
+- ISSUE-021 — Forgiveness: undo (a snackbar) after deleting a reminder, board card, checklist task or
+  grade, instead of relying on confirmations. Only attendance swipes have undo today.
+- ISSUE-022 — Check the v0.33 motion on a phone: glass blur cost on low-end devices, flick
+  sensitivity (`Physics.FAST_DECELERATION`), haptic strength.
 
 ## Needs to be done (requested, deferred on purpose — 2026-11-11)
 - ISSUE-015 — Google account backup: built in v0.21; needs the shared Firebase/Google Cloud project

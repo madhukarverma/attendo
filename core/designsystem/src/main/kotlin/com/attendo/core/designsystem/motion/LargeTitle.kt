@@ -20,7 +20,12 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,8 +54,9 @@ fun rememberCollapseFraction(state: ScrollState): State<Float> {
 
 /**
  * Navigation bar in the style of iOS Settings: "‹ Back" on the left, a small centred title that
- * fades in once the [LargeTitle] scrolls underneath, and a hairline that appears with it.
- * [onBack] null hides the back button (top-level tabs).
+ * fades in once the [LargeTitle] scrolls underneath. Instead of a hard divider, content fades out
+ * as it scrolls under the bar (Apple's scroll edge effect), only once something is under it.
+ * [onBack] null hides the back button (top-level tabs). Drawn above the content that follows it.
  */
 @Composable
 fun CollapsingTopBar(
@@ -62,8 +68,25 @@ fun CollapsingTopBar(
 ) {
     Box(
         modifier
+            .zIndex(1f)
             .fillMaxWidth()
             .height(48.dp)
+            .drawWithContent {
+                drawContent()
+                val f = collapseFraction()
+                if (f > 0f) {
+                    val fade = EdgeFade.toPx()
+                    drawRect(
+                        Brush.verticalGradient(
+                            listOf(AttendoColors.Cream.copy(alpha = 0.92f * f), AttendoColors.Cream.copy(alpha = 0f)),
+                            startY = size.height,
+                            endY = size.height + fade,
+                        ),
+                        topLeft = Offset(0f, size.height),
+                        size = Size(size.width, fade),
+                    )
+                }
+            }
             .background(AttendoColors.Cream),
     ) {
         if (onBack != null) Row(
@@ -91,16 +114,11 @@ fun CollapsingTopBar(
                     alpha = ((f - 0.5f) * 2f).coerceIn(0f, 1f)
                 },
         )
-        Box(
-            Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .height(0.5.dp)
-                .graphicsLayer { alpha = collapseFraction() }
-                .background(AttendoColors.CreamDeep),
-        )
     }
 }
+
+/** How far below the bar the scroll edge fade reaches. */
+private val EdgeFade = 18.dp
 
 /** The big bold page title that sits at the top of the scrolling content. */
 @Composable
