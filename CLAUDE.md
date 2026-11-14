@@ -8,7 +8,7 @@ calendar and friends. All data is CSV. Private repo `madhukarverma/attendo`, bra
 | Folder or file | What's inside | Open it when |
 |---|---|---|
 | `app/` | Start-up and app container, navigation and tabs, reminders, CSV export/import, launch image, manifest. See `app/CLAUDE.md` | wiring a screen in, notifications, permissions |
-| `app/build.gradle.kts` | Version number, signing (debug key for now), Firebase settings read from `google-services.json` | releasing, changing build settings |
+| `app/build.gradle.kts` | Version number, release signing (from `keystore.properties`), Firebase settings read from `google-services.json` | releasing, changing build settings |
 | `core/model/` | Plain-Kotlin data types and maths: attendance, grades, habits, board, planner, curriculum. See `core/model/CLAUDE.md` | changing a calculation or a data type |
 | `core/data/` | CSV storage and repositories, bundled calendar and curriculum CSVs, backup format, CSV import, Pomodoro timer engine. See `core/data/CLAUDE.md` | changing what's saved, adding a column or file |
 | `core/designsystem/` | Themes, colours, fonts, motion, mascots, shared components, tab bar. See `core/designsystem/CLAUDE.md` | look and feel, animations |
@@ -21,6 +21,7 @@ calendar and friends. All data is CSV. Private repo `madhukarverma/attendo`, bra
 | `settings.gradle.kts` | Module list | adding a module |
 | `build.gradle.kts`, `gradle.properties` | Root build setup | rarely |
 | `firebase.properties.example` | Template for Firebase settings when there is no `google-services.json` | setting up Firebase on another machine |
+| `keystore.properties.example` | Template for the release key's path and password (`keystore.properties`, never committed) | building releases on another machine |
 | `README.md` | Public overview and list of data files | rarely |
 
 ## Rules
@@ -34,7 +35,7 @@ calendar and friends. All data is CSV. Private repo `madhukarverma/attendo`, bra
 **Code**
 - All user data lives in CSV files in app storage. No database, no other format.
 - Feature modules never depend on each other; the app passes shared pieces in as composable slots.
-- `app/google-services.json` and `firebase.properties` are never committed.
+- `app/google-services.json`, `firebase.properties`, `keystore.properties` and the `.jks` key are never committed.
 
 **Workflow**
 - One `feature/*` branch per feature (`docs/*` for docs only). Push it, merge `--no-ff` into
@@ -47,7 +48,8 @@ calendar and friends. All data is CSV. Private repo `madhukarverma/attendo`, bra
   through `Get-Content`/`Set-Content` (it breaks UTF-8).
 - Build and test from Bash:
   `export JAVA_HOME="$USERPROFILE/android-dev/jdk-17.0.21+9" && ./gradlew.bat test assembleRelease`.
-  The APK lands in `app/build/outputs/apk/release/app-release.apk`.
+  The APK lands in `app/build/outputs/apk/release/app-release.apk`. Only publish it when the
+  build didn't warn about the debug key (`docs/RELEASE_SIGNING.md`).
 
 ## Common tasks
 

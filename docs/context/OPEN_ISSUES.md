@@ -3,7 +3,7 @@
 - ISSUE-001 — Mixed double class (present for one, absent for the other); today a ×2 mark is all present or all absent.
 - ~~ISSUE-002 — Weekly timetable.~~ Done in v0.29.0.
 - ISSUE-003 — Daily "mark today's attendance" reminder (to-do reminders exist since v0.18).
-- ISSUE-006 — Release signing keystore + CI build (GitHub Actions). Also gives Google sign-in a
+- ISSUE-006 — ~~Release signing keystore~~ (done in v0.33.0, docs/RELEASE_SIGNING.md) + CI build (GitHub Actions). Also gives Google sign-in a
   stable SHA-1 (today it's the debug key of the build PC, DEC-012).
 - ISSUE-007 — Home-screen widget.
 - ISSUE-009 — Pomodoro: notification/alarm when a run ends while the app is in the background, and

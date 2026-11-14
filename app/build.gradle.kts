@@ -44,6 +44,16 @@ val firebaseValues: Map<String, String> = run {
 
 fun firebaseValue(key: String): String = "\"" + firebaseValues[key].orEmpty().replace("\"", "") + "\""
 
+/**
+ * Release signing (docs/RELEASE_SIGNING.md): `keystore.properties` in the repository root names the
+ * keystore and holds its password. It and the keystore are git-ignored. Without it, release builds
+ * are signed with the debug key and a warning is printed; such an APK can't update one signed with
+ * the release key.
+ */
+val releaseKey: Properties? = rootProject.file("keystore.properties").takeIf { it.exists() }?.let { f ->
+    Properties().apply { f.inputStream().use { load(it) } }
+}
+
 android {
     namespace = "com.attendo.app"
     compileSdk = 35
@@ -60,13 +70,23 @@ android {
         versionName = "0.32.0"
     }
 
+    signingConfigs {
+        if (releaseKey != null) {
+            create("release") {
+                storeFile = file(releaseKey.getProperty("storeFile"))
+                storePassword = releaseKey.getProperty("storePassword")
+                keyAlias = releaseKey.getProperty("keyAlias")
+                keyPassword = releaseKey.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // No release keystore yet: sign with the debug key so the APK is installable for testing.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName(if (releaseKey != null) "release" else "debug")
         }
     }
     compileOptions {
@@ -84,6 +104,12 @@ android {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
         // kotlinx-coroutines debugger data; only used by the IDE debugger.
         resources.excludes += "DebugProbesKt.bin"
+    }
+}
+
+if (releaseKey == null) {
+    tasks.matching { it.name == "packageRelease" }.configureEach {
+        doFirst { logger.warn("keystore.properties not found: this release APK is signed with the debug key.") }
     }
 }
 

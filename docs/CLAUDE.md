@@ -12,6 +12,7 @@ Guides and project memory. `context/` follows the user's AI context framework.
 | `FLOWCHART.md` | Mermaid diagrams: delivery plan, navigation, architecture | screens or modules change |
 | `FRIENDS_SETUP.md` | One-time Firebase setup for friends and the Google backup | setting up or debugging sign-in |
 | `GOOGLE_BACKUP_SETUP.md` | How the Drive backup works (setup now lives in `FRIENDS_SETUP.md`) | backup questions |
+| `RELEASE_SIGNING.md` | Where the release key is, backing it up, Firebase fingerprints, moving a phone to the release-signed app | releasing, signing errors, a new PC |
 | `SECURITY.md` | What protects the data, Firestore privacy, known risks | security or privacy changes |
 | `TEST_REPORT.md` | Every unit test, last results, what isn't tested | test questions; refresh after test changes |
 
