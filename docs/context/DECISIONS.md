@@ -150,7 +150,7 @@
 
 ## DEC-021 — Apple's fluid-interface rules as the motion and material standard
 - Date: 2026-11-15 · Status: Active
-- Decision: follow the user's "apple-design" skill (WWDC18 "Designing Fluid Interfaces" and
+- Decision: follow the user's "apple-design" skill (`.claude/skills/apple-design/SKILL.md`; WWDC18 "Designing Fluid Interfaces" and
   related talks), translated to Compose: springs critically damped by default (`snappy`,
   `settle`), bounce only after momentum (`release`, damping 0.8 / response 0.3); gestures start
   from the on-screen value, hand their release velocity to the spring, and decide flicks with

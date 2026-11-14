@@ -23,6 +23,7 @@ calendar and friends. All data is CSV. Private repo `madhukarverma/attendo`, bra
 | `firebase.properties.example` | Template for Firebase settings when there is no `google-services.json` | setting up Firebase on another machine |
 | `keystore.properties.example` | Template for the release key's path and password (`keystore.properties`, never committed) | building releases on another machine |
 | `README.md` | Public overview and list of data files | rarely |
+| `.claude/skills/apple-design/SKILL.md` | The user's Apple design skill (springs, gestures, materials, type), written in web terms | motion, gestures or visual polish (Compose version: `core/designsystem/CLAUDE.md`) |
 
 ## Rules
 
