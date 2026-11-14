@@ -86,12 +86,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = if (releaseKey != null) {
-                signingConfigs.getByName("release")
-            } else {
-                logger.warn("keystore.properties not found: signing the release build with the debug key.")
-                signingConfigs.getByName("debug")
-            }
+            signingConfig = signingConfigs.getByName(if (releaseKey != null) "release" else "debug")
         }
     }
     compileOptions {
@@ -109,6 +104,12 @@ android {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
         // kotlinx-coroutines debugger data; only used by the IDE debugger.
         resources.excludes += "DebugProbesKt.bin"
+    }
+}
+
+if (releaseKey == null) {
+    tasks.matching { it.name == "packageRelease" }.configureEach {
+        doFirst { logger.warn("keystore.properties not found: this release APK is signed with the debug key.") }
     }
 }
 
