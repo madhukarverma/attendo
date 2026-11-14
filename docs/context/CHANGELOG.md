@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-11-15 — v0.33.1 Animation performance
+- New project skill `.claude/skills/animation-performance/SKILL.md` (the one the apple-design
+  skill refers to), written for Compose with web equivalents: draw-phase reads, transforms over
+  layout, idle loops, blur cost, gestures, lists, stability, start-up, and how to measure.
+- Applied to the app: progress bars on Stats, Focus stats (7-day chart and per-subject bars) and
+  the Syllabus hero no longer re-measure every frame; they share one `ProgressBar` that animates
+  in the draw phase. The attendance card deck reads its drag offsets only inside layer lambdas,
+  so dragging redraws the card without recomposing the deck.
+- Audit: every other animation (press effects, rubber band, top-bar fade, focus dial, mascots,
+  glass) already reads its values in the draw phase.
+
 ## 2026-11-15 — v0.33.0 Release key, cleanup, Apple-style motion
 - **Release signing (fix 8):** releases are signed with Attendo's own key, kept outside the
   repository and read through a git-ignored `keystore.properties` (docs/RELEASE_SIGNING.md).

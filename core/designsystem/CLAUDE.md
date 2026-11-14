@@ -14,7 +14,7 @@ Look and feel shared by every screen. Sources are in
 | `motion/LargeTitle.kt` | Large titles that collapse into a top bar with a scroll-edge fade | screen headers |
 | `component/Components.kt` | Cards, buttons, speech bubble, squiggle, animated numbers, small glyphs | shared building blocks |
 | `component/Glass.kt` | Frosted glass: `rememberBackdrop`, `backdropSource`, `glass` (blur on Android 12+) | translucent surfaces |
-| `component/Controls.kt` | `PillButton`, `HeroStat`, text-field colours, date and time pickers | buttons, forms, pickers |
+| `component/Controls.kt` | `PillButton`, `HeroStat`, `ProgressBar` (animated in the draw phase), text-field colours, date and time pickers | buttons, bars, forms, pickers |
 | `component/TabBar.kt` | The bottom tab bar and `TabBarClearance` | tab bar look |
 | `component/SegmentedControl.kt` | Segmented switcher (the Focus and Tasks tab pages) | page switchers |
 | `component/DayStrip.kt` | Horizontal strip of days | picking a day |
@@ -33,5 +33,8 @@ Look and feel shared by every screen. Sources are in
 - Haptics only through `rememberHaptics()`, and only for moments that matter (DEC-021).
 - These motion rules come from `.claude/skills/apple-design/SKILL.md` (written for the web: CSS,
   Pointer Events). Use the helpers here as its Compose version.
+- Moving values are read only in draw or layout lambdas (`graphicsLayer {}`, `drawBehind {}`,
+  `Canvas`), never in a composable body, and nothing animates its size to show progress: use
+  `ProgressBar` (`.claude/skills/animation-performance/SKILL.md`, DEC-022).
 - Tab screens pad their content by `TabBarClearance` at the bottom so the tab bar doesn't cover it.
 - When a second feature needs the same control, move it here instead of copying it.

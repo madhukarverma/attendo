@@ -159,3 +159,11 @@
   The glass blur is built on Compose 1.7 graphics layers instead of adding a blur library.
 - Consequence: blur needs Android 12+ (older phones get a near-solid tab bar). Feature code
   should use these helpers rather than ad-hoc tweens or raw haptic calls.
+
+## DEC-022 — Animations stay in the draw phase
+- Date: 2026-11-15 · Status: Active
+- Decision: per `.claude/skills/animation-performance/SKILL.md`, a value that changes every frame
+  is read only inside draw or layout lambdas (`graphicsLayer {}`, `drawBehind {}`, `Canvas`, or a
+  `() -> Float` passed down), and progress is drawn, not laid out (`ProgressBar`).
+- Consequence: moving things cost a redraw of their own layer, not a recomposition or layout of
+  the screen. Short colour cross-fades on small controls are allowed to stay as they are.

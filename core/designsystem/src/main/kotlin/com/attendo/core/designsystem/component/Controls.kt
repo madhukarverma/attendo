@@ -1,5 +1,14 @@
 package com.attendo.core.designsystem.component
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.Canvas
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.unit.Dp
+import com.attendo.core.designsystem.motion.Motion
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -68,6 +77,44 @@ fun PillButton(
             Spacer(Modifier.width(8.dp))
         }
         Text(text, style = MaterialTheme.typography.labelLarge, color = fg, maxLines = 1)
+    }
+}
+
+/**
+ * A rounded progress bar whose fill animates in the draw phase only, so a moving bar never
+ * re-measures or recomposes (see the animation-performance skill). The fill grows from empty on
+ * first show and springs to new values. [vertical] fills from the bottom; [marker] draws a thin
+ * tick at that fraction (a target); [minFraction] keeps a sliver visible for zero values.
+ */
+@Composable
+fun ProgressBar(
+    fraction: Float,
+    fill: Color,
+    track: Color,
+    modifier: Modifier = Modifier,
+    vertical: Boolean = false,
+    minFraction: Float = 0f,
+    marker: Float? = null,
+    markerColor: Color = AttendoColors.Ink,
+    cornerRadius: Dp? = null,
+) {
+    val shown = remember { Animatable(0f) }
+    LaunchedEffect(fraction) { shown.animateTo(fraction.coerceIn(0f, 1f), Motion.settle()) }
+    Canvas(modifier) {
+        val radius = CornerRadius(cornerRadius?.toPx() ?: (minOf(size.width, size.height) / 2))
+        drawRoundRect(track, cornerRadius = radius)
+        val f = shown.value.coerceAtLeast(minFraction)
+        if (f > 0f) {
+            if (vertical) {
+                drawRoundRect(fill, Offset(0f, size.height * (1f - f)), Size(size.width, size.height * f), radius)
+            } else {
+                drawRoundRect(fill, Offset.Zero, Size(size.width * f, size.height), radius)
+            }
+        }
+        if (marker != null) {
+            val w = 2.dp.toPx()
+            drawRect(markerColor, Offset(size.width * marker.coerceIn(0f, 1f) - w / 2, 0f), Size(w, size.height))
+        }
     }
 }
 

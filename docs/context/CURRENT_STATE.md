@@ -1,5 +1,10 @@
 # Current State
 
+## Update 2026-11-15 (v0.33.1)
+Animation-performance pass: all progress bars and the card deck animate in the draw phase only;
+the new animation-performance skill documents the rules. Still not measured on a device (no
+frame-time numbers yet; ISSUE-022).
+
 ## Update 2026-11-15 (v0.33.0)
 Release-signed with the new key (SHA-1 33:0C:B7:CA:21:A3:03:F8:D8:42:B7:16:52:59:9E:FB:9E:2B:D9:FA;
 add it in Firebase). Dead code and duplicated controls removed. Apple-style motion: fluid card

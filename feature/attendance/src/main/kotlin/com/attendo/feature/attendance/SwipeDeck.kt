@@ -107,7 +107,8 @@ internal fun SwipeDeck(
                     val scope = rememberCoroutineScope()
                     val thresholdX = widthPx * 0.28f
                     val thresholdY = heightPx * 0.2f
-                    val progress = maxOf(abs(x.value) / thresholdX, abs(y.value) / thresholdY).coerceIn(0f, 1f)
+                    // Read only inside graphicsLayer blocks, so dragging redraws without recomposing.
+                    fun progress() = maxOf(abs(x.value) / thresholdX, abs(y.value) / thresholdY).coerceIn(0f, 1f)
                     var committing by remember { mutableStateOf(false) }
                     var dragged by remember { mutableStateOf(false) }
 
@@ -162,10 +163,11 @@ internal fun SwipeDeck(
                             next,
                             colorFor(next.summary.subject.id),
                             Modifier.graphicsLayer {
-                                val s = 0.92f + 0.08f * progress
+                                val p = progress()
+                                val s = 0.92f + 0.08f * p
                                 scaleX = s
                                 scaleY = s
-                                translationY = (1f - progress) * 18.dp.toPx()
+                                translationY = (1f - p) * 18.dp.toPx()
                             },
                         )
                     }
@@ -257,10 +259,10 @@ internal fun SwipeDeck(
                                 )
                             },
                         stamps = {
-                            Stamp("PRESENT", AttendoColors.Green, -14f, (x.value / thresholdX).coerceIn(0f, 1f), Alignment.TopStart)
-                            Stamp("ABSENT", AttendoColors.Pink, 14f, (-x.value / thresholdX).coerceIn(0f, 1f), Alignment.TopEnd)
-                            Stamp("NO CLASS", AttendoColors.Blue, 0f, (y.value / thresholdY).coerceIn(0f, 1f), Alignment.Center)
-                            Stamp("PRESENT ×2", AttendoColors.Green, 0f, (-y.value / thresholdY).coerceIn(0f, 1f), Alignment.BottomCenter)
+                            Stamp("PRESENT", AttendoColors.Green, -14f, { (x.value / thresholdX).coerceIn(0f, 1f) }, Alignment.TopStart)
+                            Stamp("ABSENT", AttendoColors.Pink, 14f, { (-x.value / thresholdX).coerceIn(0f, 1f) }, Alignment.TopEnd)
+                            Stamp("NO CLASS", AttendoColors.Blue, 0f, { (y.value / thresholdY).coerceIn(0f, 1f) }, Alignment.Center)
+                            Stamp("PRESENT ×2", AttendoColors.Green, 0f, { (-y.value / thresholdY).coerceIn(0f, 1f) }, Alignment.BottomCenter)
                         },
                     )
                 }
@@ -375,10 +377,10 @@ private fun androidx.compose.foundation.layout.BoxScope.Stamp(
     text: String,
     color: Color,
     angle: Float,
-    alpha: Float,
+    /** Read in the draw phase: the stamp fades with the drag without recomposing. */
+    alpha: () -> Float,
     alignment: Alignment,
 ) {
-    if (alpha <= 0f) return
     Text(
         text,
         color = color,
@@ -389,7 +391,7 @@ private fun androidx.compose.foundation.layout.BoxScope.Stamp(
             .align(alignment)
             .padding(28.dp)
             .graphicsLayer {
-                this.alpha = alpha
+                this.alpha = alpha()
                 rotationZ = angle
             }
             .border(4.dp, color, RoundedCornerShape(10.dp))

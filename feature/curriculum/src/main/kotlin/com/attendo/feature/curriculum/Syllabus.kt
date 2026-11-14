@@ -1,5 +1,6 @@
 package com.attendo.feature.curriculum
 
+import com.attendo.core.designsystem.component.ProgressBar
 import com.attendo.core.designsystem.component.HeroStat
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -178,7 +179,7 @@ private fun CurriculumCourse.shortName(): String = CourseCatalog.shortName(Subje
 private fun Overview(curriculum: Curriculum, covered: Set<UnitKey>) {
     val done = curriculum.coveredUnits(covered)
     val total = curriculum.totalUnits
-    val fraction by animateFloatAsState(if (total == 0) 0f else done.toFloat() / total, Motion.settle(), label = "overall")
+    val fraction = if (total == 0) 0f else done.toFloat() / total
     Column(
         Modifier
             .fillMaxWidth()
@@ -198,21 +199,7 @@ private fun Overview(curriculum: Curriculum, covered: Set<UnitKey>) {
             )
         }
         Spacer(Modifier.height(12.dp))
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .clip(CircleShape)
-                .background(AttendoColors.OnHero.copy(alpha = 0.15f)),
-        ) {
-            Box(
-                Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(fraction)
-                    .clip(CircleShape)
-                    .background(AttendoColors.GreenFill),
-            )
-        }
+        ProgressBar(fraction, AttendoColors.GreenFill, AttendoColors.OnHero.copy(alpha = 0.15f), Modifier.fillMaxWidth().height(8.dp))
         Spacer(Modifier.height(14.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(22.dp)) {
             HeroStat("${curriculum.courses.size}", "courses")
