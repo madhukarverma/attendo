@@ -31,5 +31,7 @@ Look and feel shared by every screen. Sources are in
   only after a drag or flick, started with the finger's velocity; decide flicks with
   `Physics.project`. Animate from the current on-screen value so motion can be interrupted.
 - Haptics only through `rememberHaptics()`, and only for moments that matter (DEC-021).
+- These motion rules come from `.claude/skills/apple-design/SKILL.md` (written for the web: CSS,
+  Pointer Events). Use the helpers here as its Compose version.
 - Tab screens pad their content by `TabBarClearance` at the bottom so the tab bar doesn't cover it.
 - When a second feature needs the same control, move it here instead of copying it.
