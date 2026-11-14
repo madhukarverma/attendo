@@ -1,5 +1,6 @@
 package com.attendo.feature.pomodoro
 
+import com.attendo.core.designsystem.component.ProgressBar
 import com.attendo.core.designsystem.component.HeroStat
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
@@ -11,7 +12,6 @@ import com.attendo.core.designsystem.component.SegmentedControl
 import com.attendo.core.designsystem.component.TabBarClearance
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -43,7 +43,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -502,18 +501,18 @@ private fun WeekChart(summary: PomodoroSummary) {
     ) {
         summary.last7Days.forEachIndexed { i, (day, minutes) ->
             val target = minutes / max.toFloat()
-            val anim = remember { Animatable(0f) }
-            LaunchedEffect(target) { anim.animateTo(target, Motion.settle()) }
             val isToday = i == summary.last7Days.lastIndex
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
                 Text(if (minutes > 0) "$minutes" else "", style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
                 Box(Modifier.height(86.dp), contentAlignment = Alignment.BottomCenter) {
-                    Box(
-                        Modifier
-                            .width(18.dp)
-                            .fillMaxHeight(anim.value.coerceAtLeast(0.03f))
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(if (isToday) AttendoColors.Green else AttendoColors.Ink.copy(alpha = 0.75f)),
+                    ProgressBar(
+                        fraction = target,
+                        fill = if (isToday) AttendoColors.Green else AttendoColors.Ink.copy(alpha = 0.75f),
+                        track = Color.Transparent,
+                        modifier = Modifier.width(18.dp).fillMaxHeight(),
+                        vertical = true,
+                        minFraction = 0.03f,
+                        cornerRadius = 6.dp,
                     )
                 }
                 Spacer(Modifier.height(6.dp))
@@ -529,28 +528,12 @@ private fun WeekChart(summary: PomodoroSummary) {
 
 @Composable
 private fun SubjectFocusBar(name: String, minutes: Int, fraction: Float) {
-    val anim = remember { Animatable(0f) }
-    LaunchedEffect(fraction) { anim.animateTo(fraction, Motion.settle()) }
     Column(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
         Row {
             Text(name, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f), maxLines = 1)
             Text("$minutes min", style = MaterialTheme.typography.labelLarge, color = AttendoColors.Green)
         }
         Spacer(Modifier.height(4.dp))
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .height(10.dp)
-                .clip(CircleShape)
-                .background(AttendoColors.CreamDeep),
-        ) {
-            Box(
-                Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(anim.value)
-                    .clip(CircleShape)
-                    .background(AttendoColors.Green),
-            )
-        }
+        ProgressBar(fraction, AttendoColors.Green, AttendoColors.CreamDeep, Modifier.fillMaxWidth().height(10.dp))
     }
 }

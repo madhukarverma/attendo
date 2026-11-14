@@ -22,7 +22,8 @@
 - ISSUE-021 — Forgiveness: undo (a snackbar) after deleting a reminder, board card, checklist task or
   grade, instead of relying on confirmations. Only attendance swipes have undo today.
 - ISSUE-022 — Check the v0.33 motion on a phone: glass blur cost on low-end devices, flick
-  sensitivity (`Physics.FAST_DECELERATION`), haptic strength.
+  sensitivity (`Physics.FAST_DECELERATION`), haptic strength; record frame times with
+  `adb shell dumpsys gfxinfo com.attendo.app framestats` (animation-performance skill, §10).
 
 ## Needs to be done (requested, deferred on purpose — 2026-11-11)
 - ISSUE-015 — Google account backup: built in v0.21; needs the shared Firebase/Google Cloud project

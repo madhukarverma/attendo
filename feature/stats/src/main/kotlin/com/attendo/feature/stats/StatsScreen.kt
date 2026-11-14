@@ -1,5 +1,6 @@
 package com.attendo.feature.stats
 
+import com.attendo.core.designsystem.component.ProgressBar
 import com.attendo.core.data.GradeRepository
 import com.attendo.core.model.Grades
 import com.attendo.core.model.SubjectGrades
@@ -8,28 +9,20 @@ import kotlinx.coroutines.flow.flowOf
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.foundation.layout.size
 import com.attendo.core.designsystem.component.TabBarClearance
-import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import com.attendo.core.designsystem.component.AnimatedNumber
 import com.attendo.core.designsystem.motion.BounceContainer
 import com.attendo.core.designsystem.motion.CollapsingTopBar
-import com.attendo.core.designsystem.motion.Motion
 import com.attendo.core.designsystem.motion.LargeTitle
 import com.attendo.core.designsystem.motion.rememberCollapseFraction
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
@@ -173,8 +166,6 @@ private fun Stat(label: String, value: Int) {
 private fun SubjectBar(summary: AttendanceSummary, modifier: Modifier = Modifier) {
     // Bars grow from zero on first show, then spring to new values.
     val target = (summary.percent / 100).toFloat().coerceIn(0f, 1f)
-    val progress = remember { Animatable(0f) }
-    LaunchedEffect(target) { progress.animateTo(target, Motion.settle()) }
     Column(
         modifier
             .fillMaxWidth()
@@ -192,28 +183,13 @@ private fun SubjectBar(summary: AttendanceSummary, modifier: Modifier = Modifier
             )
         }
         Spacer(Modifier.height(10.dp))
-        BoxWithConstraints(
-            Modifier
-                .fillMaxWidth()
-                .height(12.dp)
-                .clip(CircleShape)
-                .background(AttendoColors.CreamDeep),
-        ) {
-            Box(
-                Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(progress.value)
-                    .clip(CircleShape)
-                    .background(if (summary.isOnTrack) AttendoColors.Green else AttendoColors.Pink),
-            )
-            Box(
-                Modifier
-                    .offset(x = maxWidth * (summary.subject.targetPercent / 100f) - 1.dp)
-                    .width(2.dp)
-                    .fillMaxHeight()
-                    .background(AttendoColors.Ink),
-            )
-        }
+        ProgressBar(
+            fraction = target,
+            fill = if (summary.isOnTrack) AttendoColors.Green else AttendoColors.Pink,
+            track = AttendoColors.CreamDeep,
+            modifier = Modifier.fillMaxWidth().height(12.dp),
+            marker = summary.subject.targetPercent / 100f,
+        )
         Spacer(Modifier.height(6.dp))
         Text(
             "${summary.present} present · ${summary.absent} absent · target ${summary.subject.targetPercent}%",
