@@ -138,3 +138,12 @@
   in `gradle.properties`) rather than a major AGP upgrade in the same release. The app was already
   edge-to-edge, so Android 15's enforced edge-to-edge changes nothing.
 - Consequence: an AGP and library update remains a separate task.
+
+## DEC-020 — Release key outside the repository
+- Date: 2026-11-15 · Status: Active
+- Decision: a PKCS12 key (`attendo`, RSA 4096) in `%USERPROFILE%\android-dev\keys`, read through a
+  git-ignored `keystore.properties`. The user chose the password; it never appears in the repo or
+  in chat. Without the file, release builds fall back to the debug key with a warning, so the
+  project still builds anywhere.
+- Consequence: phones on v0.32.0 or older must uninstall once (after a backup) to move to the
+  release-signed app. The key's SHA-1 must be added in Firebase for Google sign-in.

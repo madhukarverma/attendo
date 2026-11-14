@@ -17,7 +17,8 @@ The `:app` module ties everything together. Kotlin sources are in `src/main/kotl
 | `DisplayRefresh.kt` | Asks for the screen's highest refresh rate | smoothness on 90/120 Hz phones |
 
 Other files:
-- `build.gradle.kts`: version, signing, feature dependencies, Firebase settings (from
+- `build.gradle.kts`: version, release signing (from `../keystore.properties`, see
+  `docs/RELEASE_SIGNING.md`), feature dependencies, Firebase settings (from
   `google-services.json`, else `../firebase.properties`).
 - `src/main/AndroidManifest.xml`: permissions (notifications, exact alarms), activity, receiver,
   file provider.
@@ -29,4 +30,4 @@ Other files:
 - Feature modules don't know about each other. When one screen needs a piece of another, pass it
   in here as a composable slot or callback (examples: `syllabus` into the Focus tab,
   `syllabusSection` into the subject page).
-- `google-services.json` and `firebase.properties` stay out of git.
+- `google-services.json`, `firebase.properties`, `keystore.properties` and the key stay out of git.

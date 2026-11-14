@@ -33,8 +33,9 @@ only network traffic is the optional Google account backup and the optional Frie
 
 ## Known limitations
 
-- Release APKs are signed with the build PC's debug key (ISSUE-006). Anyone with that key could
-  sign an update, so a private release keystore is needed before wider distribution.
+- Since v0.33.0 releases are signed with a private release key kept outside the repository
+  (`docs/RELEASE_SIGNING.md`). Losing the key or its password means no further updates can be
+  installed over the app, so both must be backed up.
 - Data at rest is not encrypted beyond Android's file-based encryption, by design (the CSV files
   are meant to be readable when exported). Android Auto Backup is enabled, so the system may back
   the files up to the user's Google account.
