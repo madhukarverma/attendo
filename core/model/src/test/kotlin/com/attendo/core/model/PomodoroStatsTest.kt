@@ -33,4 +33,14 @@ class PomodoroStatsTest {
         val s = PomodoroStats.summarize(listOf(focus(1, 25), focus(2, 25), focus(4, 25)), emptyList(), today)
         assertEquals(2, s.streakDays)
     }
+
+    @Test
+    fun clockRoundsUpToTheWholeSecond() {
+        assertEquals("25:00", formatClock(25 * 60_000L))
+        assertEquals("25:00", formatClock(1_499_001))
+        assertEquals("24:59", formatClock(1_499_000))
+        assertEquals("00:01", formatClock(1))
+        assertEquals("00:00", formatClock(0))
+        assertEquals("00:00", formatClock(-500))
+    }
 }

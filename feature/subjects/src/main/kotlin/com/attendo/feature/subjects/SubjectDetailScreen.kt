@@ -1,5 +1,6 @@
 package com.attendo.feature.subjects
 
+import com.attendo.core.designsystem.component.attendoFieldColors
 import com.attendo.core.data.PlannerRepository
 import com.attendo.core.data.GradeRepository
 import com.attendo.core.model.Assessment
@@ -12,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.sp
@@ -36,12 +36,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -404,10 +402,7 @@ private fun LectureHoursDialog(current: Int?, onDismiss: () -> Unit, onSave: (In
                     placeholder = { Text("e.g. 45") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = AttendoColors.Green,
-                        cursorColor = AttendoColors.Green,
-                    ),
+                    colors = attendoFieldColors(),
                 )
             }
         },

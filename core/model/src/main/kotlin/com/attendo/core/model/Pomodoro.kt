@@ -62,3 +62,9 @@ object PomodoroStats {
         )
     }
 }
+
+/** A countdown as "mm:ss", rounded up so a fresh 25-minute session reads 25:00, not 24:59. */
+fun formatClock(millis: Long): String {
+    val total = (millis.coerceAtLeast(0) + 999) / 1000
+    return "%02d:%02d".format(total / 60, total % 60)
+}

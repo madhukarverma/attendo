@@ -1,5 +1,7 @@
 package com.attendo.feature.tasks
 
+import com.attendo.core.designsystem.component.attendoFilledFieldColors
+import com.attendo.core.designsystem.component.attendoFieldColors
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +32,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -374,13 +375,7 @@ private fun AddHabitCard(selectedDay: DayOfWeek, onAdd: (String, Set<DayOfWeek>)
                 shape = RoundedCornerShape(16.dp),
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { submit() }),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = AttendoColors.Cream,
-                    unfocusedContainerColor = AttendoColors.Cream,
-                    focusedBorderColor = AttendoColors.Green,
-                    unfocusedBorderColor = AttendoColors.Cream,
-                    cursorColor = AttendoColors.Green,
-                ),
+                colors = attendoFilledFieldColors(AttendoColors.Cream),
             )
             Spacer(Modifier.width(10.dp))
             Box(
@@ -453,12 +448,7 @@ private fun EditHabitDialog(habit: Habit, onDismiss: () -> Unit, onSave: (Habit)
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = AttendoColors.Green,
-                        unfocusedBorderColor = AttendoColors.CreamDeep,
-                        cursorColor = AttendoColors.Green,
-                        focusedLabelColor = AttendoColors.Green,
-                    ),
+                    colors = attendoFieldColors(),
                 )
                 Spacer(Modifier.height(14.dp))
                 Text("Repeats on", style = MaterialTheme.typography.labelMedium, color = AttendoColors.Muted)

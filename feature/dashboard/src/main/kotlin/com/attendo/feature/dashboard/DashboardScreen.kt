@@ -1,5 +1,6 @@
 package com.attendo.feature.dashboard
 
+import com.attendo.core.model.formatClock
 import androidx.compose.material.icons.filled.Person
 import com.attendo.core.data.PlannerRepository
 import com.attendo.core.data.HabitRepository
@@ -333,11 +334,6 @@ private fun PomodoroKind.label() = when (this) {
     PomodoroKind.FOCUS -> "Focus"
     PomodoroKind.SHORT_BREAK -> "Short break"
     PomodoroKind.LONG_BREAK -> "Long break"
-}
-
-private fun formatClock(millis: Long): String {
-    val total = (millis / 1000).coerceAtLeast(0)
-    return "%d:%02d".format(total / 60, total % 60)
 }
 
 /** Today's weekday-checklist tasks, tickable in place. */

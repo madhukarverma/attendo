@@ -1,5 +1,6 @@
 package com.attendo.feature.pomodoro
 
+import com.attendo.core.model.formatClock
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -196,11 +197,6 @@ internal fun PomodoroKind.label() = when (this) {
 }
 
 internal fun PomodoroKind.color() = if (this == PomodoroKind.FOCUS) AttendoColors.Green else AttendoColors.Blue
-
-internal fun formatClock(millis: Long): String {
-    val total = kotlin.math.ceil(millis / 1000.0).toLong()
-    return "%02d:%02d".format(total / 60, total % 60)
-}
 
 /** Small play / pause glyphs drawn in code (no pause icon in material-icons-core). */
 @Composable

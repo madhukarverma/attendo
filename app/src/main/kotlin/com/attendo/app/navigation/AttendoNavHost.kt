@@ -7,8 +7,6 @@ import com.attendo.feature.curriculum.SubjectSyllabusSection
 import com.attendo.feature.curriculum.SyllabusRoute
 import com.attendo.feature.pomodoro.FocusPage
 import com.attendo.feature.pomodoro.FocusRequest
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.attendo.app.CsvImporter

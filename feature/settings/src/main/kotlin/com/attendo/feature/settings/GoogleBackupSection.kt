@@ -1,5 +1,6 @@
 package com.attendo.feature.settings
 
+import com.attendo.core.designsystem.component.PillButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

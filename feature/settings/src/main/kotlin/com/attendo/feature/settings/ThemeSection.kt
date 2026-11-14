@@ -1,5 +1,6 @@
 package com.attendo.feature.settings
 
+import com.attendo.core.designsystem.component.attendoFieldColors
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -25,7 +26,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -196,11 +196,7 @@ private fun HexColorRow(label: String, hex: String, onValid: (String) -> Unit) {
             textStyle = MaterialTheme.typography.labelLarge,
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters),
             shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = AttendoColors.Green,
-                unfocusedBorderColor = AttendoColors.CreamDeep,
-                cursorColor = AttendoColors.Green,
-            ),
+            colors = attendoFieldColors(),
             modifier = Modifier.width(118.dp),
         )
     }

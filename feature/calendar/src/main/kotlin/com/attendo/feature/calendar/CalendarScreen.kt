@@ -1,5 +1,7 @@
 package com.attendo.feature.calendar
 
+import com.attendo.core.designsystem.component.PillButton
+import com.attendo.core.designsystem.component.HeroStat
 import com.attendo.core.model.PersonalEvent
 import com.attendo.core.model.Subject
 import com.attendo.core.model.TimetableSlot
@@ -130,13 +132,19 @@ fun CalendarScreen(
                 item { LargeTitle("Calendar") }
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        ActionPill(
+                        PillButton(
                             if (slots.isEmpty()) "Set timetable" else "Timetable",
                             Icons.Filled.DateRange,
-                            Modifier.weight(1f),
-                            onOpenTimetable,
+                            modifier = Modifier.weight(1f),
+                            onClick = onOpenTimetable,
                         )
-                        ActionPill("Add event", Icons.Filled.Add, Modifier.weight(1f), { eventDraft = PersonalEvent("", "", today) }, primary = true)
+                        PillButton(
+                            "Add event",
+                            Icons.Filled.Add,
+                            AttendoColors.GreenFill,
+                            AttendoColors.OnAccent,
+                            Modifier.weight(1f),
+                        ) { eventDraft = PersonalEvent("", "", today) }
                     }
                 }
                 item { SemesterCard(calendar, today) }
@@ -245,20 +253,12 @@ private fun SemesterCard(calendar: AcademicCalendar, today: LocalDate) {
             Spacer(Modifier.height(14.dp))
             val week = (ChronoUnit.DAYS.between(start, today) / 7 + 1).coerceIn(1, total / 7 + 1)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Stat("Class days", calendar.classDayCount().toString())
-                Stat("Week", if (today.isBefore(start)) "–" else if (today.isAfter(end)) "Done" else "$week")
-                Stat("Holidays", calendar.events.count { it.kind == DayKind.HOLIDAY }.toString())
-                Stat("Finals end", calendar.semesterEnd?.format(Short) ?: "–")
+                HeroStat(calendar.classDayCount().toString(), "Class days")
+                HeroStat(if (today.isBefore(start)) "–" else if (today.isAfter(end)) "Done" else "$week", "Week")
+                HeroStat(calendar.events.count { it.kind == DayKind.HOLIDAY }.toString(), "Holidays")
+                HeroStat(calendar.semesterEnd?.format(Short) ?: "–", "Finals end")
             }
         }
-    }
-}
-
-@Composable
-private fun Stat(label: String, value: String) {
-    Column {
-        Text(value, style = MaterialTheme.typography.titleMedium, color = AttendoColors.OnHero)
-        Text(label, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
     }
 }
 

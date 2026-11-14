@@ -1,5 +1,7 @@
 package com.attendo.feature.subjects
 
+import com.attendo.core.designsystem.component.AttendoDatePicker
+import com.attendo.core.designsystem.component.attendoFieldColors
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -22,16 +24,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,9 +48,7 @@ import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.core.model.Assessment
 import com.attendo.core.model.Grades
 import com.attendo.core.model.SubjectGrades
-import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
@@ -200,7 +195,7 @@ private fun AssessmentDialog(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    colors = fieldColors(),
+                    colors = attendoFieldColors(),
                 )
                 Spacer(Modifier.height(8.dp))
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -230,7 +225,7 @@ private fun AssessmentDialog(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(14.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        colors = fieldColors(),
+                        colors = attendoFieldColors(),
                     )
                     Text(" / ", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 6.dp))
                     OutlinedTextField(
@@ -242,7 +237,7 @@ private fun AssessmentDialog(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(14.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        colors = fieldColors(),
+                        colors = attendoFieldColors(),
                     )
                 }
                 if (tooHigh) {
@@ -279,29 +274,6 @@ private fun AssessmentDialog(
         containerColor = AttendoColors.Cream,
     )
 
-    if (pickDate) GradeDatePicker(date, onDismiss = { pickDate = false }) { date = it }
+    if (pickDate) AttendoDatePicker(date, onDismiss = { pickDate = false }) { date = it }
 }
 
-@Composable
-private fun fieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor = AttendoColors.Green,
-    unfocusedBorderColor = AttendoColors.CreamDeep,
-    cursorColor = AttendoColors.Green,
-    focusedLabelColor = AttendoColors.Green,
-)
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun GradeDatePicker(initial: LocalDate, onDismiss: () -> Unit, onPick: (LocalDate) -> Unit) {
-    val state = rememberDatePickerState(initialSelectedDateMillis = initial.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = {
-                state.selectedDateMillis?.let { onPick(Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()) }
-                onDismiss()
-            }) { Text("OK", color = AttendoColors.Green) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel", color = AttendoColors.Muted) } },
-    ) { DatePicker(state = state) }
-}

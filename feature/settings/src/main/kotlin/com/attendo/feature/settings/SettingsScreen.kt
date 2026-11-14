@@ -1,5 +1,7 @@
 package com.attendo.feature.settings
 
+import com.attendo.core.designsystem.component.PillButton
+import com.attendo.core.designsystem.component.attendoFilledFieldColors
 import com.attendo.core.backup.GoogleDriveBackup
 import com.attendo.core.data.backup.CsvImportPlan
 import androidx.compose.foundation.background
@@ -12,17 +14,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -178,13 +175,7 @@ fun SettingsScreen(
                     label = { Text("Your name") },
                     shape = RoundedCornerShape(20.dp),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = AttendoColors.CreamCard,
-                        unfocusedContainerColor = AttendoColors.CreamCard,
-                        focusedBorderColor = AttendoColors.Green,
-                        unfocusedBorderColor = AttendoColors.CreamCard,
-                        cursorColor = AttendoColors.Green,
-                    ),
+                    colors = attendoFilledFieldColors(AttendoColors.CreamCard),
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(

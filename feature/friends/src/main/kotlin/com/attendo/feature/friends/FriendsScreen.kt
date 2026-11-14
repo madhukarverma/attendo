@@ -1,5 +1,6 @@
 package com.attendo.feature.friends
 
+import com.attendo.core.designsystem.component.attendoFilledFieldColors
 import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,7 +30,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -304,13 +304,7 @@ private fun SearchField(query: String, searching: Boolean, onChange: (String) ->
         shape = RoundedCornerShape(18.dp),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = {}),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = AttendoColors.CreamCard,
-            unfocusedContainerColor = AttendoColors.CreamCard,
-            focusedBorderColor = AttendoColors.Green,
-            unfocusedBorderColor = AttendoColors.CreamCard,
-            cursorColor = AttendoColors.Green,
-        ),
+        colors = attendoFilledFieldColors(AttendoColors.CreamCard),
     )
 }
 

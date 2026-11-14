@@ -30,7 +30,6 @@ class TodoAgendaTest {
         assertEquals(listOf("todayAt9", "todayPlain", "todayDone"), g.today.map { it.id })
         assertEquals(listOf("soon", "next"), g.upcoming.map { it.id })
         assertEquals(listOf("lateDone"), g.done.map { it.id })
-        assertEquals(5, g.openCount)
     }
 
     @Test

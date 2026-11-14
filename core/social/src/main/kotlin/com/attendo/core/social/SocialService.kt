@@ -369,7 +369,6 @@ class SocialService(
     }
 
     private suspend fun publishNow() {
-        if (deleting) return
         publishLock.withLock { if (!deleting) publishLocked() }
     }
 

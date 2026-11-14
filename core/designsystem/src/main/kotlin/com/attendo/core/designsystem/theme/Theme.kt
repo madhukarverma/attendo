@@ -69,7 +69,6 @@ data class AttendoPalette(
     val text: Color,
     val muted: Color,
     val accent: Color,
-    val accentDark: Color,
     /** Big feature cards and the bottom bar. */
     val hero: Color,
     val onHero: Color,
@@ -92,7 +91,6 @@ data class AttendoPalette(
             text = Color(0xFF232323),
             muted = Color(0xFF8C8E82),
             accent = Color(0xFF50A65C),
-            accentDark = Color(0xFF3E8A4A),
             hero = Color(0xFF232323),
             onHero = Color(0xFFF8FAED),
             pink = Color(0xFFE0399A),
@@ -109,7 +107,6 @@ data class AttendoPalette(
             text = Color(0xFFF2F2F2),
             muted = Color(0xFF8E8E93),
             accent = Color(0xFF5DBB6A),
-            accentDark = Color(0xFF4A9A55),
             hero = Color(0xFF1C1C1E),
             onHero = Color(0xFFF2F2F2),
             pink = Color(0xFFFF5FAE),
@@ -127,7 +124,6 @@ data class AttendoPalette(
                 text = Color(0xFF141414),
                 muted = Color(0xFF7B776C),
                 accent = Color(0xFFD6247F),
-                accentDark = Color(0xFFB01A66),
                 hero = Color(0xFF1B1B1B),
                 onHero = Color(0xFFF4F1E8),
                 pink = Color(0xFFC2511F), // "absent": rust, so it stays apart from the magenta accent
@@ -146,7 +142,6 @@ data class AttendoPalette(
             text = Color(0xFFF4F4F4),
             muted = Color(0xFF8B8B8B),
             accent = Color(0xFFC6F432),
-            accentDark = Color(0xFFA5D11C),
             hero = Color(0xFF1A1A1A),
             onHero = Color(0xFFF4F4F4),
             pink = Color(0xFFEA5A2F),
@@ -164,7 +159,6 @@ data class AttendoPalette(
             text = Color(0xFF101214),
             muted = Color(0xFF7C7F84),
             accent = Color(0xFF2E8B57),
-            accentDark = Color(0xFF226B43),
             hero = Color(0xFFBFE6EE),
             onHero = Color(0xFF101214),
             pink = Color(0xFFD9534A),
@@ -185,7 +179,6 @@ data class AttendoPalette(
             text = Color(0xFFBFBFBF), // foreground
             muted = Color(0xFF8C8C8C), // descriptionForeground
             accent = Color(0xFF48A0C7), // textLink.foreground
-            accentDark = Color(0xFF297AA0), // button.background
             hero = Color(0xFF202122), // editorWidget.background
             onHero = Color(0xFFBFBFBF),
             pink = Color(0xFFF48771), // errorForeground
@@ -233,7 +226,6 @@ data class AttendoPalette(
                 text = pick("text", base.text),
                 muted = pick("muted", base.muted),
                 accent = accent,
-                accentDark = accent.copy(red = accent.red * 0.8f, green = accent.green * 0.8f, blue = accent.blue * 0.8f),
                 hero = pick("hero", base.hero),
                 onHero = pick("on_hero", base.onHero),
                 pink = pink,

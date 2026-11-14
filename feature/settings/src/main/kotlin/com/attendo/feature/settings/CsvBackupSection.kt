@@ -1,5 +1,6 @@
 package com.attendo.feature.settings
 
+import com.attendo.core.designsystem.component.PillButton
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,13 +35,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.attendo.core.data.backup.CsvImportPlan
-import com.attendo.core.designsystem.motion.PressStyle
-import com.attendo.core.designsystem.motion.iosPress
 import com.attendo.core.designsystem.theme.AttendoColors
 import kotlinx.coroutines.launch
 
@@ -187,31 +184,3 @@ private fun ConfirmRestoreDialog(plan: CsvImportPlan, onDismiss: () -> Unit, onC
     )
 }
 
-@Composable
-internal fun PillButton(
-    text: String,
-    icon: ImageVector?,
-    container: Color,
-    content: Color,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    onClick: () -> Unit,
-) {
-    Row(
-        modifier
-            .height(48.dp)
-            .iosPress(PressStyle.Dim, enabled = enabled, onClickLabel = text, onClick = onClick)
-            .clip(CircleShape)
-            .background(if (enabled) container else AttendoColors.CreamDeep)
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        val fg = if (enabled) content else AttendoColors.Muted
-        if (icon != null) {
-            Icon(icon, contentDescription = null, tint = fg, modifier = Modifier.size(18.dp))
-            Spacer(Modifier.width(8.dp))
-        }
-        Text(text, style = MaterialTheme.typography.labelLarge, color = fg)
-    }
-}
