@@ -1,7 +1,8 @@
 # Security notes
 
 Attendo is an offline-first app: all data lives in the app's private storage as CSV files, and the
-only network traffic is the optional Google account backup. Review: 2026-11-11 (v0.27.0).
+only network traffic is the optional Google account backup and the optional Friends feature. Review:
+2026-11-11 (v0.27.0); Friends rules and storage safety updated 2026-11-15 (v0.32.0).
 
 ## What protects the data
 
@@ -22,7 +23,9 @@ only network traffic is the optional Google account backup. Review: 2026-11-11 (
 
 | Area | Measure |
 |---|---|
-| Who sees what | Server-side Firestore rules (`firebase/firestore.rules`): profiles (name, programme, friend code) readable by signed-in students; friend lists and shared attendance/grades only by the owner and the owner's friends. |
+| Who sees what | Server-side Firestore rules (`firebase/firestore.rules`): profiles (name, programme, friend code) readable by signed-in students, but only one at a time or in searches of at most 20 (the full list can't be downloaded); friend lists and shared attendance/grades only by the owner and the owner's friends. |
+| Friend codes | Always derived from the account id. The rules reject a profile or request that claims another account's code, and the app ignores codes stored in documents. |
+| Leaving | **Delete profile** removes the profile, both sides of every friendship, pending requests and shared data, then signs out. |
 | Friendships | Can only be created by the student accepting a pending request; either side can remove it. Requests can only be sent as yourself, never to yourself or an existing friend. |
 | Sharing | Attendance sharing is a visible toggle; grades are off by default. Turning a toggle off deletes the server copy. Emails are never stored. |
 | Validation | Rules allow only known fields with length limits (names ≤ 40 chars, ≤ 20 subjects per shared document). |

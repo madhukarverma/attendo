@@ -18,7 +18,6 @@ Look and feel shared by every screen. Sources are in
 | `component/Mascots.kt` | Mascot shapes and mood faces | mascots |
 | `component/Confetti.kt` | Confetti burst | celebrations |
 | `component/LaunchArt.kt` | Launch-screen background, batch label, "developed by" line | launch screen |
-| `component/AttendoLogo.kt` | Drawn logo (not used anywhere at the moment) | rarely |
 
 ## Rules
 - Take colours from `AttendoColors` so every theme works. Don't add new raw `Color(0x…)` values

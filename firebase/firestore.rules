@@ -2,7 +2,8 @@ rules_version = '2';
 
 // Attendo friends. Paste into Firebase console › Firestore Database › Rules and click Publish.
 //
-// - Profiles (name, friend code, programme) are visible to signed-in students, so they can search.
+// - Profiles (name, friend code, programme) are visible to signed-in students, so they can search
+//   (20 results per query at most). A profile's friend code must belong to its own account.
 // - A friend list is visible to its owner and to the owner's friends.
 // - Shared attendance / grades are visible to the owner and the owner's friends only; the app
 //   deletes the document when the student turns sharing off (grades are off by default).
@@ -30,11 +31,17 @@ service cloud.firestore {
       return v is string && v.size() <= max;
     }
 
-    function validProfile(d) {
+    // A friend code is the first 6 letters/digits of the account id, upper-case. Checking it stops
+    // anyone from claiming a classmate's code.
+    function ownCode(code, uid) {
+      return code is string && code.matches('^[A-Z0-9]{6}$') && uid.upper().matches('^' + code + '.*');
+    }
+
+    function validProfile(d, uid) {
       return d.keys().hasOnly(['name', 'searchName', 'code', 'programme', 'updatedAt'])
         && shortText(d.name, 40) && d.name.size() > 0
         && shortText(d.searchName, 40)
-        && shortText(d.code, 12)
+        && ownCode(d.code, uid)
         && shortText(d.programme, 40);
     }
 
@@ -45,8 +52,10 @@ service cloud.firestore {
     }
 
     match /users/{uid} {
-      allow read: if signedIn();
-      allow create, update: if isUser(uid) && validProfile(request.resource.data);
+      allow get: if signedIn();
+      // Search only: at most 20 results per query, so nobody can download the whole student list.
+      allow list: if signedIn() && request.query.limit <= 20;
+      allow create, update: if isUser(uid) && validProfile(request.resource.data, uid);
       allow delete: if isUser(uid);
 
       match /friends/{fid} {
@@ -79,7 +88,7 @@ service cloud.firestore {
         && id == request.auth.uid + '_' + request.resource.data.to
         && shortText(request.resource.data.fromName, 40)
         && shortText(request.resource.data.toName, 40)
-        && shortText(request.resource.data.fromCode, 12)
+        && ownCode(request.resource.data.fromCode, request.auth.uid)
         && !areFriends(request.auth.uid, request.resource.data.to);
       allow update: if false;
       allow delete: if signedIn()

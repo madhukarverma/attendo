@@ -37,17 +37,19 @@ flowchart TD
         Home[Home summary<br/>attendance · focus · today's to-dos<br/>reminders · exams]
         Classes[Classes<br/>day strip · Penta · mark subjects · Tinder mode]
         Todo[Tasks<br/>Checklist · Board · Reminders]
-        Timer[Pomodoro<br/>timer · stats · export]
+        Timer[Focus<br/>timer · syllabus · stats]
         Stats[Statistics]
     end
 
     Home -- person icon --> Friends[Friends<br/>search · requests · friend pages]
     Friends --> Fire[(Firebase<br/>Auth + Firestore)]
+    Friends -- Delete profile --> Fire
     Home -- gear --> Settings[Settings<br/>profile · theme · animations · launch image<br/>Backup: Google account · CSV export / restore]
     Settings -- sign in --> Drive[(Google Drive<br/>app-data folder<br/>attendo-backup.zip)]
     Onb -- Restore from Google --> Drive
     Home -- exams card --> Cal[Academic calendar<br/>events + your reminders]
-    Home -- curriculum card --> Cur[Curriculum<br/>courses · units · outcomes]
+    Timer -- Syllabus page --> Cur[Syllabus<br/>courses · units · outcomes]
+    Detail -- syllabus section --> Cur
     Classes -- calendar button --> Cal
     Cal -- pick a day --> Classes
     Classes -- Add a subject --> Add[Add subject<br/>name · code · target · lecture hours]

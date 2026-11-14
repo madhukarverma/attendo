@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.attendo.feature.attendance"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 26

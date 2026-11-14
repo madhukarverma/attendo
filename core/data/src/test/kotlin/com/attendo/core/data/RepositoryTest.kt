@@ -19,7 +19,13 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import com.attendo.core.data.csv.StorageProblems
+import com.attendo.core.model.Assessment
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 import java.nio.file.Files
@@ -315,6 +321,74 @@ class RepositoryTest {
         assertEquals(2, reloaded.attendance.records.first().single().count)
         data.attendance.mark("s", day, null)
         assertEquals(0, data.attendance.records.first().size)
+        dir.deleteRecursively()
+    }
+
+    @Test
+    fun everyTableChangeIsSeenByTheBackupWatcher() = runTest {
+        val dir = Files.createTempDirectory("attendo").toFile()
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val data = AttendoData(dir, TestScope(dispatcher), dispatcher) { 17L }
+        var seen = 0
+        val watcher = launch(dispatcher) { data.changes.collect { seen++ } }
+        advanceUntilIdle()
+        assertEquals("one emission once every table has loaded", 1, seen)
+
+        val changes: List<Pair<String, suspend () -> Unit>> = listOf(
+            "grades" to { data.grades.add("os", "Quiz 1", 8.0, 10.0, null) },
+            "timetable" to { data.planner.saveSlot(TimetableSlot("", "os", DayOfWeek.MONDAY, LocalTime.of(9, 0), LocalTime.of(9, 50), "")) },
+            "events" to { data.planner.saveEvent(PersonalEvent("", "Fest", LocalDate.of(2026, 11, 28))) },
+            "syllabus" to { data.syllabus.setCovered("CA717", "I", true) },
+            "checklist" to { data.habits.add("Revise DSA", DayOfWeek.entries.toSet()) },
+        )
+        changes.forEach { (name, change) ->
+            val before = seen
+            change()
+            advanceUntilIdle()
+            assertTrue("a change to $name is seen", seen > before)
+        }
+        watcher.cancel()
+        dir.deleteRecursively()
+    }
+
+    @Test
+    fun timetableEventsAndSyllabusCountAsUserData() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val changes: List<suspend (AttendoData) -> Unit> = listOf(
+            { it.planner.saveSlot(TimetableSlot("", "os", DayOfWeek.FRIDAY, LocalTime.of(11, 0), LocalTime.of(11, 50), "")) },
+            { it.planner.saveEvent(PersonalEvent("", "Hackathon", LocalDate.of(2026, 12, 5))) },
+            { it.syllabus.setCovered("CA717", "I", true) },
+        )
+        changes.forEach { change ->
+            val dir = Files.createTempDirectory("attendo").toFile()
+            val data = AttendoData(dir, TestScope(dispatcher), dispatcher)
+            advanceUntilIdle()
+            assertTrue(data.hasNoUserData())
+            change(data)
+            // Otherwise signing in to Google would restore the backup over this data without asking.
+            assertFalse(data.hasNoUserData())
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun aFileThatCannotBeReadOrSavedNeitherCrashesNorLosesData() = runTest {
+        val dir = Files.createTempDirectory("attendo").toFile()
+        // A folder where grades.csv should be: reading it fails, and so does replacing it.
+        File(dir, AttendoData.GRADES_FILE).mkdirs()
+        File(dir, "${AttendoData.GRADES_FILE}/keep.txt").writeText("x")
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val data = AttendoData(dir, TestScope(dispatcher), dispatcher)
+        advanceUntilIdle()
+        withTimeout(1_000) { StorageProblems.messages.first { "grades.csv couldn't be read" in it } }
+
+        data.grades.add("os", "Quiz", 7.0, 10.0, null) // must not throw
+        assertEquals(emptyList<Assessment>(), data.grades.assessments.first())
+        withTimeout(1_000) { StorageProblems.messages.first { "Couldn't save your change to grades.csv" in it } }
+
+        // Other files are unaffected.
+        data.subjects.add("OS", "CA719", 75)
+        assertEquals(1, data.subjects.subjects.first().size)
         dir.deleteRecursively()
     }
 }

@@ -1,5 +1,15 @@
 # Current State
 
+## Update 2026-11-15
+v0.31.0 moved the syllabus into the Focus tab and redesigned the timer. v0.32.0 fixes everything
+from the code scan except the release keystore (ISSUE-006): the automatic Google backup now
+watches every data file; signing in no longer restores over a phone that only has a timetable,
+events or syllabus ticks; an unreadable data file is copied aside before anything is saved over
+it, and a failed save shows a message instead of crashing. Friends: search returns at most 20
+students, friend codes are checked against the account, and **Delete profile** removes you from
+Friends. Targets Android 15 (SDK 35). 66 unit tests pass; nothing run on a phone yet. The updated
+`firebase/firestore.rules` must be published in the Firebase console.
+
 ## Update 2026-11-12
 v0.28.0 grades, v0.29.0 personalised calendar (timetable, own events, day agenda), v0.30.0
 friends on Firebase. Friends and the Drive backup need the Firebase project

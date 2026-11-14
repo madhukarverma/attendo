@@ -57,8 +57,8 @@ fun CollapsingTopBar(
     title: String,
     collapseFraction: () -> Float,
     onBack: (() -> Unit)?,
-    backLabel: String = "Back",
     modifier: Modifier = Modifier,
+    backLabel: String = "Back",
 ) {
     Box(
         modifier

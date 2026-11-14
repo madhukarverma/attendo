@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-11-15 — v0.32.0 Fixes from the code scan
+- Google backup: the automatic backup now reacts to every data file (grades, timetable, events,
+  syllabus, checklist and board changes were missed). It watches `AttendoData.changes`, built from
+  the list of tables, so a new data file is covered without extra wiring.
+- Signing in to Google no longer restores a backup over a phone that only has a timetable,
+  personal events or syllabus ticks (`hasNoUserData` counts them now).
+- Storage safety: a data file that can't be read is copied to `<name>.unreadable-<time>` before
+  anything is saved over it; a failed save keeps the previous data and shows a message instead
+  of crashing (`StorageProblems`, shown as a toast).
+- Friends: search returns at most 20 students per query and the full list can't be downloaded;
+  friend codes always come from the account id, and the rules reject profiles or requests that
+  claim someone else's code. New **Delete profile** (with a confirmation) removes your profile,
+  friendships, requests and shared data, then signs out. Re-publish `firebase/firestore.rules`.
+- Targets Android 15 (compileSdk/targetSdk 35); `DebugProbesKt.bin` no longer ships in the APK.
+- Cleanup: removed unused `AttendoLogo.kt`, `GreenDark`, `HandFont`, `Timetable.sorted`,
+  `selectedDayEvents` and `R.color.green`; lint tidy-ups in `LargeTitle` and the reminders page.
+  Merging `mipmap-anydpi-v26` into `mipmap-anydpi` broke resource linking on AGP 8.5, so it stays
+  (ISSUE-019).
+- Docs: README (all 13 data files, modules), flowchart, master context, current state, test
+  report, security notes; `CLAUDE.md` maps updated.
+- Tests: 66 (new: backup watcher sees every table, empty-phone check, unreadable and unsaveable
+  files, unreadable-file copy).
+
 ## 2026-11-12 — v0.31.0 Focus tab: animated dial timer and the syllabus
 - Timer redesigned after the user's references: a dial of 60 ticks that fade as time passes with a
   glowing marker gliding between seconds, and a soft disc that slowly fills with a two-layer wave

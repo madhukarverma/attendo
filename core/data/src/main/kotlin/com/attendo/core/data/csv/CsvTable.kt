@@ -24,6 +24,17 @@ class CsvTable(val file: File, val columns: List<String>) {
         }
     }
 
+    /**
+     * For a file that couldn't be read: copies it to `<name>.unreadable-<time>` so a later save
+     * can't lose it. Returns the copy, or null when there is no file to keep. Throws if copying fails.
+     */
+    fun keepUnreadableCopy(): File? {
+        if (!file.exists()) return null
+        val copy = File(file.parentFile, "${file.name}.unreadable-${System.currentTimeMillis()}")
+        file.copyTo(copy, overwrite = true)
+        return copy
+    }
+
     fun write(rows: List<Map<String, String>>) {
         file.parentFile?.mkdirs()
         val tmp = this.tmp

@@ -44,6 +44,7 @@ email, **Save**.
 4. Open the **Rules** tab, replace everything with the contents of
    [`firebase/firestore.rules`](../firebase/firestore.rules), and click **Publish**. These rules
    are what keep attendance visible to friends only and grades private.
+   When an update changes `firebase/firestore.rules` (v0.32.0 did), paste and **Publish** again.
 
 ## 5. Google backup (Drive) in the same project
 

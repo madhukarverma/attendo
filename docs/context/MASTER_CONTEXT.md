@@ -7,7 +7,7 @@ Follows the layering of `AI_CONTEXT_FRAMEWORK.md`: this file = durable project m
 Android app to track class attendance for every subject, styled after the "habit tracker" reference
 designs (dark onboarding, cream home, green geometric mascots, handwritten speech bubbles).
 
-## Scope v0.1 (bare bones)
+## Original scope (v0.1, bare bones — kept for history; today's features are in CURRENT_STATE.md)
 - Onboarding (name).
 - Subjects: add / list / delete, each with a target percentage (default 75%).
 - Daily marking: Present / Absent / Cancelled per subject per day (one class per day per subject).
@@ -17,7 +17,7 @@ designs (dark onboarding, cream home, green geometric mascots, handwritten speec
 
 ## Technology
 - Kotlin 2.0.20, Jetpack Compose (BOM 2024.09.00), Material 3, Navigation Compose.
-- AGP 8.5.2, Gradle 8.9, JDK 17, compileSdk/targetSdk 34, minSdk 26.
+- AGP 8.5.2, Gradle 8.9, JDK 17, compileSdk/targetSdk 35 (since v0.32), minSdk 26.
 - Multi-module: `:app`, `:core:model`, `:core:data`, `:core:designsystem`, `:feature:*`.
 
 ## Constraints

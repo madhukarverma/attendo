@@ -15,6 +15,10 @@
 - ISSUE-013 — Reminders on Google Play would need SCHEDULE_EXACT_ALARM + a permission prompt (DEC-009).
 - ISSUE-014 — Google backup: merge instead of replace when both phone and account have data;
   backup history (keep a few versions); a periodic backup with WorkManager when the app is closed.
+- ISSUE-019 — Lint `ObsoleteSdkInt`: `mipmap-anydpi-v26` can't be merged into `mipmap-anydpi` on
+  AGP 8.5 (the launcher icon isn't found at link time). Retry after an AGP update.
+- ISSUE-020 — Before targeting Android 16 (SDK 36): check its stricter intent matching against
+  `ReminderReceiver`, whose alarm actions aren't listed in its intent filter.
 
 ## Needs to be done (requested, deferred on purpose — 2026-11-11)
 - ISSUE-015 — Google account backup: built in v0.21; needs the shared Firebase/Google Cloud project

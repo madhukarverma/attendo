@@ -61,7 +61,7 @@ and `core/model/src/test/…/X.kt` is the same path under `src/test`.
    → `core/data/…/backup/CsvImport.kt` → `core/data/src/test/…/RepositoryTest.kt`.
 3. **Add a new data file:** `core/data/…/Repositories.kt` → a new `core/data/…/<area>/Csv<Name>Repository.kt`
    → `core/data/…/AttendoData.kt` (every spot on the checklist in `core/data/CLAUDE.md`) → `core/data/…/backup/CsvImport.kt`
-   → `core/backup/…/GoogleDriveBackup.kt` (`watchForChanges`) → `core/data/src/test/…/RepositoryTest.kt`.
+   → `core/data/src/test/…/RepositoryTest.kt`. The Google backup picks it up through `AttendoData.changes`.
 4. **Add a screen:** `settings.gradle.kts` → `feature/<name>/build.gradle.kts` (copy a sibling) → the screen
    → `app/build.gradle.kts` (dependency) → `app/…/navigation/AttendoNavHost.kt` (`Routes` and the composable).
 5. **Add or change a theme:** `core/designsystem/…/theme/Theme.kt` → `core/model/…/AppSettings.kt`
