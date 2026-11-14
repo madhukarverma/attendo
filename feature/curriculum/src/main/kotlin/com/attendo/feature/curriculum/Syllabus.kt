@@ -1,5 +1,6 @@
 package com.attendo.feature.curriculum
 
+import com.attendo.core.designsystem.component.HeroStat
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -215,18 +216,10 @@ private fun Overview(curriculum: Curriculum, covered: Set<UnitKey>) {
         }
         Spacer(Modifier.height(14.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(22.dp)) {
-            Stat("${curriculum.courses.size}", "courses")
-            Stat("${curriculum.totalHours}", "contact hours")
-            Stat("${curriculum.courses.count { curriculum.progress(it, covered).let { p -> p.total > 0 && p.covered == p.total } }}", "completed")
+            HeroStat("${curriculum.courses.size}", "courses")
+            HeroStat("${curriculum.totalHours}", "contact hours")
+            HeroStat("${curriculum.courses.count { curriculum.progress(it, covered).let { p -> p.total > 0 && p.covered == p.total } }}", "completed")
         }
-    }
-}
-
-@Composable
-private fun Stat(value: String, label: String) {
-    Column {
-        Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = AttendoColors.OnHero)
-        Text(label, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
     }
 }
 

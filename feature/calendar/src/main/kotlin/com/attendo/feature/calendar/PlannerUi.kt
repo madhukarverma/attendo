@@ -1,5 +1,9 @@
 package com.attendo.feature.calendar
 
+import com.attendo.core.designsystem.component.PillButton
+import com.attendo.core.designsystem.component.AttendoTimePicker
+import com.attendo.core.designsystem.component.AttendoDatePicker
+import com.attendo.core.designsystem.component.attendoFieldColors
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -29,21 +33,14 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TimePickerDefaults
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -74,10 +71,8 @@ import com.attendo.core.model.Timetable
 import com.attendo.core.model.TimetableSlot
 import com.attendo.core.model.Todo
 import java.time.DayOfWeek
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
@@ -192,8 +187,15 @@ internal fun DayAgendaSheet(
 
             Spacer(Modifier.height(18.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ActionPill("Add event", Icons.Filled.Add, Modifier.weight(1f), onAddEvent)
-                ActionPill("Mark attendance", Icons.Filled.DateRange, Modifier.weight(1f), onMarkAttendance, primary = true)
+                PillButton("Add event", Icons.Filled.Add, modifier = Modifier.weight(1f), onClick = onAddEvent)
+                PillButton(
+                    "Mark attendance",
+                    Icons.Filled.DateRange,
+                    AttendoColors.GreenFill,
+                    AttendoColors.OnAccent,
+                    Modifier.weight(1f),
+                    onClick = onMarkAttendance,
+                )
             }
         }
     }
@@ -245,32 +247,6 @@ private fun AgendaRow(dot: Color, title: String, detail: String, onEdit: (() -> 
     }
 }
 
-@Composable
-internal fun ActionPill(
-    text: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-    primary: Boolean = false,
-) {
-    val container = if (primary) AttendoColors.GreenFill else AttendoColors.CreamCard
-    val content = if (primary) AttendoColors.OnAccent else AttendoColors.Ink
-    Row(
-        modifier
-            .height(46.dp)
-            .clip(CircleShape)
-            .iosPress(PressStyle.Dim, onClickLabel = text, onClick = onClick)
-            .background(container)
-            .padding(horizontal = 14.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(18.dp))
-        Spacer(Modifier.width(8.dp))
-        Text(text, style = MaterialTheme.typography.labelLarge, color = content, maxLines = 1)
-    }
-}
-
 // ---------------------------------------------------------------------------------------------
 // Personal event editor
 // ---------------------------------------------------------------------------------------------
@@ -306,7 +282,7 @@ internal fun EventDialog(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    colors = fieldColors(),
+                    colors = attendoFieldColors(),
                 )
                 Spacer(Modifier.height(10.dp))
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -327,7 +303,7 @@ internal fun EventDialog(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    colors = fieldColors(),
+                    colors = attendoFieldColors(),
                 )
                 if (onDelete != null) {
                     TextButton(onClick = { if (confirmDelete) onDelete() else confirmDelete = true }) {
@@ -347,11 +323,11 @@ internal fun EventDialog(
     )
 
     when (picking) {
-        "start" -> PlannerDatePicker(start, onDismiss = { picking = null }) { picked ->
+        "start" -> AttendoDatePicker(start, onDismiss = { picking = null }) { picked ->
             if (end == start || end < picked) end = picked
             start = picked
         }
-        "end" -> PlannerDatePicker(end, onDismiss = { picking = null }) { picked -> end = maxOf(picked, start) }
+        "end" -> AttendoDatePicker(end, onDismiss = { picking = null }) { picked -> end = maxOf(picked, start) }
     }
 }
 
@@ -416,7 +392,7 @@ fun TimetableScreen(
                     item {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             hiddenWeekend.forEach { day ->
-                                ActionPill(
+                                PillButton(
                                     "Add ${day.getDisplayName(TextStyle.SHORT, Locale.getDefault())} class",
                                     Icons.Filled.Add,
                                     onClick = { editing = newSlot(day, slots, subjects) },
@@ -575,7 +551,7 @@ private fun SlotDialog(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters),
-                    colors = fieldColors(),
+                    colors = attendoFieldColors(),
                 )
                 if (onDelete != null) {
                     TextButton(onClick = { if (confirmDelete) onDelete() else confirmDelete = true }) {
@@ -592,12 +568,12 @@ private fun SlotDialog(
     )
 
     when (picking) {
-        "start" -> PlannerTimePicker(start, onDismiss = { picking = null }) { picked ->
+        "start" -> AttendoTimePicker(start, onDismiss = { picking = null }) { picked ->
             val length = java.time.Duration.between(start, end).takeIf { !it.isNegative && !it.isZero } ?: java.time.Duration.ofMinutes(50)
             start = picked
             end = picked.plus(length).takeIf { it > picked } ?: LocalTime.of(23, 59)
         }
-        "end" -> PlannerTimePicker(end, onDismiss = { picking = null }) { end = it }
+        "end" -> AttendoTimePicker(end, onDismiss = { picking = null }) { end = it }
     }
 }
 
@@ -630,49 +606,3 @@ private fun Chip(text: String, selected: Boolean, dot: Color? = null, onClick: (
     }
 }
 
-@Composable
-private fun fieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor = AttendoColors.Green,
-    unfocusedBorderColor = AttendoColors.CreamDeep,
-    cursorColor = AttendoColors.Green,
-    focusedLabelColor = AttendoColors.Green,
-)
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun PlannerDatePicker(initial: LocalDate, onDismiss: () -> Unit, onPick: (LocalDate) -> Unit) {
-    val state = rememberDatePickerState(initialSelectedDateMillis = initial.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = {
-                state.selectedDateMillis?.let { onPick(Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()) }
-                onDismiss()
-            }) { Text("OK", color = AttendoColors.Green) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel", color = AttendoColors.Muted) } },
-    ) { DatePicker(state = state) }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun PlannerTimePicker(initial: LocalTime, onDismiss: () -> Unit, onPick: (LocalTime) -> Unit) {
-    val state = rememberTimePickerState(initialHour = initial.hour, initialMinute = initial.minute, is24Hour = true)
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        text = {
-            TimePicker(
-                state = state,
-                colors = TimePickerDefaults.colors(
-                    timeSelectorSelectedContainerColor = AttendoColors.GreenFill,
-                    timeSelectorSelectedContentColor = AttendoColors.OnAccent,
-                ),
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = { onPick(LocalTime.of(state.hour, state.minute)); onDismiss() }) { Text("OK", color = AttendoColors.Green) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel", color = AttendoColors.Muted) } },
-        containerColor = AttendoColors.CreamCard,
-    )
-}

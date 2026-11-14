@@ -11,7 +11,6 @@ import com.attendo.core.data.SettingsRepository
 import com.attendo.core.data.SubjectRepository
 import com.attendo.core.model.AcademicCalendar
 import com.attendo.core.model.AttendanceStatus
-import com.attendo.core.model.CalendarEvent
 import com.attendo.core.model.DayKind
 import com.attendo.core.model.AttendanceSummary
 import com.attendo.core.model.CourseCatalog

@@ -1,8 +1,5 @@
 package com.attendo.core.designsystem.component
 
-import androidx.compose.material3.Icon
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.Canvas
@@ -13,7 +10,6 @@ import androidx.compose.ui.text.font.FontWeight
 import com.attendo.core.designsystem.motion.Motion
 import com.attendo.core.designsystem.motion.PressStyle
 import com.attendo.core.designsystem.motion.iosPress
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

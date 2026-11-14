@@ -1,5 +1,8 @@
 package com.attendo.feature.tasks
 
+import com.attendo.core.designsystem.component.AttendoTimePicker
+import com.attendo.core.designsystem.component.AttendoDatePicker
+import com.attendo.core.designsystem.component.attendoFilledFieldColors
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -34,21 +37,12 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TimePickerDefaults
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -75,11 +69,9 @@ import com.attendo.core.designsystem.motion.PressStyle
 import com.attendo.core.designsystem.motion.iosPress
 import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.core.model.Todo
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 /**
@@ -253,13 +245,7 @@ private fun AddTodoCard(today: LocalDate, now: LocalDateTime, onAdd: (String, Lo
             shape = RoundedCornerShape(16.dp),
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { submit() }),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = AttendoColors.Cream,
-                unfocusedContainerColor = AttendoColors.Cream,
-                focusedBorderColor = AttendoColors.Green,
-                unfocusedBorderColor = AttendoColors.Cream,
-                cursorColor = AttendoColors.Green,
-            ),
+            colors = attendoFilledFieldColors(AttendoColors.Cream),
         )
         Spacer(Modifier.height(10.dp))
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -301,10 +287,12 @@ private fun AddTodoCard(today: LocalDate, now: LocalDateTime, onAdd: (String, Lo
     }
 
     if (pickDate) {
-        TaskDatePicker(initial = date, onDismiss = { pickDate = false }, onPick = { date = it })
+        AttendoDatePicker(initial = date, onDismiss = { pickDate = false }, onPick = { date = it })
     }
     if (pickTime) {
-        TodoTimePicker(
+        AttendoTimePicker(
+            title = "Remind me at",
+            confirmLabel = "Set",
             initial = time ?: LocalTime.of(9, 0),
             onDismiss = { pickTime = false },
             onPick = { time = it },
@@ -459,57 +447,3 @@ private fun EmptyState(modifier: Modifier = Modifier) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun TaskDatePicker(initial: LocalDate, onDismiss: () -> Unit, onPick: (LocalDate) -> Unit) {
-    // The Material date picker works in UTC midnight millis.
-    val state = rememberDatePickerState(
-        initialSelectedDateMillis = initial.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
-    )
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = {
-                state.selectedDateMillis?.let { onPick(Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()) }
-                onDismiss()
-            }) { Text("OK", color = AttendoColors.Green) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel", color = AttendoColors.Muted) } },
-    ) {
-        DatePicker(state = state)
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TodoTimePicker(initial: LocalTime, onDismiss: () -> Unit, onPick: (LocalTime) -> Unit) {
-    val context = LocalContext.current
-    val state = rememberTimePickerState(
-        initialHour = initial.hour,
-        initialMinute = initial.minute,
-        is24Hour = android.text.format.DateFormat.is24HourFormat(context),
-    )
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Remind me at") },
-        text = {
-            TimePicker(
-                state = state,
-                colors = TimePickerDefaults.colors(
-                    timeSelectorSelectedContainerColor = AttendoColors.Green,
-                    timeSelectorSelectedContentColor = AttendoColors.Cream,
-                    periodSelectorSelectedContainerColor = AttendoColors.Green,
-                    periodSelectorSelectedContentColor = AttendoColors.Cream,
-                ),
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                onPick(LocalTime.of(state.hour, state.minute))
-                onDismiss()
-            }) { Text("Set", color = AttendoColors.Green) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel", color = AttendoColors.Muted) } },
-        containerColor = AttendoColors.CreamCard,
-    )
-}

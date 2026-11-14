@@ -13,7 +13,7 @@ Plain-Kotlin data types and the maths on them. Sources are in
 | `Habit.kt` | Habits, check-ins, weekly streaks | habit maths | `HabitWeekTest` |
 | `Kanban.kt` | Board columns, cards, priorities, moves | board rules | `KanbanOpsTest` |
 | `Todo.kt` | Reminders and their agenda grouping | reminder data | `TodoAgendaTest` |
-| `Pomodoro.kt` | Session kinds, finished sessions, focus stats | focus stats | `PomodoroStatsTest` |
+| `Pomodoro.kt` | Session kinds, finished sessions, focus stats, `formatClock` (mm:ss countdown) | focus stats, timer text | `PomodoroStatsTest` |
 | `AcademicCalendar.kt` | Day kinds, calendar events, the academic calendar | holidays, exams, teaching days | |
 | `Planner.kt` | Timetable slots, personal events, merging them into the calendar | timetable rules | `PlannerTest` |
 | `Curriculum.kt` | Syllabus courses and units, coverage progress | syllabus progress | (in `core/data`: `CurriculumTest`) |

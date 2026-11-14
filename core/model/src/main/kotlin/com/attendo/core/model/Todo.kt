@@ -35,9 +35,7 @@ object TodoAgenda {
         val upcoming: List<Todo>,
         /** Most recently dated first. */
         val done: List<Todo>,
-    ) {
-        val openCount: Int get() = overdue.size + today.count { !it.done } + upcoming.size
-    }
+    )
 
     /** Sort key within a day: reminders by time first, then plain to-dos in the order added. */
     private val order = compareBy<Todo>({ it.date }, { it.remindAt ?: LocalTime.MAX }, { it.createdAt })

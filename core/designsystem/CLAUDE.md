@@ -12,6 +12,7 @@ Look and feel shared by every screen. Sources are in
 | `motion/BounceScroll.kt` | `BounceContainer`: stretchy overscroll | scroll bounce |
 | `motion/LargeTitle.kt` | Large titles that collapse into a top bar on scroll | screen headers |
 | `component/Components.kt` | Cards, buttons, speech bubble, squiggle, animated numbers, small glyphs | shared building blocks |
+| `component/Controls.kt` | `PillButton`, `HeroStat`, text-field colours, date and time pickers | buttons, forms, pickers |
 | `component/TabBar.kt` | The bottom tab bar and `TabBarClearance` | tab bar look |
 | `component/SegmentedControl.kt` | Segmented switcher (the Focus and Tasks tab pages) | page switchers |
 | `component/DayStrip.kt` | Horizontal strip of days | picking a day |
@@ -25,3 +26,4 @@ Look and feel shared by every screen. Sources are in
 - Animations use the specs in `Motion` and must respect the user's Animations setting: with
   `LocalAnimationMode.current == AnimationMode.NONE` nothing moves.
 - Tab screens pad their content by `TabBarClearance` at the bottom so the tab bar doesn't cover it.
+- When a second feature needs the same control, move it here instead of copying it.

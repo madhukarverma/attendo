@@ -73,8 +73,6 @@ data class DashboardUiState(
     val exams: List<CalendarEvent> = emptyList(),
     val focus: PomodoroSummary? = null,
     val nextClass: NextClass? = null,
-    /** Classes on today's timetable (0 without a timetable). */
-    val classesToday: Int = 0,
 ) {
     val today: LocalDate get() = now.toLocalDate()
 
@@ -171,7 +169,6 @@ class DashboardViewModel(
             nextClass = next?.let {
                 NextClass(names[it.subjectId] ?: "Class", it.start, it.end, it.room, inProgress = now.toLocalTime() >= it.start)
             },
-            classesToday = Timetable.on(att.slots, today).size,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardUiState())
 

@@ -1,5 +1,7 @@
 package com.attendo.feature.tasks
 
+import com.attendo.core.designsystem.component.AttendoDatePicker
+import com.attendo.core.designsystem.component.attendoFieldColors
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,7 +28,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -55,14 +56,6 @@ private const val MAX_TITLE = 80
 private const val MAX_NOTES = 500
 private const val MAX_COLUMN_TITLE = 24
 private val LongDate = DateTimeFormatter.ofPattern("EEE, d MMM yyyy")
-
-@Composable
-private fun fieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor = AttendoColors.Green,
-    unfocusedBorderColor = AttendoColors.CreamDeep,
-    cursorColor = AttendoColors.Green,
-    focusedLabelColor = AttendoColors.Green,
-)
 
 /** Add or edit a card. [card] null = new card. */
 @Composable
@@ -95,7 +88,7 @@ internal fun CardEditorDialog(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    colors = fieldColors(),
+                    colors = attendoFieldColors(),
                 )
                 Spacer(Modifier.height(10.dp))
                 OutlinedTextField(
@@ -107,7 +100,7 @@ internal fun CardEditorDialog(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    colors = fieldColors(),
+                    colors = attendoFieldColors(),
                 )
 
                 FieldLabel("Due date")
@@ -179,7 +172,7 @@ internal fun CardEditorDialog(
     )
 
     if (pickDate) {
-        TaskDatePicker(initial = due ?: LocalDate.now(), onDismiss = { pickDate = false }, onPick = { due = it })
+        AttendoDatePicker(initial = due ?: LocalDate.now(), onDismiss = { pickDate = false }, onPick = { due = it })
     }
 }
 
@@ -268,7 +261,7 @@ internal fun ColumnDialog(
                 singleLine = true,
                 shape = RoundedCornerShape(14.dp),
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                colors = fieldColors(),
+                colors = attendoFieldColors(),
             )
         },
         confirmButton = {

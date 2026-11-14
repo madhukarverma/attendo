@@ -33,5 +33,7 @@ One Gradle module per screen. Each module's sources are in
 - Screens are built in three layers: `XRoute` (creates the view model, collects its `StateFlow`)
   → `XViewModel` (reads and writes repositories) → `XScreen` (draws state, no data access).
 - Tab screens leave `TabBarClearance` of space at the bottom for the tab bar.
+- Use the shared controls in `core/designsystem/.../component/Controls.kt` (pills, pickers, field
+  colours, hero stats) rather than a private copy.
 - A new module also goes in `settings.gradle.kts`, `app/build.gradle.kts` and the map in the root
   `CLAUDE.md`.

@@ -1,5 +1,6 @@
 package com.attendo.feature.subjects
 
+import com.attendo.core.designsystem.component.attendoFilledFieldColors
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -23,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -219,13 +219,7 @@ private fun RoundedField(
         shape = RoundedCornerShape(20.dp),
         placeholder = { Text(placeholder) },
         keyboardOptions = KeyboardOptions(capitalization = capitalization, keyboardType = keyboardType),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = AttendoColors.CreamCard,
-            unfocusedContainerColor = AttendoColors.CreamCard,
-            focusedBorderColor = AttendoColors.Green,
-            unfocusedBorderColor = AttendoColors.CreamCard,
-            cursorColor = AttendoColors.Green,
-        ),
+        colors = attendoFilledFieldColors(AttendoColors.CreamCard),
     )
 }
 
