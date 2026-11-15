@@ -13,7 +13,8 @@
 - Build: the Gradle download is verified by SHA-256.
 - Privacy: a real name used as a code example is replaced with a made-up one.
 - Audit results and what doesn't apply to the app are in `docs/SECURITY.md`; no secrets found in
-  any commit, the APK or the code. The GitHub repository was found to be public.
+  any commit, the APK or the code. The GitHub repository was found to be public and was made
+  private the same day (release links now need a GitHub login).
 
 ## 2026-11-15 — v0.33.1 Animation performance
 - New project skill `.claude/skills/animation-performance/SKILL.md` (the one the apple-design
