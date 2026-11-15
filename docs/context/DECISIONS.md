@@ -167,3 +167,13 @@
   `() -> Float` passed down), and progress is drawn, not laid out (`ProgressBar`).
 - Consequence: moving things cost a redraw of their own layer, not a recomposition or layout of
   the screen. Short colour cross-fades on small controls are allowed to stay as they are.
+
+## DEC-023 — Rules are tested before they're published; libraries stay buildable
+- Date: 2026-11-15 · Status: Active
+- Decision: every change to `firebase/firestore.rules` passes `firebase/test/` on the local
+  emulator first, with a test for each app write and each attack. Only Google accounts count as
+  signed in, and timestamps must equal `request.time`. Libraries are updated to the newest versions
+  the current toolchain compiles; the toolchain upgrade itself (AGP 9, Kotlin 2.4) is separate
+  work that needs a phone to test on (ISSUE-023).
+- Consequence: the test suite adds Node tooling under `firebase/test/` (not part of the Android
+  build). No server-side rate limiting: the free Firebase plan can't do it (`docs/SECURITY.md`).

@@ -13,7 +13,11 @@ shows "isn't set up for this build yet".
 | Value | |
 |---|---|
 | Package name | `com.attendo.app` |
+| SHA-1 (release key, v0.33.0 and later) | `33:0C:B7:CA:21:A3:03:F8:D8:42:B7:16:52:59:9E:FB:9E:2B:D9:FA` |
 | SHA-1 (debug key on the build PC) | `3F:82:53:4D:8D:3D:B6:C5:FB:A5:35:A4:26:1D:0E:43:33:57:48:28` |
+
+Releases since v0.33.0 are signed with the release key, so its fingerprint must be added too
+(Project settings › Your apps › Attendo › Add fingerprint), or sign-in fails.
 
 Google Cloud requires 2-Step Verification on the Google account you use for this.
 
@@ -44,7 +48,9 @@ email, **Save**.
 4. Open the **Rules** tab, replace everything with the contents of
    [`firebase/firestore.rules`](../firebase/firestore.rules), and click **Publish**. These rules
    are what keep attendance visible to friends only and grades private.
-   When an update changes `firebase/firestore.rules` (v0.32.0 did), paste and **Publish** again.
+   When an update changes `firebase/firestore.rules` (v0.32.0 and v0.34.0 did), paste and
+   **Publish** again. To check a change first, run the tests in `firebase/test/` (`npm install`,
+   then `npm test`; needs Node and Java 11+).
 
 ## 5. Google backup (Drive) in the same project
 
@@ -64,6 +70,23 @@ Put the downloaded `google-services.json` in the repository at `Attendo/app/goog
 (re-download it after step 3 so it contains the web client). It's git-ignored. Rebuild, and the
 release APK has Friends and backup sign-in enabled. Alternatively fill `firebase.properties` from
 `firebase.properties.example`.
+
+## 7. Check the API key's limits
+
+The API key in the app can't be hidden; what matters is which Google APIs it can call.
+
+1. Google Cloud console › **APIs & Services › Credentials** › the key named "Android key
+   (auto created by Firebase)".
+2. **API restrictions** should say **Restrict key**, with only Firebase APIs ticked (Firebase sets
+   this up for its own keys). If it says **Don't restrict key**, choose Restrict key and tick the
+   Firebase ones: Identity Toolkit API, Token Service API, Cloud Firestore API, Cloud Datastore
+   API, Firebase Installations API. Never add anything else (such as Gemini) to this key.
+3. **Application restrictions** are optional. To use them, pick Android apps and add
+   `com.attendo.app` with **both** SHA-1 fingerprints above; if sign-in stops working, set it
+   back to None.
+
+Also check **Authentication › Sign-in method**: only Google needs to be on. (The rules refuse
+other kinds of accounts anyway since v0.34.0.)
 
 ## How Friends works
 

@@ -2,17 +2,26 @@ rules_version = '2';
 
 // Attendo friends. Paste into Firebase console › Firestore Database › Rules and click Publish.
 //
+// - Only Google accounts count as signed in (not anonymous or email/password accounts, even if
+//   those are switched on in the console by mistake).
 // - Profiles (name, friend code, programme) are visible to signed-in students, so they can search
 //   (20 results per query at most). A profile's friend code must belong to its own account.
 // - A friend list is visible to its owner and to the owner's friends.
 // - Shared attendance / grades are visible to the owner and the owner's friends only; the app
 //   deletes the document when the student turns sharing off (grades are off by default).
 // - Friendships are created only by accepting a pending request, and either side can end them.
+// - Timestamps must be the server's time, so no field can be stuffed with junk.
+// Tests: firebase/test/rules.test.mjs (npm test, on the local emulator).
 service cloud.firestore {
   match /databases/{database}/documents {
 
     function signedIn() {
-      return request.auth != null;
+      return request.auth != null && request.auth.token.firebase.sign_in_provider == 'google.com';
+    }
+
+    // Set by the app with FieldValue.serverTimestamp(), which arrives as the request time.
+    function now(v) {
+      return v == request.time;
     }
 
     function isUser(uid) {
@@ -42,13 +51,15 @@ service cloud.firestore {
         && shortText(d.name, 40) && d.name.size() > 0
         && shortText(d.searchName, 40)
         && ownCode(d.code, uid)
-        && shortText(d.programme, 40);
+        && shortText(d.programme, 40)
+        && now(d.updatedAt);
     }
 
     function validShared(d) {
       return d.keys().hasOnly(['overall', 'subjects', 'updatedAt'])
         && d.overall is number
-        && d.subjects is list && d.subjects.size() <= 20;
+        && d.subjects is list && d.subjects.size() <= 20
+        && now(d.updatedAt);
     }
 
     match /users/{uid} {
@@ -64,6 +75,7 @@ service cloud.firestore {
         allow create: if signedIn()
           && request.resource.data.keys().hasOnly(['name', 'since'])
           && shortText(request.resource.data.name, 40)
+          && now(request.resource.data.since)
           && ((request.auth.uid == uid && pending(fid, uid))
               || (request.auth.uid == fid && pending(uid, fid)));
         allow update: if false;
@@ -89,6 +101,7 @@ service cloud.firestore {
         && shortText(request.resource.data.fromName, 40)
         && shortText(request.resource.data.toName, 40)
         && ownCode(request.resource.data.fromCode, request.auth.uid)
+        && now(request.resource.data.createdAt)
         && !areFriends(request.auth.uid, request.resource.data.to);
       allow update: if false;
       allow delete: if signedIn()

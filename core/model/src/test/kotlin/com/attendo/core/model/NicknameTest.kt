@@ -16,9 +16,9 @@ class NicknameTest {
 
     @Test
     fun longNamesBecomeFirstFourLetters() {
-        assertEquals("Prab", Nickname.of("Prabhanshu Kumar"))
+        assertEquals("Alex", Nickname.of("Alexandra Fernandes"))
         assertEquals("Madh", Nickname.of("MADHUKAR VERMA"))
         assertEquals("Alpa", Nickname.of("Al Pacino Junior")) // letters only, spaces skipped
-        assertTrue(Nickname.isShortened("Prabhanshu Kumar"))
+        assertTrue(Nickname.isShortened("Alexandra Fernandes"))
     }
 }

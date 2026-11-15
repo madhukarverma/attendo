@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Android 12+ cloud backup and phone-to-phone transfer. Attendo's own files (the CSV data and
+    settings) are included; left out are the sign-in state that libraries keep in shared preferences
+    (Firebase) and Firestore's cache of friends' shared data. After a restore, sign in again.
+    Android 11 and older use backup_rules.xml.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="database" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="database" path="." />
+    </device-transfer>
+</data-extraction-rules>

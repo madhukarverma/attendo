@@ -12,6 +12,7 @@ with `./gradlew :core:model:test --rerun :core:data:test --rerun` (JDK 17, Windo
 | Test time | 1.1 s |
 | Release build (R8 + resource shrinking) | Passed |
 | Android Lint (v0.33: the 9 changed Android modules) | 0 errors, 0 new warnings |
+| Firestore rules (`firebase/test/`, v0.34.0) | **32 / 32 passed** on the local emulator |
 | Run on a phone or emulator | **Never** — no device testing has been done |
 
 Run them yourself:
@@ -21,6 +22,10 @@ Run them yourself:
 ```
 
 Results land in `core/*/build/test-results/test/` (XML) and `core/*/build/reports/tests/` (HTML).
+
+The Firestore rules have their own suite: from `firebase/test/`, `npm install` then `npm test`
+(Node and Java 11+). 13 tests check that every read and write the app makes is allowed, and 19
+check that attacks are refused.
 
 ## Automated unit tests
 
@@ -162,7 +167,7 @@ Results land in `core/*/build/test-results/test/` (XML) and `core/*/build/report
 | Test | Checks | Result | Time |
 |---|---|---|---|
 | `shortNamesAreKept` | Names of 10 characters or fewer are kept. | ✅ | 0.000 s |
-| `longNamesBecomeFirstFourLetters` | Longer names become their first 4 letters ("Prabhanshu Kumar" → "Prab"). | ✅ | 0.000 s |
+| `longNamesBecomeFirstFourLetters` | Longer names become their first 4 letters ("Alexandra Fernandes" → "Alex"). | ✅ | 0.000 s |
 
 **PhysicsTest** (`core/model`)
 

@@ -19,3 +19,7 @@ firebase.properties
 
 # Release signing key settings and password (see docs/RELEASE_SIGNING.md)
 keystore.properties
+
+# Firestore rules tests (firebase/test): npm packages and emulator logs
+node_modules/
+*-debug.log
