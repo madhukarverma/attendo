@@ -1,6 +1,6 @@
 package com.attendo.feature.onboarding
 
-import com.attendo.core.designsystem.theme.Corner
+import androidx.compose.foundation.shape.CircleShape
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.backup.GoogleDriveBackup
 import com.attendo.core.backup.rememberGoogleSignIn
@@ -170,7 +170,7 @@ fun OnboardingScreen(
                 onValueChange = { name = it.take(30) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                shape = Corner.Shape,
+                shape = CircleShape,
                 placeholder = { Text("What should we call you?") },
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Words,

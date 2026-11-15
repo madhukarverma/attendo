@@ -1,5 +1,6 @@
 package com.attendo.feature.dashboard
 
+import com.attendo.core.designsystem.motion.PageHeaderRow
 import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.model.formatClock
@@ -175,19 +176,26 @@ private fun greeting(now: LocalDateTime): String = when (now.hour) {
 
 @Composable
 private fun Header(state: DashboardUiState, onOpenSettings: () -> Unit, onOpenFriends: () -> Unit) {
-    Row(Modifier.fillMaxWidth().padding(top = Space.M), verticalAlignment = Alignment.Top) {
-        Column(Modifier.weight(1f)) {
-            Text("${greeting(state.now)},", style = MaterialTheme.typography.headlineLarge)
-            Text(
-                state.nickname.ifBlank { "there" },
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Spacer(Modifier.height(Space.XXS))
-            Text(state.today.format(LongDate), style = MaterialTheme.typography.labelLarge, color = AttendoColors.Muted)
+    Column {
+        // The greeting's first line sits in the shared title row, level with every other tab's title.
+        PageHeaderRow(trailing = { HeaderButtons(onOpenSettings, onOpenFriends) }) {
+            Text("${greeting(state.now)},", style = MaterialTheme.typography.headlineLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
+        Text(
+            state.nickname.ifBlank { "there" },
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Spacer(Modifier.height(Space.XXS))
+        Text(state.today.format(LongDate), style = MaterialTheme.typography.labelLarge, color = AttendoColors.Muted)
+    }
+}
+
+@Composable
+private fun HeaderButtons(onOpenSettings: () -> Unit, onOpenFriends: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             Modifier
                 .size(40.dp)

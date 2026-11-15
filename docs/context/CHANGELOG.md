@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-11-15 — v0.36.0 Apple look back, aligned titles, font picker, DNA mascots
+- Back to the Apple design: the phone's own font by default, and capsule buttons, chips, tab bar
+  and day strip again (cards keep their 16 dp corners). DEC-026.
+- **Settings › Font** (new, above Theme): Theme font, System, Roboto, Open Sans, Montserrat, Lato,
+  Poppins, Plus Jakarta Sans, Monospace, Typewriter, Handwritten; each shown in its own font.
+  Fonts ship as one file per weight, so bold really is bold.
+- All five tab titles start at the same height (shared `PageHeader`); Focus and Statistics no
+  longer reserve an empty bar above their title.
+- Classes: undo remembers every mark made on the screen, from the list or from Tinder mode, and puts
+  back the previous mark (not just "unmarked"); switching modes keeps it.
+- Tinder mode: the card stack sizes itself to the space left, so the five buttons are never under
+  the tab bar; on short screens the card text shrinks. The hint line is shorter.
+- Mascots follow a DNA nucleotide: pentagon (pentose sugar) on Home, circle (phosphate) on Classes
+  and the subject pages, rectangle (nitrogenous base) on Tasks. Every mascot idles (hop when happy,
+  sway when sad, breathe when neutral), and the onboarding blob breathes and rocks. Still when
+  Animations is None.
+
 ## 2026-11-15 — v0.35.0 Feedback, design system, error codes
 - **Settings › Support › Send feedback** (new `:feature:feedback`): 1–5 star rating, category
   (Problem / Idea / Praise / Other), message (2,000 characters), optional reply email, optional phone

@@ -9,10 +9,10 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.ui.Modifier
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.runtime.State
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -23,9 +23,10 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
-import com.attendo.core.designsystem.theme.AttendoColors
+import androidx.compose.ui.graphics.drawscope.withTransform
 import com.attendo.core.designsystem.motion.LocalAnimationMode
 import com.attendo.core.designsystem.motion.Motion
+import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.core.model.AnimationMode
 import kotlin.math.cos
 import kotlin.math.sin
@@ -102,127 +103,165 @@ fun moodColor(mood: Mood): Color = when (mood) {
 }
 
 /**
+ * The mascots follow the three parts of a DNA nucleotide, one per tab: a pentagon (the pentose
+ * sugar) on Home, a circle (the phosphate) on Classes and a rectangle (the nitrogenous base) on
+ * Tasks.
+ */
+private enum class MascotShape { Pentagon, Circle, Rectangle }
+
+/**
  * Meet Penta, the rounded pentagon who lives on the Home screen. (He never introduces himself in the
  * app; his name is a codebase-only easter egg.) Penta is happy when every subject is at or above its
- * target and sad otherwise.
- *
- * Animated by mood:
- * - Happy: small bounce with a little squash on landing; the shadow shrinks as it rises.
- * - Sad: slow left-right sway from the base, like a sigh.
- * - Neutral: gentle "breathing" scale.
- * Colour cross-fades between moods. Animated values are read only in the draw phase, so the
- * animation never triggers recomposition.
+ * target and sad otherwise. [color] null follows the mood.
  */
 @Composable
-fun PentagonMascot(modifier: Modifier = Modifier, mood: Mood = Mood.Happy, color: Color? = null) {
-    if (LocalAnimationMode.current == AnimationMode.NONE) {
-        // Animations off: a still pentagon in the mood colour, no idle loop running.
-        StaticPentagon(modifier, mood, color ?: moodColor(mood))
-        return
-    }
-    AnimatedPentagon(modifier, mood, color)
-}
+fun PentagonMascot(modifier: Modifier = Modifier, mood: Mood = Mood.Happy, color: Color? = null) =
+    Mascot(MascotShape.Pentagon, modifier, mood, color)
 
+/** The Classes mascot: a round phosphate on two legs. */
 @Composable
-private fun StaticPentagon(modifier: Modifier, mood: Mood, color: Color) {
+fun CircleMascot(modifier: Modifier = Modifier, mood: Mood = Mood.Happy, color: Color? = null) =
+    Mascot(MascotShape.Circle, modifier, mood, color)
+
+/** The Tasks mascot: a rectangular base on two legs. */
+@Composable
+fun RectangleMascot(modifier: Modifier = Modifier, mood: Mood = Mood.Happy, color: Color? = null) =
+    Mascot(MascotShape.Rectangle, modifier, mood, color)
+
+/**
+ * Every mascot idles by mood (DEC-022: values are read only in the draw phase):
+ * - Happy: a small hop with a squash on landing; the shadow shrinks as it rises.
+ * - Sad: a slow sway from the feet, like a sigh.
+ * - Neutral: gentle breathing.
+ * With Animations set to None it's drawn still and no loop runs.
+ */
+@Composable
+private fun Mascot(shape: MascotShape, modifier: Modifier, mood: Mood, color: Color?) {
+    val still = LocalAnimationMode.current == AnimationMode.NONE
+    val body = if (still) rememberUpdatedState(color ?: moodColor(mood)) else animateColorAsState(color ?: moodColor(mood), tween(600), label = "mascotColor")
+    val idle = if (still) null else rememberIdle(mood)
     Canvas(modifier) {
         val s = size.minDimension
-        val c = Offset(size.width / 2, size.height * 0.44f)
-        val r = s * 0.38f
-        drawShadow(c.x, size.height * 0.86f, s * 0.75f)
-        val pts = (0 until 5).map { i ->
-            val a = Math.toRadians(-90.0 + 72.0 * i)
-            Offset(c.x + r * cos(a).toFloat(), c.y + r * sin(a).toFloat())
+        val cx = size.width / 2
+        val ground = size.height * 0.86f
+        val g = when (shape) {
+            MascotShape.Pentagon -> Geometry(base = size.height * 0.44f + s * 0.38f * 0.85f, shadow = 0.75f)
+            MascotShape.Circle, MascotShape.Rectangle -> Geometry(base = ground, shadow = 0.6f)
         }
-        drawRoundedPolygon(pts, color, s * 0.1f)
-        drawMascotFace(Offset(c.x, c.y + s * 0.06f), s * 0.42f, mood)
+        val m = idle?.frame(s) ?: Frame.Still
+        drawShadow(cx, ground, s * g.shadow * (1f - m.lift / (s * 0.2f)))
+        withTransform({
+            translate(top = -m.lift)
+            rotate(m.angle, pivot = Offset(cx, g.base))
+            scale(scaleX = m.scaleX, scaleY = m.scaleY, pivot = Offset(cx, g.base))
+        }) {
+            when (shape) {
+                MascotShape.Pentagon -> drawPentagon(s, cx, body.value, mood)
+                MascotShape.Circle -> drawCircleBody(s, cx, ground, body.value, mood)
+                MascotShape.Rectangle -> drawRectangleBody(s, cx, ground, body.value, mood)
+            }
+        }
+    }
+}
+
+private class Geometry(val base: Float, val shadow: Float)
+
+private fun DrawScope.drawPentagon(s: Float, cx: Float, color: Color, mood: Mood) {
+    val c = Offset(cx, size.height * 0.44f)
+    val r = s * 0.38f
+    val pts = (0 until 5).map { i ->
+        val a = Math.toRadians(-90.0 + 72.0 * i)
+        Offset(c.x + r * cos(a).toFloat(), c.y + r * sin(a).toFloat())
+    }
+    drawRoundedPolygon(pts, color, s * 0.1f)
+    drawMascotFace(Offset(c.x, c.y + s * 0.06f), s * 0.42f, mood)
+}
+
+private fun DrawScope.drawLegs(s: Float, cx: Float, hip: Float, ground: Float, spread: Float) {
+    val stroke = s * 0.03f
+    drawLine(AttendoColors.Ink, Offset(cx - spread * 0.55f, hip), Offset(cx - spread * 0.8f, ground + s * 0.02f), stroke, StrokeCap.Round)
+    drawLine(AttendoColors.Ink, Offset(cx + spread * 0.55f, hip), Offset(cx + spread * 0.85f, ground), stroke, StrokeCap.Round)
+}
+
+private fun DrawScope.drawCircleBody(s: Float, cx: Float, ground: Float, color: Color, mood: Mood) {
+    val r = s * 0.29f
+    val c = Offset(cx, size.height * 0.1f + r)
+    drawLegs(s, cx, c.y + r * 0.8f, ground, r * 0.6f)
+    drawCircle(color, r, c)
+    drawMascotFace(Offset(c.x, c.y + s * 0.02f), s * 0.36f, mood)
+}
+
+private fun DrawScope.drawRectangleBody(s: Float, cx: Float, ground: Float, color: Color, mood: Mood) {
+    val w = s * 0.64f
+    val h = s * 0.46f
+    val top = size.height * 0.16f
+    drawLegs(s, cx, top + h, ground, w * 0.35f)
+    drawRoundRect(color, Offset(cx - w / 2, top), Size(w, h), CornerRadius(s * 0.05f))
+    drawMascotFace(Offset(cx, top + h * 0.52f), s * 0.36f, mood)
+}
+
+/** One frame of the idle loop, in px and degrees. */
+private class Frame(val lift: Float, val angle: Float, val scaleX: Float, val scaleY: Float) {
+    companion object {
+        val Still = Frame(0f, 0f, 1f, 1f)
+    }
+}
+
+/** The running idle loop; [frame] is called from draw blocks only. */
+private class Idle(
+    private val bounce: State<Float>,
+    private val sway: State<Float>,
+    private val happy: State<Float>,
+    private val sad: State<Float>,
+    private val neutral: State<Float>,
+) {
+    fun frame(s: Float): Frame {
+        val b = bounce.value
+        val lift = b * s * 0.035f * happy.value // ~6 dp at 170 dp: "a very small amount"
+        val squash = (1f - b) * 0.03f * happy.value // slight squash at the bottom of the hop
+        val breathe = 1f + (b - 0.5f) * 0.02f * neutral.value
+        return Frame(lift, sway.value * 6f * sad.value, (1f + squash) * breathe, (1f - squash) * breathe)
     }
 }
 
 @Composable
-private fun AnimatedPentagon(modifier: Modifier, mood: Mood, color: Color?) {
-    val bodyColor by animateColorAsState(color ?: moodColor(mood), tween(600), label = "mascotColor")
+private fun rememberIdle(mood: Mood): Idle {
     val loop = rememberInfiniteTransition(label = "mascot")
     // Smooth mode slows the idle loops and uses a symmetric ease so there's no visible "kick".
     val slow = Motion.idleSlowdown
     val easing = if (slow > 1f) Motion.Easing else FastOutSlowInEasing
-    // 0..1 phase; each mood maps it differently.
-    val bounce by loop.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween((900 * slow).toInt(), easing = easing), RepeatMode.Reverse),
-        label = "bounce",
-    )
-    val sway by loop.animateFloat(
-        initialValue = -1f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween((1600 * slow).toInt(), easing = easing), RepeatMode.Reverse),
-        label = "sway",
-    )
-    // Smoothly blend the motion amount when the mood changes instead of jumping.
-    val happyAmount by animateFloatAsState(if (mood == Mood.Happy) 1f else 0f, tween(500), label = "happy")
-    val sadAmount by animateFloatAsState(if (mood == Mood.Sad) 1f else 0f, tween(500), label = "sad")
-    val neutralAmount by animateFloatAsState(if (mood == Mood.Neutral) 1f else 0f, tween(500), label = "neutral")
-
-    Canvas(modifier) {
-        val s = size.minDimension
-        val c = Offset(size.width / 2, size.height * 0.44f)
-        val r = s * 0.38f
-        val baseY = c.y + r * 0.85f
-
-        val lift = bounce * s * 0.035f * happyAmount // ~6dp at 170dp: "a very small amount"
-        val squash = (1f - bounce) * 0.03f * happyAmount // slight squash at the bottom of the bounce
-        val angle = sway * 6f * sadAmount
-        val breathe = 1f + (bounce - 0.5f) * 0.02f * neutralAmount
-
-        drawShadow(c.x, size.height * 0.86f, s * 0.75f * (1f - lift / (s * 0.2f)))
-        withTransform({
-            translate(top = -lift)
-            rotate(angle, pivot = Offset(c.x, baseY))
-            scale(scaleX = (1f + squash) * breathe, scaleY = (1f - squash) * breathe, pivot = Offset(c.x, baseY))
-        }) {
-            val pts = (0 until 5).map { i ->
-                val a = Math.toRadians(-90.0 + 72.0 * i)
-                Offset(c.x + r * cos(a).toFloat(), c.y + r * sin(a).toFloat())
-            }
-            drawRoundedPolygon(pts, bodyColor, s * 0.1f)
-            drawMascotFace(Offset(c.x, c.y + s * 0.06f), s * 0.42f, mood)
-        }
-    }
+    val bounce = loop.animateFloat(0f, 1f, infiniteRepeatable(tween((900 * slow).toInt(), easing = easing), RepeatMode.Reverse), label = "bounce")
+    val sway = loop.animateFloat(-1f, 1f, infiniteRepeatable(tween((1600 * slow).toInt(), easing = easing), RepeatMode.Reverse), label = "sway")
+    // Blend the motion amount when the mood changes instead of jumping.
+    val happy = animateFloatAsState(if (mood == Mood.Happy) 1f else 0f, tween(500), label = "happy")
+    val sad = animateFloatAsState(if (mood == Mood.Sad) 1f else 0f, tween(500), label = "sad")
+    val neutral = animateFloatAsState(if (mood == Mood.Neutral) 1f else 0f, tween(500), label = "neutral")
+    return Idle(bounce, sway, happy, sad, neutral)
 }
 
-/** Green rounded triangle with legs (celebration / detail mascot). */
-@Composable
-fun TriangleMascot(modifier: Modifier = Modifier, mood: Mood = Mood.Happy, color: Color = AttendoColors.GreenFill) {
-    Canvas(modifier) {
-        val s = size.minDimension
-        val cx = size.width / 2
-        val top = size.height * 0.1f
-        val base = size.height * 0.62f
-        val half = s * 0.36f
-        drawShadow(cx, size.height * 0.86f, s * 0.6f)
-        // legs
-        val legStroke = s * 0.03f
-        drawLine(AttendoColors.Ink, Offset(cx - half * 0.3f, base), Offset(cx - half * 0.45f, size.height * 0.88f), legStroke, StrokeCap.Round)
-        drawLine(AttendoColors.Ink, Offset(cx + half * 0.3f, base), Offset(cx + half * 0.5f, size.height * 0.86f), legStroke, StrokeCap.Round)
-        drawRoundedPolygon(listOf(Offset(cx, top), Offset(cx + half, base), Offset(cx - half, base)), color, s * 0.1f)
-        drawMascotFace(Offset(cx, base - s * 0.17f), s * 0.36f, mood)
-    }
-}
-
-/** Big tilted capsule mascot used on the dark onboarding screen. */
+/** Big tilted capsule mascot on the dark onboarding screen; it breathes and rocks gently. */
 @Composable
 fun BlobMascot(modifier: Modifier = Modifier, mood: Mood = Mood.Happy, color: Color = AttendoColors.GreenFill) {
+    val idle = if (LocalAnimationMode.current == AnimationMode.NONE) null else rememberIdle(Mood.Neutral)
+    val rock = if (idle == null) null else {
+        val loop = rememberInfiniteTransition(label = "blob")
+        loop.animateFloat(-1f, 1f, infiniteRepeatable(tween((2400 * Motion.idleSlowdown).toInt(), easing = Motion.Easing), RepeatMode.Reverse), label = "rock")
+    }
     Canvas(modifier) {
+        val m = idle?.frame(size.minDimension) ?: Frame.Still
         val h = size.height * 0.62f
-        rotate(degrees = 22f, pivot = Offset(size.width * 0.5f, size.height * 0.5f)) {
-            drawRoundRect(
-                color = color,
-                topLeft = Offset(size.width * 0.12f, size.height * 0.2f),
-                size = Size(size.width * 1.4f, h),
-                cornerRadius = CornerRadius(h / 2, h / 2),
-            )
+        val pivot = Offset(size.width * 0.5f, size.height * 0.5f)
+        withTransform({ scale(m.scaleX, m.scaleY, pivot) }) {
+            // The body rocks a little around its tilt; the face stays upright, as before.
+            rotate(degrees = 22f + (rock?.value ?: 0f) * 2.5f, pivot = pivot) {
+                drawRoundRect(
+                    color = color,
+                    topLeft = Offset(size.width * 0.12f, size.height * 0.2f),
+                    size = Size(size.width * 1.4f, h),
+                    cornerRadius = CornerRadius(h / 2, h / 2),
+                )
+            }
+            drawMascotFace(Offset(size.width * 0.34f, size.height * 0.42f), size.minDimension * 0.42f, mood)
         }
-        drawMascotFace(Offset(size.width * 0.34f, size.height * 0.42f), size.minDimension * 0.42f, mood)
     }
 }

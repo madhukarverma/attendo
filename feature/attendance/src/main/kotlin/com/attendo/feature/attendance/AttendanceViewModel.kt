@@ -40,7 +40,8 @@ data class AttendanceUiState(
     val items: List<SubjectDayItem> = emptyList(),
     val markedDays: Set<LocalDate> = emptySet(),
     val tinderMode: Boolean = false,
-    val canUndoSwipe: Boolean = false,
+    /** Something marked on this screen, in either mode, can be undone. */
+    val canUndo: Boolean = false,
     val calendar: AcademicCalendar = AcademicCalendar.EMPTY,
     /** The student has entered a weekly timetable. */
     val hasTimetable: Boolean = false,
@@ -93,8 +94,21 @@ class AttendanceViewModel(
         planner?.slots ?: flowOf(emptyList()),
     ) { cal, slots -> cal to slots }
 
-    /** Swipes made in this session, newest last, for the Tinder-style undo button. */
-    private val swipeHistory = MutableStateFlow<List<Pair<String, LocalDate>>>(emptyList())
+    /** A subject's mark on a day before it was changed: what undo puts back. */
+    private data class MarkChange(val subjectId: String, val date: LocalDate, val status: AttendanceStatus?, val count: Int)
+
+    /**
+     * Every change made on this screen, newest last, whether by tapping in the list or swiping in
+     * Tinder mode, so switching modes keeps undo working.
+     */
+    private val history = MutableStateFlow<List<MarkChange>>(emptyList())
+
+    /** Remembers [subjectId]'s current mark on the selected day before it changes. */
+    private fun rememberBefore(subjectId: String, date: LocalDate) {
+        val item = uiState.value.items.firstOrNull { it.summary.subject.id == subjectId }
+        val change = MarkChange(subjectId, date, item?.statusOnDay, item?.countOnDay ?: 1)
+        history.value = (history.value + change).takeLast(MAX_UNDO)
+    }
 
     fun setTinderMode(enabled: Boolean) {
         viewModelScope.launch { settings.setTinderMode(enabled) }
@@ -103,7 +117,7 @@ class AttendanceViewModel(
     /** A card swipe: sets the status directly (no toggle) and remembers it for undo. */
     fun swipe(subjectId: String, status: AttendanceStatus, count: Int = 1) {
         val date = selectedDate.value
-        swipeHistory.value = swipeHistory.value + (subjectId to date)
+        rememberBefore(subjectId, date)
         viewModelScope.launch { attendance.mark(subjectId, date, status, count) }
     }
 
@@ -112,14 +126,16 @@ class AttendanceViewModel(
         val item = uiState.value.items.firstOrNull { it.summary.subject.id == subjectId } ?: return
         val status = item.statusOnDay?.takeIf { it != AttendanceStatus.CANCELLED } ?: return
         val date = selectedDate.value
+        rememberBefore(subjectId, date)
         viewModelScope.launch { attendance.mark(subjectId, date, status, if (item.countOnDay >= 2) 1 else 2) }
     }
 
-    fun undoSwipe() {
-        val last = swipeHistory.value.lastOrNull() ?: return
-        swipeHistory.value = swipeHistory.value.dropLast(1)
-        selectedDate.value = last.second
-        viewModelScope.launch { attendance.mark(last.first, last.second, null) }
+    /** Puts back the mark the last change replaced (or clears it if there was none), on its day. */
+    fun undo() {
+        val last = history.value.lastOrNull() ?: return
+        history.value = history.value.dropLast(1)
+        selectedDate.value = last.date
+        viewModelScope.launch { attendance.mark(last.subjectId, last.date, last.status, last.count) }
     }
 
     fun addCourseSubjects() {
@@ -133,8 +149,8 @@ class AttendanceViewModel(
         subjects.subjects,
         attendance.records,
         selectedDate,
-        combine(swipeHistory, plan) { history, p -> history to p },
-    ) { s, subjectList, records, date, (history, p) ->
+        combine(history, plan) { changes, p -> changes to p },
+    ) { s, subjectList, records, date, (changes, p) ->
         val (cal, slots) = p
         val onDay = records.filter { it.date == date }.associateBy { it.subjectId }
         val slotsToday = Timetable.bySubjectOn(slots, date)
@@ -151,7 +167,7 @@ class AttendanceViewModel(
             },
             markedDays = records.mapTo(HashSet()) { it.date },
             tinderMode = s.tinderMode,
-            canUndoSwipe = history.isNotEmpty(),
+            canUndo = changes.isNotEmpty(),
             calendar = cal,
             hasTimetable = slots.isNotEmpty(),
         )
@@ -165,8 +181,14 @@ class AttendanceViewModel(
     fun mark(subjectId: String, status: AttendanceStatus) {
         val date = selectedDate.value
         val current = uiState.value.items.firstOrNull { it.summary.subject.id == subjectId }?.statusOnDay
+        rememberBefore(subjectId, date)
         viewModelScope.launch {
             attendance.mark(subjectId, date, if (current == status) null else status)
         }
+    }
+
+    private companion object {
+        /** How many changes undo can go back through. */
+        const val MAX_UNDO = 50
     }
 }

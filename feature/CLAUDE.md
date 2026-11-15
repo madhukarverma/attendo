@@ -16,7 +16,7 @@ One Gradle module per screen. Each module's sources are in
 | `calendar` | Pushed screens | `CalendarScreen.kt` (month view), `PlannerUi.kt` (day agenda, event dialog, timetable screen) | calendar, timetable, personal events |
 | `friends` | Pushed screens | `FriendsScreen.kt` (search, requests, list), `StudentScreen.kt` (a friend's page) | friends screens |
 | `feedback` | Pushed from Settings › Support | `FeedbackScreen.kt` (screen, view model, thank-you state) | rating and feedback form |
-| `settings` | Pushed screen | `SettingsScreen.kt`, `ThemeSection.kt`, `AnimationModeSlider.kt`, `CsvBackupSection.kt`, `GoogleBackupSection.kt`, `LaunchImageSection.kt` | any setting |
+| `settings` | Pushed screen | `SettingsScreen.kt`, `FontSection.kt`, `ThemeSection.kt`, `AnimationModeSlider.kt`, `CsvBackupSection.kt`, `GoogleBackupSection.kt`, `LaunchImageSection.kt` | any setting |
 | `onboarding` | First launch | `OnboardingScreen.kt` (view model inside) | first-run flow |
 | `splash` | Each launch (skipped when Animations is None) | `LogoSplash.kt` | launch animation |
 

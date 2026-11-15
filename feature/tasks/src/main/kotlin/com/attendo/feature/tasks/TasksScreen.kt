@@ -1,5 +1,6 @@
 package com.attendo.feature.tasks
 
+import com.attendo.core.designsystem.motion.PageHeader
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.data.HabitRepository
 import androidx.compose.foundation.background
@@ -8,8 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,7 +16,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -73,12 +71,7 @@ fun TasksRoute(
             .background(AttendoColors.Cream)
             .safeDrawingPadding(),
     ) {
-        Text(
-            "Tasks",
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = Space.L, end = Space.L, top = Space.M),
-        )
+        PageHeader("Tasks", Modifier.padding(horizontal = Space.L))
         SegmentedControl(
             items = TasksPage.entries.map { it.label },
             selected = page.ordinal,

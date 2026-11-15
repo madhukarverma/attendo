@@ -1,5 +1,6 @@
 package com.attendo.feature.tasks
 
+import com.attendo.core.designsystem.component.RectangleMascot
 import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.attendoFilledFieldColors
@@ -52,7 +53,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.attendo.core.designsystem.component.TriangleMascot
 import com.attendo.core.designsystem.motion.BounceContainer
 import com.attendo.core.designsystem.motion.PressStyle
 import com.attendo.core.designsystem.motion.iosPress
@@ -325,7 +325,7 @@ private fun WeekDots(week: List<DayMark>) {
 private fun EmptyDay(state: HabitsUiState, modifier: Modifier = Modifier) {
     Column(modifier.fillMaxWidth().padding(vertical = Space.S), horizontalAlignment = Alignment.CenterHorizontally) {
         if (state.totalHabits == 0) {
-            TriangleMascot(Modifier.size(110.dp))
+            RectangleMascot(Modifier.size(110.dp))
             Spacer(Modifier.height(Space.S))
             Text("No tasks yet.", style = MaterialTheme.typography.titleMedium)
             Text(

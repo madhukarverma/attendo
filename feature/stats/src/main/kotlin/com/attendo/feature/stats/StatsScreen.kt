@@ -1,5 +1,7 @@
 package com.attendo.feature.stats
 
+import com.attendo.core.designsystem.motion.PageHeader
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.DateRange
 import com.attendo.core.designsystem.component.EmptyState
 import com.attendo.core.designsystem.theme.Corner
@@ -104,14 +106,15 @@ fun StatsScreen(state: StatsUiState, onClose: (() -> Unit)?) {
             .background(AttendoColors.Cream)
             .safeDrawingPadding(),
     ) {
-    CollapsingTopBar(title = "Statistics", collapseFraction = { collapse }, onBack = onClose, backLabel = "Home")
+    // As a tab it has no back bar, so its title lines up with the other tabs (PageHeader).
+    if (onClose != null) CollapsingTopBar(title = "Statistics", collapseFraction = { collapse }, onBack = onClose, backLabel = "Home")
     BounceContainer(Modifier.fillMaxSize()) {
     LazyColumn(
         Modifier.fillMaxSize().padding(horizontal = Space.L),
         state = listState,
         verticalArrangement = Arrangement.spacedBy(Space.S),
     ) {
-        item { LargeTitle("Statistics") }
+        item { if (onClose != null) LargeTitle("Statistics") else PageHeader("Statistics") }
         item { OverallCard(state) }
         item {
             Text("By subject", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = Space.XS))
@@ -221,7 +224,7 @@ private fun GradesCard(grades: List<SubjectGrades>, modifier: Modifier = Modifie
             Text("Grades", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
             Row(
                 Modifier
-                    .clip(Corner.Shape)
+                    .clip(CircleShape)
                     .background(AttendoColors.CreamDeep)
                     .padding(horizontal = Space.XS, vertical = Space.XXS),
                 verticalAlignment = Alignment.CenterVertically,
@@ -257,7 +260,7 @@ private fun GradesCard(grades: List<SubjectGrades>, modifier: Modifier = Modifie
                     style = MaterialTheme.typography.labelLarge,
                     color = AttendoColors.OnAccent,
                     modifier = Modifier
-                        .clip(Corner.Shape)
+                        .clip(CircleShape)
                         .background(AttendoColors.GreenFill)
                         .padding(horizontal = Space.XS, vertical = Space.XXS),
                 )

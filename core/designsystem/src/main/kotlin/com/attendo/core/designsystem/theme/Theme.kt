@@ -1,6 +1,5 @@
 package com.attendo.core.designsystem.theme
 
-import android.graphics.Typeface
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
@@ -24,10 +23,13 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.attendo.core.model.ThemeMode
 
-/** The typefaces a theme uses: the bundled [AttendoSans], or a font that ships with Android. */
+/**
+ * The typefaces a theme uses. Themes use fonts that ship with Android (the platform font first, as
+ * the apple-design skill asks); Settings › Font can swap the body font for a bundled one.
+ */
 @Immutable
 data class AttendoFonts(
-    val body: FontFamily = AttendoSans,
+    val body: FontFamily = FontFamily.SansSerif,
     /** Speech bubbles. */
     val hand: FontFamily = FontFamily.Cursive,
     val handItalic: Boolean = true,
@@ -38,15 +40,15 @@ data class AttendoFonts(
         /** System sans with handwritten bubbles (Light, Dark, Custom). */
         val Default = AttendoFonts()
 
-        /** The app font everywhere, speech bubbles included. */
-        val Sans = AttendoFonts(hand = AttendoSans, handItalic = false)
+        /** System sans everywhere. */
+        val Sans = AttendoFonts(hand = FontFamily.SansSerif, handItalic = false)
 
         /** The system's code font. */
         val Mono = AttendoFonts(body = FontFamily.Monospace, hand = FontFamily.Monospace, handItalic = false, scale = 0.92f)
 
         /** Android's typewriter-style slab monospace ("serif-monospace"). */
         val Typewriter: AttendoFonts by lazy {
-            val face = FontFamily(Typeface.create("serif-monospace", Typeface.NORMAL))
+            val face = AppFonts.Typewriter
             AttendoFonts(body = face, hand = face, handItalic = false, scale = 0.94f)
         }
     }

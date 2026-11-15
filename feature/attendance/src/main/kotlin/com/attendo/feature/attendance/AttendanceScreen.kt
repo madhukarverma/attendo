@@ -1,5 +1,13 @@
 package com.attendo.feature.attendance
 
+import com.attendo.core.designsystem.component.CircleMascot
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.foundation.lazy.rememberLazyListState
+import com.attendo.core.designsystem.motion.PageHeader
 import com.attendo.core.designsystem.component.AttendoIcons
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.attendo.core.designsystem.theme.Corner
@@ -66,7 +74,6 @@ import com.attendo.core.data.SettingsRepository
 import com.attendo.core.data.SubjectRepository
 import com.attendo.core.designsystem.component.DayStrip
 import com.attendo.core.designsystem.component.Mood
-import com.attendo.core.designsystem.component.PentagonMascot
 import com.attendo.core.designsystem.component.SpeechBubble
 import com.attendo.core.designsystem.component.StatusLabel
 import com.attendo.core.designsystem.component.TailSide
@@ -112,7 +119,7 @@ fun AttendanceRoute(
         onTinderModeChange = vm::setTinderMode,
         onSwipe = vm::swipe,
         onToggleDouble = vm::toggleDouble,
-        onUndoSwipe = vm::undoSwipe,
+        onUndo = vm::undo,
         onOpenCalendar = onOpenCalendar,
         onAddSubject = onAddSubject,
         onOpenSubject = onOpenSubject,
@@ -130,7 +137,7 @@ fun AttendanceScreen(
     onTinderModeChange: (Boolean) -> Unit = {},
     onSwipe: (subjectId: String, status: AttendanceStatus, count: Int) -> Unit = { _, _, _ -> },
     onToggleDouble: (subjectId: String) -> Unit = {},
-    onUndoSwipe: () -> Unit = {},
+    onUndo: () -> Unit = {},
     onOpenCalendar: (LocalDate) -> Unit = {},
 ) {
     // Subjects not on the selected day's timetable stay folded away until asked for.
@@ -142,8 +149,22 @@ fun AttendanceScreen(
             .safeDrawingPadding(),
     ) {
         BounceContainer(Modifier.fillMaxSize()) {
+        // Where the deck starts when the list is at the top, so the cards can fill the space down to
+        // the tab bar without hiding the buttons under it.
+        val listState = rememberLazyListState()
+        val density = LocalDensity.current
+        var deckSpace by remember { mutableStateOf<Dp?>(null) }
+        LaunchedEffect(listState) {
+            snapshotFlow {
+                val info = listState.layoutInfo
+                val deck = info.visibleItemsInfo.firstOrNull { it.key == "deck" }
+                if (deck == null || listState.firstVisibleItemIndex != 0) null
+                else info.viewportEndOffset - (deck.offset + listState.firstVisibleItemScrollOffset)
+            }.filterNotNull().distinctUntilChanged().collect { px -> deckSpace = with(density) { px.toDp() } }
+        }
         LazyColumn(
             Modifier.fillMaxSize(),
+            state = listState,
             verticalArrangement = Arrangement.spacedBy(Space.XS),
         ) {
             item { Header(state.selectedDate) { onOpenCalendar(state.selectedDate) } }
@@ -192,11 +213,12 @@ fun AttendanceScreen(
                     SwipeDeck(
                         cards = state.unmarked,
                         totalToday = state.deck.size,
-                        canUndo = state.canUndoSwipe,
+                        canUndo = state.canUndo,
                         onSwipe = onSwipe,
-                        onUndo = onUndoSwipe,
+                        onUndo = onUndo,
                         colorFor = { id -> cardColor(state.items.indexOfFirst { it.summary.subject.id == id }) },
                         modifier = Modifier.animateItem(),
+                        availableHeight = deckSpace,
                     )
                 }
             } else {
@@ -300,24 +322,12 @@ private fun pentaSays(state: AttendanceUiState): Pair<List<String>, Mood> {
 private const val BUBBLE_PHASE_MILLIS = 4_000L
 
 /** Header top padding; tightened slightly in v0.14 (was 24.dp: change back here if preferred). */
-private val HeaderTopPadding = 14.dp
-
 private val HeaderDate = java.time.format.DateTimeFormatter.ofPattern("EEE, d MMM")
 
 /** "Classes" title (the greeting moved to Home in v0.19), the calendar button and the selected date. */
 @Composable
 internal fun Header(selectedDate: LocalDate, onOpenCalendar: () -> Unit = {}) {
-    Row(
-        Modifier.fillMaxWidth().padding(start = Space.L, end = Space.L, top = HeaderTopPadding),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            "Classes",
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
-            maxLines = 1,
-            modifier = Modifier.weight(1f),
-        )
+    PageHeader("Classes", Modifier.padding(horizontal = Space.L)) {
         // Academic calendar button, then the selected date (top right).
         Box(
             Modifier
@@ -335,7 +345,7 @@ internal fun Header(selectedDate: LocalDate, onOpenCalendar: () -> Unit = {}) {
             style = MaterialTheme.typography.labelLarge,
             color = if (selectedDate == LocalDate.now()) AttendoColors.OnAccent else AttendoColors.Ink,
             modifier = Modifier
-                .clip(Corner.Shape)
+                .clip(CircleShape)
                 .background(if (selectedDate == LocalDate.now()) AttendoColors.GreenFill else AttendoColors.CreamDeep)
                 .padding(horizontal = Space.S, vertical = Space.XS),
         )
@@ -364,7 +374,7 @@ internal fun MascotHeader(messages: List<String>, mood: Mood, modifier: Modifier
             }
         }
         // Penta, slightly smaller since v0.14 (was 170.dp).
-        PentagonMascot(Modifier.size(156.dp), mood = mood)
+        CircleMascot(Modifier.size(156.dp), mood = mood)
     }
 }
 
@@ -408,7 +418,7 @@ internal fun SubjectBadge(subject: Subject) {
     Box(
         Modifier
             .size(36.dp)
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .background(AttendoColors.CreamDeep),
         contentAlignment = Alignment.Center,
     ) {

@@ -1,5 +1,6 @@
 package com.attendo.feature.subjects
 
+import androidx.compose.foundation.shape.CircleShape
 import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.AttendoDatePicker
@@ -59,7 +60,7 @@ private val GradeDate = DateTimeFormatter.ofPattern("d MMM yyyy")
 internal fun PrivateTag(text: String = "Private") {
     Row(
         Modifier
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .background(AttendoColors.CreamDeep)
             .padding(horizontal = Space.XS, vertical = Space.XXS),
         verticalAlignment = Alignment.CenterVertically,
@@ -206,10 +207,10 @@ private fun AssessmentDialog(
                             style = MaterialTheme.typography.labelMedium,
                             color = if (selected) AttendoColors.Cream else AttendoColors.Ink,
                             modifier = Modifier
-                                .clip(Corner.Shape)
+                                .clip(CircleShape)
                                 .iosPress(PressStyle.Dim, onClickLabel = suggestion) { title = suggestion }
                                 .background(if (selected) AttendoColors.Ink else AttendoColors.CreamCard)
-                                .border(1.dp, AttendoColors.CreamDeep, Corner.Shape)
+                                .border(1.dp, AttendoColors.CreamDeep, CircleShape)
                                 .padding(horizontal = Space.S, vertical = Space.XS),
                         )
                     }
@@ -246,7 +247,7 @@ private fun AssessmentDialog(
                 Spacer(Modifier.height(Space.S))
                 Row(
                     Modifier
-                        .clip(Corner.Shape)
+                        .clip(CircleShape)
                         .iosPress(PressStyle.Dim, onClickLabel = "Change date") { pickDate = true }
                         .background(AttendoColors.CreamCard)
                         .padding(horizontal = Space.S, vertical = Space.XS),

@@ -1,5 +1,6 @@
 package com.attendo.feature.subjects
 
+import com.attendo.core.designsystem.component.CircleMascot
 import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.attendoFieldColors
@@ -66,7 +67,6 @@ import com.attendo.core.designsystem.component.PercentPill
 import com.attendo.core.designsystem.component.PrimaryButton
 import com.attendo.core.designsystem.component.SpeechBubble
 import com.attendo.core.designsystem.component.TailSide
-import com.attendo.core.designsystem.component.TriangleMascot
 import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.core.model.AttendanceRecord
 import com.attendo.core.model.AttendanceStatus
@@ -203,7 +203,7 @@ fun SubjectDetailScreen(
 
         Box(Modifier.fillMaxWidth().height(260.dp)) {
             Confetti(Modifier.fillMaxSize(), seed = subject.id.hashCode())
-            TriangleMascot(
+            CircleMascot(
                 Modifier.size(200.dp).align(Alignment.Center),
                 mood = if (summary.isOnTrack) Mood.Happy else Mood.Sad,
             )

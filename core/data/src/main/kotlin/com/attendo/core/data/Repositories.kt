@@ -1,5 +1,6 @@
 package com.attendo.core.data
 
+import com.attendo.core.model.FontChoice
 import com.attendo.core.model.UnitKey
 import com.attendo.core.model.AcademicCalendar
 import com.attendo.core.model.PersonalEvent
@@ -37,6 +38,8 @@ interface SettingsRepository {
     suspend fun setOnboarded(onboarded: Boolean)
     suspend fun setAnimationMode(mode: AnimationMode)
     suspend fun setTheme(mode: ThemeMode)
+
+    suspend fun setFont(font: FontChoice)
 
     /** Saves custom-theme colours (palette key -> "#RRGGBB"), replacing the given keys. */
     suspend fun setCustomColors(colors: Map<String, String>)

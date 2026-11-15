@@ -1,5 +1,6 @@
 package com.attendo.core.designsystem.component
 
+import androidx.compose.foundation.shape.CircleShape
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.theme.Corner
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -68,7 +69,7 @@ fun PillButton(
     Row(
         modifier
             .height(48.dp)
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .iosPress(PressStyle.Dim, enabled = enabled, onClickLabel = text, onClick = onClick)
             .background(if (enabled) container else AttendoColors.CreamDeep)
             .padding(horizontal = Space.M),

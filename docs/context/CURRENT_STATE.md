@@ -1,5 +1,11 @@
 # Current State
 
+## Update 2026-11-15 (v0.36.0)
+Apple look restored (system font, capsules), font picker, aligned tab titles, shared undo on
+Classes, Tinder deck fitted above the tab bar, DNA mascots with idle animation. Checked against the
+user's screenshots of v0.35.0; v0.36.0 itself not yet seen on a phone. Still to publish: the
+v0.35.0 Firestore rules (feedback).
+
 ## Update 2026-11-15 (v0.35.0)
 Feedback in Settings (Firestore, read in the console), design tokens applied app-wide, coded error
 messages. Waiting on the user: publish the updated Firestore rules. The new look (font, corners,
