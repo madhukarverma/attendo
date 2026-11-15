@@ -1,7 +1,7 @@
 # Attendo
 
 Kotlin + Jetpack Compose Android app for one MCA student: attendance, tasks, focus timer, grades,
-calendar and friends. All data is CSV. Private repo `madhukarverma/attendo`, branch `master`.
+calendar and friends. All data is CSV. Repo `madhukarverma/attendo` (public on GitHub), branch `master`.
 
 ## Map: where things live
 
@@ -16,6 +16,7 @@ calendar and friends. All data is CSV. Private repo `madhukarverma/attendo`, bra
 | `core/social/` | Friends backend on Firebase: `SocialService.kt` (sign-in, requests, sharing), `SocialModels.kt` | friends logic, what's shared |
 | `feature/` | One module per screen, 12 in all. See `feature/CLAUDE.md` | changing a screen |
 | `firebase/firestore.rules` | Server-side privacy rules for friends | changing who sees what (re-publish in the Firebase console) |
+| `firebase/test/` | Tests for those rules on the local Firestore emulator (`npm install`, `npm test`; Node + Java) | after any rules change, before publishing |
 | `docs/` | Setup guides, security notes, test report, flowcharts, project memory. See `docs/CLAUDE.md` | setup, history, decisions, recording a feature |
 | `gradle/libs.versions.toml` | Every library and plugin version | adding or updating a library |
 | `settings.gradle.kts` | Module list | adding a module |
@@ -78,8 +79,8 @@ and `core/model/src/test/…/X.kt` is the same path under `src/test`.
    → `core/data/…/pomodoro/PomodoroTimer.kt` (timing) → `core/data/src/test/…/PomodoroTimerTest.kt`.
 9. **Change reminders:** `feature/tasks/…/TodoScreen.kt` → `app/…/reminders/ReminderScheduler.kt`,
    `ReminderReceiver.kt`, `ReminderNotifications.kt` → `app/src/main/AndroidManifest.xml`.
-10. **Change friends:** `core/social/…/SocialService.kt` → `firebase/firestore.rules`
-    → `feature/friends/…/FriendsScreen.kt`, `StudentScreen.kt`.
+10. **Change friends:** `core/social/…/SocialService.kt` → `firebase/firestore.rules` → `firebase/test/rules.test.mjs`
+    (`npm test`) → `feature/friends/…/FriendsScreen.kt`, `StudentScreen.kt`.
 11. **Change the Google backup:** `core/backup/…/GoogleDriveBackup.kt` → `feature/settings/…/GoogleBackupSection.kt`.
 12. **Release a version:** `app/build.gradle.kts` → `docs/context/CHANGELOG.md` → build and test → tag `vX.Y.Z`
     → `gh release create` with both APK names.

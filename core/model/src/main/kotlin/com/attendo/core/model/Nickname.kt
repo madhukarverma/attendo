@@ -2,7 +2,7 @@ package com.attendo.core.model
 
 /**
  * The name the app calls the user by. Names longer than [MAX_LENGTH] characters are shortened to
- * their first [SHORT_LETTERS] letters ("Prabhanshu Kumar" -> "Prab") so greetings stay on one line.
+ * their first [SHORT_LETTERS] letters ("Alexandra Fernandes" -> "Alex") so greetings stay on one line.
  * The full name is still what's stored in settings.csv.
  */
 object Nickname {

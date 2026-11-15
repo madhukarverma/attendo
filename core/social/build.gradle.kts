@@ -29,4 +29,9 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services)
     implementation(libs.googleid)
+    constraints {
+        // Firestore brings Guava 32.1.3 (CVE-2026-102554, Java deserialization). Attendo never
+        // deserializes Java objects, so it isn't reachable, but the fixed version costs nothing.
+        implementation(libs.guava)
+    }
 }

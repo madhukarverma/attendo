@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-11-15 — v0.34.0 Security audit
+- Firestore rules: only Google accounts count as signed in, and every timestamp must be the
+  server's time (no junk-stuffed fields). New test suite `firebase/test/` (32 checks on the local
+  emulator; the old rules failed 5, the new ones pass all). **Publish the new rules** in the
+  Firebase console.
+- Android backup: the system cloud backup and phone transfer leave out sign-in tokens and
+  Firestore's cache of friends' data.
+- Libraries: Firebase BoM 33.7.0 → 34.12.0, Play services auth 21.4.0 → 22.0.0, Credential
+  Manager 1.3.0 → 1.5.0, coroutines 1.8.1 → 1.10.2 (the newest the current build tools can
+  compile); Guava pinned to 33.8.0 (CVE-2026-102554). OSV check of all 168 release libraries.
+- Build: the Gradle download is verified by SHA-256.
+- Privacy: a real name used as a code example is replaced with a made-up one.
+- Audit results and what doesn't apply to the app are in `docs/SECURITY.md`; no secrets found in
+  any commit, the APK or the code. The GitHub repository was found to be public.
+
 ## 2026-11-15 — v0.33.1 Animation performance
 - New project skill `.claude/skills/animation-performance/SKILL.md` (the one the apple-design
   skill refers to), written for Compose with web equivalents: draw-phase reads, transforms over
@@ -240,8 +255,8 @@
   rows show "N left".
 
 ## 2026-11-09 — v0.16.0 nickname
-- Names longer than 10 characters are shown as their first 4 letters ("Prabhanshu Kumar" ->
-  "Prab") via `Nickname.of` / `AppSettings.nickname`. The full name stays in settings.csv;
+- Names longer than 10 characters are shown as their first 4 letters ("Alexandra Fernandes" ->
+  "Alex") via `Nickname.of` / `AppSettings.nickname`. The full name stays in settings.csv;
   onboarding and Settings show the nickname that will be used.
 
 ## 2026-11-09 — v0.15.0 dark theme legibility

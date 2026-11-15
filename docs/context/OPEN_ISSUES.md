@@ -24,6 +24,12 @@
 - ISSUE-022 — Check the v0.33 motion on a phone: glass blur cost on low-end devices, flick
   sensitivity (`Physics.FAST_DECELERATION`), haptic strength; record frame times with
   `adb shell dumpsys gfxinfo com.attendo.app framestats` (animation-performance skill, §10).
+- ISSUE-023 — Upgrade the build tools (AGP 8.5.2 → 9.x, Kotlin 2.0.20 → 2.4, compileSdk 36) to
+  reach the newest Firebase BoM (35.x), Credential Manager 1.6, Google ID 1.2, AndroidX and
+  Compose. Needs a phone to check nothing changed at runtime.
+- ISSUE-024 — Console steps for v0.34.0 (only the account owner can do them): publish the new
+  Firestore rules, add the release SHA-1, limit the API key (`docs/FRIENDS_SETUP.md` step 7), and
+  decide whether the GitHub repo should be private (private stops the public APK links working).
 
 ## Needs to be done (requested, deferred on purpose — 2026-11-11)
 - ISSUE-015 — Google account backup: built in v0.21; needs the shared Firebase/Google Cloud project
