@@ -1,5 +1,7 @@
 package com.attendo.feature.subjects
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.attendoFieldColors
 import com.attendo.core.data.PlannerRepository
 import com.attendo.core.data.GradeRepository
@@ -9,7 +11,6 @@ import com.attendo.core.model.SubjectGrades
 import java.time.LocalDate
 import kotlinx.coroutines.flow.flowOf
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.OutlinedTextField
@@ -196,7 +197,7 @@ fun SubjectDetailScreen(
         Modifier
             .fillMaxSize()
             .verticalScroll(scroll)
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = Space.L),
     ) {
         LargeTitle(subject.name)
 
@@ -222,10 +223,10 @@ fun SubjectDetailScreen(
                 "${summary.percent.roundToInt()}%  ·  ${summary.present} of ${summary.held} classes",
         )
 
-        Text("Helpful tips", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 24.dp, bottom = 10.dp))
+        Text("Helpful tips", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = Space.L, bottom = Space.S))
         val target = subject.targetPercent
         TipRow(Icons.Filled.Star, "Target: $target% minimum attendance")
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Space.XS))
         TipRow(
             Icons.Filled.Info,
             when {
@@ -236,7 +237,7 @@ fun SubjectDetailScreen(
             },
         )
 
-        Text("Course hours", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 24.dp, bottom = 10.dp))
+        Text("Course hours", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = Space.L, bottom = Space.S))
         CourseHours(summary, onEdit = { editHours = true })
 
         summary.subject.code.takeIf { it.isNotBlank() }?.let { code -> syllabusSection(code) }
@@ -244,14 +245,14 @@ fun SubjectDetailScreen(
         state.grades?.let { GradesSection(it, onAddMarks, onUpdateMarks, onDeleteMarks) }
 
         if (state.history.isNotEmpty()) {
-            Text("History", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 24.dp, bottom = 10.dp))
+            Text("History", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = Space.L, bottom = Space.S))
             state.history.take(30).forEach { record ->
                 val (label, color) = when (record.status) {
                     AttendanceStatus.PRESENT -> "Present" to AttendoColors.Green
                     AttendanceStatus.ABSENT -> "Absent" to AttendoColors.Pink
                     AttendanceStatus.CANCELLED -> "No class" to AttendoColors.Blue
                 }
-                Row(Modifier.fillMaxWidth().padding(vertical = 6.dp, horizontal = 4.dp)) {
+                Row(Modifier.fillMaxWidth().padding(vertical = Space.XS, horizontal = Space.XXS)) {
                     Text(record.date.format(DateFormat), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
                     Text(
                         if (record.count > 1 && record.status != AttendanceStatus.CANCELLED) "$label ×${record.count}" else label,
@@ -262,12 +263,12 @@ fun SubjectDetailScreen(
             }
         }
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(Space.L))
         PrimaryButton("Finish", onClick = onClose)
         TextButton(onClick = { confirmDelete = true }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
             Text("Delete subject", color = AttendoColors.Pink)
         }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(Space.M))
     }
     }
     }
@@ -298,7 +299,7 @@ fun SubjectDetailScreen(
 private fun TipRow(icon: ImageVector, text: String) {
     AttendoCard {
         Icon(icon, contentDescription = null, tint = AttendoColors.Ink, modifier = Modifier.size(20.dp))
-        Spacer(Modifier.width(14.dp))
+        Spacer(Modifier.width(Space.M))
         Text(text, style = MaterialTheme.typography.bodyMedium)
     }
 }
@@ -314,7 +315,7 @@ private fun CourseHours(summary: AttendanceSummary, onEdit: () -> Unit) {
     if (hours == null || left == null) {
         AttendoCard(onClick = onEdit) {
             Icon(Icons.Filled.DateRange, contentDescription = null, tint = AttendoColors.Ink, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(14.dp))
+            Spacer(Modifier.width(Space.M))
             Column(Modifier.weight(1f)) {
                 Text("Set the course's lecture hours", style = MaterialTheme.typography.titleMedium)
                 Text(
@@ -331,17 +332,17 @@ private fun CourseHours(summary: AttendanceSummary, onEdit: () -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = Space.M, vertical = Space.M),
     ) {
         Row(verticalAlignment = Alignment.Bottom) {
             Text("$left", style = MaterialTheme.typography.displayLarge.copy(fontSize = 40.sp, lineHeight = 40.sp))
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(Space.XS))
             Text(
                 if (left == 1) "lecture left" else "lectures left",
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 4.dp).weight(1f),
+                modifier = Modifier.padding(bottom = Space.XXS).weight(1f),
             )
             TextButton(onClick = onEdit) { Text("Edit", color = AttendoColors.Green) }
         }
@@ -350,7 +351,7 @@ private fun CourseHours(summary: AttendanceSummary, onEdit: () -> Unit) {
             style = MaterialTheme.typography.labelSmall,
             color = AttendoColors.Muted,
         )
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(Space.S))
         Box(
             Modifier
                 .fillMaxWidth()
@@ -367,7 +368,7 @@ private fun CourseHours(summary: AttendanceSummary, onEdit: () -> Unit) {
             )
         }
     }
-    Spacer(Modifier.height(8.dp))
+    Spacer(Modifier.height(Space.XS))
     val target = summary.subject.targetPercent
     val skips = summary.courseSkipsLeft() ?: 0
     TipRow(
@@ -394,14 +395,14 @@ private fun LectureHoursDialog(current: Int?, onDismiss: () -> Unit, onSave: (In
                     "Total lecture hours for this course. One lecture is one hour.",
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(Space.S))
                 OutlinedTextField(
                     value = text,
                     onValueChange = { new -> text = new.filter(Char::isDigit).take(3) },
                     singleLine = true,
                     placeholder = { Text("e.g. 45") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = Corner.Shape,
                     colors = attendoFieldColors(),
                 )
             }

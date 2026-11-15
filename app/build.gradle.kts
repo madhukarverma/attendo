@@ -66,8 +66,8 @@ android {
         buildConfigField("String", "FIREBASE_WEB_CLIENT_ID", firebaseValue("webClientId"))
         minSdk = 26
         targetSdk = 35
-        versionCode = 36
-        versionName = "0.34.0"
+        versionCode = 37
+        versionName = "0.35.0"
     }
 
     signingConfigs {
@@ -131,6 +131,7 @@ dependencies {
     implementation(project(":feature:dashboard"))
     implementation(project(":feature:curriculum"))
     implementation(project(":feature:friends"))
+    implementation(project(":feature:feedback"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

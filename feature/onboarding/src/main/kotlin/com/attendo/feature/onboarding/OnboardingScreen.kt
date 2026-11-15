@@ -1,5 +1,7 @@
 package com.attendo.feature.onboarding
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.backup.GoogleDriveBackup
 import com.attendo.core.backup.rememberGoogleSignIn
 import androidx.compose.material3.TextButton
@@ -23,7 +25,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
@@ -146,30 +147,30 @@ fun OnboardingScreen(
                 .fillMaxSize()
                 .safeDrawingPadding()
                 .imePadding()
-                .padding(horizontal = 28.dp, vertical = 24.dp),
+                .padding(horizontal = Space.XL, vertical = Space.L),
         ) {
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(Space.XL))
             val headline = MaterialTheme.typography.displayLarge
             Text("NEVER", style = headline, color = AttendoColors.OnHero)
             Text("MISS", style = headline, color = AttendoColors.Green)
             Text("A CLASS", style = headline, color = AttendoColors.Green)
             Text("WITH", style = headline, color = AttendoColors.OnHero)
             Text("ATTENDO", style = headline, color = AttendoColors.OnHero)
-            Squiggle(Modifier.width(150.dp).padding(top = 4.dp))
+            Squiggle(Modifier.width(150.dp).padding(top = Space.XXS))
 
             Spacer(Modifier.weight(1f))
             SpeechBubble(
                 text = "It's more fun when you show up!",
                 tail = TailSide.TopCenter,
                 color = AttendoColors.Cream,
-                modifier = Modifier.padding(bottom = 20.dp),
+                modifier = Modifier.padding(bottom = Space.L),
             )
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it.take(30) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                shape = CircleShape,
+                shape = Corner.Shape,
                 placeholder = { Text("What should we call you?") },
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Words,
@@ -191,13 +192,13 @@ fun OnboardingScreen(
                     "We'll call you “${Nickname.of(name)}” for short.",
                     color = AttendoColors.OnHero.copy(alpha = 0.7f),
                     style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.padding(start = 20.dp, top = 6.dp),
+                    modifier = Modifier.padding(start = Space.L, top = Space.XS),
                 )
             }
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .padding(top = 6.dp)
+                    .padding(top = Space.XS)
                     .iosPress(PressStyle.Dim) { addCourse = !addCourse },
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -216,7 +217,7 @@ fun OnboardingScreen(
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(Space.XS))
             PrimaryButton(
                 text = "Let's go",
                 onClick = { onContinue(name, addCourse) },

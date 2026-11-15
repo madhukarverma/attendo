@@ -20,6 +20,8 @@ Plain-Kotlin data types and the maths on them. Sources are in
 | `AppSettings.kt` | All settings, theme mode, animation mode | adding a setting | |
 | `Physics.kt` | Apple's flick projection and rubber band, in px | gesture maths | `PhysicsTest` |
 | `Nickname.kt` | The short name the app calls the user | greeting name | `NicknameTest` |
+| `ErrorCode.kt` | Every user-facing error with its stable code (`ST-`, `IM-`, `BK-`, `FR-`, `FB-`); list in `docs/ERROR_CODES.md` | showing or adding an error | `FeedbackTest` |
+| `Feedback.kt` | Feedback and rating, categories, validation, `FeedbackSender` interface, results | the feedback form | `FeedbackTest` |
 
 ## Rules
 - Plain Kotlin only: no Android or Compose imports, so everything here runs in fast unit tests.

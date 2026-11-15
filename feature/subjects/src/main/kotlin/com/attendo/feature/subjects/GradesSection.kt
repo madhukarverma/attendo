@@ -1,5 +1,7 @@
 package com.attendo.feature.subjects
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.AttendoDatePicker
 import com.attendo.core.designsystem.component.attendoFieldColors
 import androidx.compose.foundation.background
@@ -16,8 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -59,13 +59,13 @@ private val GradeDate = DateTimeFormatter.ofPattern("d MMM yyyy")
 internal fun PrivateTag(text: String = "Private") {
     Row(
         Modifier
-            .clip(CircleShape)
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamDeep)
-            .padding(horizontal = 8.dp, vertical = 3.dp),
+            .padding(horizontal = Space.XS, vertical = Space.XXS),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(Icons.Filled.Lock, contentDescription = null, tint = AttendoColors.Muted, modifier = Modifier.size(11.dp))
-        Spacer(Modifier.width(4.dp))
+        Spacer(Modifier.width(Space.XXS))
         Text(text, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
     }
 }
@@ -81,9 +81,9 @@ internal fun GradesSection(
     var adding by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<Assessment?>(null) }
 
-    Row(Modifier.padding(top = 24.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.padding(top = Space.L, bottom = Space.S), verticalAlignment = Alignment.CenterVertically) {
         Text("Grades", style = MaterialTheme.typography.headlineSmall)
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(Space.S))
         PrivateTag()
         Spacer(Modifier.weight(1f))
         TextButton(onClick = { adding = true }) { Text("Add marks", color = AttendoColors.Green) }
@@ -91,9 +91,9 @@ internal fun GradesSection(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(vertical = 6.dp),
+            .padding(vertical = Space.XS),
     ) {
         val percent = grades.percent
         if (percent == null) {
@@ -101,17 +101,17 @@ internal fun GradesSection(
                 "No marks yet. Add each assessment as you get it back; only you can see them.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = AttendoColors.Muted,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                modifier = Modifier.padding(horizontal = Space.M, vertical = Space.S),
             )
         } else {
-            Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.Bottom) {
+            Row(Modifier.padding(horizontal = Space.M, vertical = Space.XS), verticalAlignment = Alignment.Bottom) {
                 Text("${percent.roundToInt()}%", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(Space.XS))
                 Text(
                     "${Grades.format(grades.scored)} / ${Grades.format(grades.maxMarks)} marks · grade ${grades.grade}",
                     style = MaterialTheme.typography.labelLarge,
                     color = AttendoColors.Muted,
-                    modifier = Modifier.padding(bottom = 4.dp),
+                    modifier = Modifier.padding(bottom = Space.XXS),
                 )
             }
             grades.assessments.forEach { a ->
@@ -119,7 +119,7 @@ internal fun GradesSection(
                     Modifier
                         .fillMaxWidth()
                         .iosPress(PressStyle.Highlight, onClickLabel = "Edit ${a.title}") { editing = a }
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                        .padding(horizontal = Space.M, vertical = Space.S),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column(Modifier.weight(1f)) {
@@ -138,7 +138,7 @@ internal fun GradesSection(
         "Letter grades follow the 10-point S–F scale as a guide; the institute's relative grading decides the final one.",
         style = MaterialTheme.typography.labelSmall,
         color = AttendoColors.Muted,
-        modifier = Modifier.padding(top = 6.dp, start = 4.dp),
+        modifier = Modifier.padding(top = Space.XS, start = Space.XXS),
     )
 
     if (adding) {
@@ -193,12 +193,12 @@ private fun AssessmentDialog(
                     label = { Text("Assessment") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = Corner.Shape,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     colors = attendoFieldColors(),
                 )
-                Spacer(Modifier.height(8.dp))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Spacer(Modifier.height(Space.XS))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(Space.XS), verticalArrangement = Arrangement.spacedBy(Space.XS)) {
                     Grades.SUGGESTED_TITLES.forEach { suggestion ->
                         val selected = title == suggestion
                         Text(
@@ -206,15 +206,15 @@ private fun AssessmentDialog(
                             style = MaterialTheme.typography.labelMedium,
                             color = if (selected) AttendoColors.Cream else AttendoColors.Ink,
                             modifier = Modifier
-                                .clip(CircleShape)
+                                .clip(Corner.Shape)
                                 .iosPress(PressStyle.Dim, onClickLabel = suggestion) { title = suggestion }
                                 .background(if (selected) AttendoColors.Ink else AttendoColors.CreamCard)
-                                .border(1.dp, AttendoColors.CreamDeep, CircleShape)
-                                .padding(horizontal = 10.dp, vertical = 6.dp),
+                                .border(1.dp, AttendoColors.CreamDeep, Corner.Shape)
+                                .padding(horizontal = Space.S, vertical = Space.XS),
                         )
                     }
                 }
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(Space.S))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     OutlinedTextField(
                         value = scored,
@@ -223,11 +223,11 @@ private fun AssessmentDialog(
                         singleLine = true,
                         isError = scored.isNotEmpty() && (scoredValue == null || tooHigh),
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(14.dp),
+                        shape = Corner.Shape,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         colors = attendoFieldColors(),
                     )
-                    Text(" / ", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 6.dp))
+                    Text(" / ", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = Space.XS))
                     OutlinedTextField(
                         value = max,
                         onValueChange = { max = it.filter { c -> c.isDigit() || c == '.' || c == ',' }.take(6) },
@@ -235,7 +235,7 @@ private fun AssessmentDialog(
                         singleLine = true,
                         isError = max.isNotEmpty() && maxValue == null,
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(14.dp),
+                        shape = Corner.Shape,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         colors = attendoFieldColors(),
                     )
@@ -243,21 +243,21 @@ private fun AssessmentDialog(
                 if (tooHigh) {
                     Text("Marks scored can't be more than the maximum.", style = MaterialTheme.typography.labelSmall, color = AttendoColors.Pink)
                 }
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(Space.S))
                 Row(
                     Modifier
-                        .clip(CircleShape)
+                        .clip(Corner.Shape)
                         .iosPress(PressStyle.Dim, onClickLabel = "Change date") { pickDate = true }
                         .background(AttendoColors.CreamCard)
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                        .padding(horizontal = Space.S, vertical = Space.XS),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(Icons.Filled.DateRange, contentDescription = null, tint = AttendoColors.Ink, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(6.dp))
+                    Spacer(Modifier.width(Space.XS))
                     Text(date.format(GradeDate), style = MaterialTheme.typography.labelLarge)
                 }
                 if (onDelete != null) {
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(Space.XS))
                     TextButton(onClick = { if (confirmDelete) onDelete() else confirmDelete = true }) {
                         Text(if (confirmDelete) "Tap again to delete" else "Delete", color = AttendoColors.Pink)
                     }

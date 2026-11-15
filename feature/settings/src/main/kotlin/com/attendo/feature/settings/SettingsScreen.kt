@@ -1,6 +1,11 @@
 package com.attendo.feature.settings
 
-import com.attendo.core.designsystem.component.PillButton
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.Icons
+import com.attendo.core.designsystem.component.AttendoIcons
+import com.attendo.core.designsystem.component.NavigationRow
 import com.attendo.core.designsystem.component.attendoFilledFieldColors
 import com.attendo.core.backup.GoogleDriveBackup
 import com.attendo.core.data.backup.CsvImportPlan
@@ -15,7 +20,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -88,6 +91,8 @@ fun SettingsRoute(
     onClose: () -> Unit,
     onPickLaunchImage: (Uri) -> Unit = {},
     onOpenFriends: (() -> Unit)? = null,
+    /** Support › Send feedback; null hides it. */
+    onOpenFeedback: (() -> Unit)? = null,
     onRemoveLaunchImage: () -> Unit = {},
     onPlanCsvImport: suspend (List<Uri>) -> CsvImportPlan = { CsvImportPlan(emptyList(), emptyList()) },
     onApplyCsvImport: suspend (CsvImportPlan) -> Map<String, Int> = { emptyMap() },
@@ -117,10 +122,11 @@ fun SettingsRoute(
             )
         },
         onOpenFriends = onOpenFriends,
+        onOpenFeedback = onOpenFeedback,
         backupSection = {
             if (googleBackup != null) {
                 GoogleBackupSection(googleBackup)
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(Space.S))
             }
             CsvBackupSection(onExport = onExportCsv, onPlanImport = onPlanCsvImport, onApplyImport = onApplyCsvImport)
         },
@@ -143,6 +149,7 @@ fun SettingsScreen(
     launchSection: @Composable () -> Unit = {},
     backupSection: @Composable () -> Unit = { PrimaryButton("Export CSV files", onClick = onExportCsv) },
     onOpenFriends: (() -> Unit)? = null,
+    onOpenFeedback: (() -> Unit)? = null,
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     LaunchedEffect(savedName) { if (savedName != null && name.isEmpty()) name = savedName }
@@ -162,7 +169,7 @@ fun SettingsScreen(
                 Modifier
                     .fillMaxSize()
                     .verticalScroll(scroll)
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = Space.L),
             ) {
                 LargeTitle("Settings")
 
@@ -173,7 +180,7 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     label = { Text("Your name") },
-                    shape = RoundedCornerShape(20.dp),
+                    shape = Corner.Shape,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                     colors = attendoFilledFieldColors(AttendoColors.CreamCard),
                 )
@@ -183,7 +190,7 @@ fun SettingsScreen(
                         else "",
                         style = MaterialTheme.typography.labelSmall,
                         color = AttendoColors.Muted,
-                        modifier = Modifier.weight(1f).padding(start = 4.dp),
+                        modifier = Modifier.weight(1f).padding(start = Space.XXS),
                     )
                     TextButton(
                         onClick = { onSaveName(name) },
@@ -205,21 +212,19 @@ fun SettingsScreen(
 
                 if (onOpenFriends != null) {
                     SectionTitle("Friends")
-                    PillButton(
-                        "Friends & what they can see",
-                        null,
-                        AttendoColors.CreamCard,
-                        AttendoColors.Ink,
-                        Modifier.fillMaxWidth(),
-                        onClick = onOpenFriends,
-                    )
+                    NavigationRow(Icons.Filled.Person, "Friends", "Who your friends are and what they can see", onOpenFriends)
+                }
+
+                if (onOpenFeedback != null) {
+                    SectionTitle("Support")
+                    NavigationRow(AttendoIcons.Feedback, "Send feedback", "Report a problem, share an idea or rate the app", onOpenFeedback)
                 }
 
                 SectionTitle("About")
                 Text("Attendo $appVersion", style = MaterialTheme.typography.bodyMedium, color = AttendoColors.Muted)
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(Space.XXS))
                 DeveloperCredit()
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(Space.L))
             }
         }
     }
@@ -227,5 +232,5 @@ fun SettingsScreen(
 
 @Composable
 private fun SectionTitle(text: String) {
-    Text(text, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 24.dp, bottom = 10.dp))
+    Text(text, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = Space.L, bottom = Space.S))
 }

@@ -1,5 +1,10 @@
 package com.attendo.core.designsystem.component
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.Canvas
@@ -19,8 +24,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,15 +57,15 @@ fun SpeechBubble(
         if (tail == TailSide.TopCenter) BubbleTail(color, pointingUp = true, Modifier.align(Alignment.CenterHorizontally))
         Box(
             Modifier
-                .clip(RoundedCornerShape(32.dp))
+                .clip(Corner.Shape)
                 .background(color)
-                .padding(horizontal = 22.dp, vertical = 16.dp),
+                .padding(horizontal = Space.L, vertical = Space.M),
         ) {
             Text(text.uppercase(), style = HandTextStyle)
         }
         when (tail) {
-            TailSide.BottomStart -> BubbleTail(color, false, Modifier.align(Alignment.Start).padding(start = 28.dp))
-            TailSide.BottomEnd -> BubbleTail(color, false, Modifier.align(Alignment.End).padding(end = 28.dp))
+            TailSide.BottomStart -> BubbleTail(color, false, Modifier.align(Alignment.Start).padding(start = Space.XL))
+            TailSide.BottomEnd -> BubbleTail(color, false, Modifier.align(Alignment.End).padding(end = Space.XL))
             TailSide.TopCenter -> Unit
         }
     }
@@ -111,10 +114,10 @@ fun AttendoCard(
     Row(
         modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
             .then(if (onClick != null) Modifier.iosPress(PressStyle.Highlight, onClick = onClick) else Modifier)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = Space.M, vertical = Space.M),
         verticalAlignment = Alignment.CenterVertically,
         content = content,
     )
@@ -129,7 +132,7 @@ fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifi
             .fillMaxWidth()
             .height(58.dp)
             .iosPress(PressStyle.Dim, enabled = enabled, onClick = onClick)
-            .clip(CircleShape)
+            .clip(Corner.Shape)
             .background(container),
         contentAlignment = Alignment.Center,
     ) {
@@ -186,9 +189,9 @@ fun PercentPill(text: String, modifier: Modifier = Modifier, color: Color = Atte
     Box(
         modifier
             .fillMaxWidth()
-            .clip(CircleShape)
+            .clip(Corner.Shape)
             .background(color)
-            .padding(vertical = 14.dp),
+            .padding(vertical = Space.M),
         contentAlignment = Alignment.Center,
     ) {
         Text(text, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
@@ -197,10 +200,10 @@ fun PercentPill(text: String, modifier: Modifier = Modifier, color: Color = Atte
 
 /** Status dot + label used under list rows ("✱ New", "✓ Done"). */
 @Composable
-fun StatusLabel(text: String, color: Color, symbol: String) {
+fun StatusLabel(text: String, color: Color, icon: ImageVector) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(symbol, color = color, style = MaterialTheme.typography.labelMedium)
-        Box(Modifier.width(5.dp))
+        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(14.dp))
+        Spacer(Modifier.width(Space.XXS))
         Text(text, color = color, style = MaterialTheme.typography.labelMedium)
     }
 }

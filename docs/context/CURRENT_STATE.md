@@ -1,5 +1,10 @@
 # Current State
 
+## Update 2026-11-15 (v0.35.0)
+Feedback in Settings (Firestore, read in the console), design tokens applied app-wide, coded error
+messages. Waiting on the user: publish the updated Firestore rules. The new look (font, corners,
+spacing) hasn't been seen on a phone yet; fewer-cards work beyond Settings needs screenshots (ISSUE-026).
+
 ## Update 2026-11-15 (v0.34.0)
 Security audit done (`docs/SECURITY.md`). Hardened Firestore rules with an emulator test suite
 (`firebase/test/`), backup exclusions, newer Firebase and sign-in libraries, verified Gradle

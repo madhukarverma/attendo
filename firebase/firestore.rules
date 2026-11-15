@@ -11,6 +11,8 @@ rules_version = '2';
 //   deletes the document when the student turns sharing off (grades are off by default).
 // - Friendships are created only by accepting a pending request, and either side can end them.
 // - Timestamps must be the server's time, so no field can be stuffed with junk.
+// - Feedback (Settings › Feedback) can be sent without signing in, but nobody can read, change or
+//   delete it through the app; the developer reads it in the Firebase console.
 // Tests: firebase/test/rules.test.mjs (npm test, on the local emulator).
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -55,6 +57,20 @@ service cloud.firestore {
         && now(d.updatedAt);
     }
 
+    function validFeedback(d) {
+      return d.keys().hasOnly(['rating', 'category', 'message', 'contact', 'app', 'versionCode', 'android', 'device', 'createdAt'])
+        && d.rating is int && d.rating >= 0 && d.rating <= 5
+        && d.category in ['bug', 'idea', 'praise', 'other']
+        && d.message is string && d.message.size() <= 2000
+        && (d.rating > 0 || d.message.size() >= 10)
+        && (!('contact' in d) || shortText(d.contact, 100))
+        && (!('app' in d) || shortText(d.app, 20))
+        && (!('versionCode' in d) || d.versionCode is int)
+        && (!('android' in d) || d.android is int)
+        && (!('device' in d) || shortText(d.device, 60))
+        && now(d.createdAt);
+    }
+
     function validShared(d) {
       return d.keys().hasOnly(['overall', 'subjects', 'updatedAt'])
         && d.overall is number
@@ -87,6 +103,11 @@ service cloud.firestore {
         allow create, update: if isUser(uid) && doc in ['attendance', 'grades'] && validShared(request.resource.data);
         allow delete: if isUser(uid);
       }
+    }
+
+    match /feedback/{id} {
+      allow create: if validFeedback(request.resource.data);
+      // No read, update or delete: feedback is only visible in the Firebase console.
     }
 
     match /requests/{id} {

@@ -1,5 +1,7 @@
 package com.attendo.feature.curriculum
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.ProgressBar
 import com.attendo.core.designsystem.component.HeroStat
 import androidx.compose.animation.AnimatedVisibility
@@ -25,7 +27,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -105,7 +106,7 @@ fun SyllabusPage(
     var expanded by rememberSaveable(focusCode) {
         mutableStateOf(focusCode?.let { setOf(it.uppercase()) } ?: emptySet())
     }
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(Space.S)) {
         if (curriculum.courses.isEmpty()) {
             Text("No curriculum bundled.", style = MaterialTheme.typography.bodyMedium, color = AttendoColors.Muted)
             return@Column
@@ -129,7 +130,7 @@ fun SyllabusPage(
                 "Labs (CA701, CA703) aren't part of it.",
             style = MaterialTheme.typography.labelSmall,
             color = AttendoColors.Muted,
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = Space.XXS, vertical = Space.XXS),
         )
     }
 }
@@ -146,7 +147,7 @@ fun SubjectSyllabusSection(
     val covered by syllabus.covered.collectAsStateWithLifecycle(initialValue = emptySet())
     val scope = rememberCoroutineScope()
     val progress = curriculum.progress(course, covered)
-    Row(Modifier.padding(top = 24.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.padding(top = Space.L, bottom = Space.S), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text("Syllabus", style = MaterialTheme.typography.headlineSmall)
             Text(
@@ -160,9 +161,9 @@ fun SubjectSyllabusSection(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(22.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(start = 14.dp, end = 14.dp, top = 16.dp, bottom = 4.dp),
+            .padding(start = Space.M, end = Space.M, top = Space.M, bottom = Space.XXS),
     ) {
         UnitTimeline(course, AttendoColors.Green, covered) { unit, done -> scope.launch { syllabus.setCovered(course.code, unit, done) } }
     }
@@ -183,25 +184,25 @@ private fun Overview(curriculum: Curriculum, covered: Set<UnitKey>) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(26.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.Hero)
-            .padding(20.dp),
+            .padding(Space.L),
     ) {
         Text(curriculum.title.uppercase(), style = MaterialTheme.typography.labelMedium, color = AttendoColors.Muted, letterSpacing = 1.5.sp)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Space.XS))
         Row(verticalAlignment = Alignment.Bottom) {
             Text("$done", style = MaterialTheme.typography.displayLarge.copy(fontSize = 46.sp, lineHeight = 46.sp), color = AttendoColors.OnHero)
             Text(
                 " / $total units covered",
                 style = MaterialTheme.typography.titleMedium,
                 color = AttendoColors.OnHero.copy(alpha = 0.75f),
-                modifier = Modifier.padding(bottom = 6.dp),
+                modifier = Modifier.padding(bottom = Space.XS),
             )
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Space.S))
         ProgressBar(fraction, AttendoColors.GreenFill, AttendoColors.OnHero.copy(alpha = 0.15f), Modifier.fillMaxWidth().height(8.dp))
-        Spacer(Modifier.height(14.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(22.dp)) {
+        Spacer(Modifier.height(Space.M))
+        Row(horizontalArrangement = Arrangement.spacedBy(Space.L)) {
             HeroStat("${curriculum.courses.size}", "courses")
             HeroStat("${curriculum.totalHours}", "contact hours")
             HeroStat("${curriculum.courses.count { curriculum.progress(it, covered).let { p -> p.total > 0 && p.covered == p.total } }}", "completed")
@@ -224,30 +225,30 @@ private fun CourseCard(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard),
     ) {
         Row(
             Modifier
                 .fillMaxWidth()
                 .iosPress(PressStyle.Highlight, onClickLabel = if (expanded) "Collapse ${course.name}" else "Open ${course.name}", onClick = onToggleExpanded)
-                .padding(16.dp),
+                .padding(Space.M),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             ProgressRing(progress, accent, 52.dp)
-            Spacer(Modifier.width(14.dp))
+            Spacer(Modifier.width(Space.M))
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(course.shortName(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(Space.XS))
                     Text(
                         course.code,
                         style = MaterialTheme.typography.labelSmall,
                         color = AttendoColors.Muted,
                         modifier = Modifier
-                            .clip(CircleShape)
+                            .clip(Corner.Shape)
                             .background(AttendoColors.Cream)
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                            .padding(horizontal = Space.XS, vertical = Space.XXS),
                     )
                 }
                 Text(
@@ -275,12 +276,12 @@ private fun CourseCard(
             enter = expandVertically(Motion.settle()) + fadeIn(Motion.settle()),
             exit = shrinkVertically(Motion.settle()) + fadeOut(Motion.settle()),
         ) {
-            Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+            Column(Modifier.padding(start = Space.M, end = Space.M, bottom = Space.M)) {
                 Box(Modifier.fillMaxWidth().height(1.dp).background(AttendoColors.CreamDeep))
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(Space.M))
                 UnitTimeline(course, accent, covered) { unit, done -> onToggleUnit(course.code, unit, done) }
                 if (course.outcomes.isNotEmpty()) Outcomes(course.outcomes)
-                Spacer(Modifier.height(14.dp))
+                Spacer(Modifier.height(Space.M))
                 FocusButton(course.shortName(), onFocus)
             }
         }
@@ -350,7 +351,7 @@ private fun UnitRow(unit: CurriculumUnit, done: Boolean, accent: Color, isLast: 
             if (!isLast) {
                 Box(
                     Modifier
-                        .padding(vertical = 4.dp)
+                        .padding(vertical = Space.XXS)
                         .width(2.dp)
                         .weight(1f)
                         .clip(CircleShape)
@@ -358,11 +359,11 @@ private fun UnitRow(unit: CurriculumUnit, done: Boolean, accent: Color, isLast: 
                 )
             }
         }
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(Space.S))
         Column(
             Modifier
                 .weight(1f)
-                .padding(bottom = if (isLast) 4.dp else 18.dp)
+                .padding(bottom = if (isLast) Space.XXS else Space.M)
                 .iosPress(PressStyle.Dim, onClickLabel = if (open) "Show fewer topics" else "Show all topics") { open = !open },
         ) {
             Text(
@@ -373,7 +374,7 @@ private fun UnitRow(unit: CurriculumUnit, done: Boolean, accent: Color, isLast: 
                 fontWeight = FontWeight.Bold,
             )
             Text(unit.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(Space.XXS))
             Text(
                 unit.topics.joinToString("  ·  "),
                 style = MaterialTheme.typography.bodySmall,
@@ -392,15 +393,15 @@ private fun UnitRow(unit: CurriculumUnit, done: Boolean, accent: Color, isLast: 
 private fun Outcomes(outcomes: List<String>) {
     Column(
         Modifier
-            .padding(top = 10.dp)
+            .padding(top = Space.S)
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.Cream)
-            .padding(14.dp),
+            .padding(Space.M),
     ) {
         Text("You'll be able to", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
         outcomes.forEachIndexed { i, outcome ->
-            Row(Modifier.padding(top = 8.dp)) {
+            Row(Modifier.padding(top = Space.XS)) {
                 Text("${i + 1}", style = MaterialTheme.typography.labelMedium, color = AttendoColors.Green, fontWeight = FontWeight.Bold, modifier = Modifier.width(18.dp))
                 Text(outcome, style = MaterialTheme.typography.bodySmall)
             }
@@ -414,14 +415,14 @@ private fun FocusButton(name: String, onClick: () -> Unit) {
         Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .clip(CircleShape)
+            .clip(Corner.Shape)
             .iosPress(PressStyle.Scale, onClickLabel = "Focus on $name", onClick = onClick)
             .background(AttendoColors.Hero),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         TimerGlyph(color = AttendoColors.OnHero, size = 18.dp)
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(Space.S))
         Text("Focus on $name", style = MaterialTheme.typography.labelLarge, color = AttendoColors.OnHero)
     }
 }

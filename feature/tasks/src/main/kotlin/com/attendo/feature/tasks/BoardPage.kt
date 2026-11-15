@@ -1,5 +1,7 @@
 package com.attendo.feature.tasks
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -20,7 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -232,8 +233,8 @@ internal fun BoardPage(board: KanbanBoard?, today: LocalDate, actions: BoardActi
             Modifier
                 .fillMaxSize()
                 .horizontalScroll(scroll)
-                .padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = bottomPadding),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(start = Space.L, end = Space.L, top = Space.XXS, bottom = bottomPadding),
+            horizontalArrangement = Arrangement.spacedBy(Space.S),
             verticalAlignment = Alignment.Top,
         ) {
             columns.forEachIndexed { columnIndex, column ->
@@ -286,7 +287,7 @@ internal fun BoardPage(board: KanbanBoard?, today: LocalDate, actions: BoardActi
                                 "No cards yet",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = AttendoColors.Muted,
-                                modifier = Modifier.padding(vertical = 6.dp, horizontal = 4.dp),
+                                modifier = Modifier.padding(vertical = Space.XS, horizontal = Space.XXS),
                             )
                         }
                     }
@@ -369,7 +370,7 @@ internal fun BoardPage(board: KanbanBoard?, today: LocalDate, actions: BoardActi
     }
 }
 
-private val CardShape = RoundedCornerShape(16.dp)
+private val CardShape = Corner.Shape
 private val DueFormat = DateTimeFormatter.ofPattern("d MMM")
 
 internal fun CardPriority.color(): Color = when (this) {
@@ -412,12 +413,12 @@ private fun ColumnShell(
     var menu by remember { mutableStateOf(false) }
     Column(
         modifier
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .then(if (isDropTarget) Modifier.border(2.dp, AttendoColors.Green, RoundedCornerShape(20.dp)) else Modifier),
+            .then(if (isDropTarget) Modifier.border(2.dp, AttendoColors.Green, Corner.Shape) else Modifier),
     ) {
         Row(
-            Modifier.fillMaxWidth().padding(start = 14.dp, end = 4.dp, top = 6.dp),
+            Modifier.fillMaxWidth().padding(start = Space.M, end = Space.XXS, top = Space.XS),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // Title and count share the space left of the menu; a long title is cut, not the count.
@@ -430,15 +431,15 @@ private fun ColumnShell(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false),
                 )
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(Space.XS))
                 Text(
-                    if (column.done) "$cardCount ✓" else "$cardCount",
+                    if (column.done) "$cardCount done" else "$cardCount",
                     style = MaterialTheme.typography.labelMedium,
                     color = if (column.done) AttendoColors.Green else AttendoColors.Muted,
                     modifier = Modifier
-                        .clip(CircleShape)
+                        .clip(Corner.Shape)
                         .background(AttendoColors.Cream)
-                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                        .padding(horizontal = Space.XS, vertical = Space.XXS),
                 )
             }
             Box {
@@ -464,18 +465,18 @@ private fun ColumnShell(
             Modifier
                 .weight(1f, fill = false)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 10.dp, vertical = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+                .padding(horizontal = Space.S, vertical = Space.XXS),
+            verticalArrangement = Arrangement.spacedBy(Space.XS),
         ) { content() }
         Row(
             Modifier
                 .fillMaxWidth()
                 .iosPress(PressStyle.Highlight, onClickLabel = "Add a card to ${column.title}", onClick = onAddCard)
-                .padding(horizontal = 14.dp, vertical = 12.dp),
+                .padding(horizontal = Space.M, vertical = Space.S),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(Icons.Filled.Add, contentDescription = null, tint = AttendoColors.Green, modifier = Modifier.size(18.dp))
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(Space.XS))
             Text("Add a card", style = MaterialTheme.typography.labelLarge, color = AttendoColors.Green)
         }
     }
@@ -502,14 +503,14 @@ private fun DropLine() {
 private fun AddColumnTile(modifier: Modifier, onClick: () -> Unit) {
     Row(
         modifier
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Corner.Shape)
             .iosPress(PressStyle.Highlight, onClickLabel = "Add a column", onClick = onClick)
-            .border(1.5.dp, AttendoColors.CreamDeep, RoundedCornerShape(20.dp))
-            .padding(horizontal = 14.dp, vertical = 14.dp),
+            .border(1.5.dp, AttendoColors.CreamDeep, Corner.Shape)
+            .padding(horizontal = Space.M, vertical = Space.M),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(Icons.Filled.Add, contentDescription = null, tint = AttendoColors.Muted, modifier = Modifier.size(18.dp))
-        Spacer(Modifier.width(8.dp))
+        Spacer(Modifier.width(Space.XS))
         Text("Add a column", style = MaterialTheme.typography.labelLarge, color = AttendoColors.Muted)
     }
 }
@@ -529,12 +530,12 @@ private fun CardFace(
         modifier
             .fillMaxWidth()
             .background(AttendoColors.Cream, CardShape)
-            .padding(start = 12.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
+            .padding(start = Space.S, end = Space.XS, top = Space.S, bottom = Space.S),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (card.priority != CardPriority.NONE) {
                 Box(Modifier.size(9.dp).clip(CircleShape).background(card.priority.color()))
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(Space.XS))
             }
             Text(
                 card.title,
@@ -544,7 +545,7 @@ private fun CardFace(
                 modifier = Modifier.weight(1f),
             )
             if (nextColumnTitle != null) {
-                Spacer(Modifier.width(6.dp))
+                Spacer(Modifier.width(Space.XS))
                 Box(
                     Modifier
                         .size(28.dp)
@@ -569,14 +570,14 @@ private fun CardFace(
                 color = AttendoColors.Muted,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 4.dp),
+                modifier = Modifier.padding(top = Space.XXS),
             )
         }
         card.due?.let { due ->
             val color = if (overdue) AttendoColors.Pink else AttendoColors.Muted
-            Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.padding(top = Space.XS), verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Filled.DateRange, contentDescription = null, tint = color, modifier = Modifier.size(12.dp))
-                Spacer(Modifier.width(4.dp))
+                Spacer(Modifier.width(Space.XXS))
                 Text(dueLabel(due, today, overdue), style = MaterialTheme.typography.labelSmall, color = color)
             }
         }

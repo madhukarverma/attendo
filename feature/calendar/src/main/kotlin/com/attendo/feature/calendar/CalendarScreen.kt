@@ -1,5 +1,7 @@
 package com.attendo.feature.calendar
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.PillButton
 import com.attendo.core.designsystem.component.HeroStat
 import com.attendo.core.model.PersonalEvent
@@ -35,7 +37,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -125,13 +126,13 @@ fun CalendarScreen(
         CollapsingTopBar(title = "Calendar", collapseFraction = { collapse }, onBack = onClose, backLabel = "Back")
         BounceContainer(Modifier.fillMaxSize()) {
             LazyColumn(
-                Modifier.fillMaxSize().padding(horizontal = 20.dp),
+                Modifier.fillMaxSize().padding(horizontal = Space.L),
                 state = listState,
-                verticalArrangement = Arrangement.spacedBy(14.dp),
+                verticalArrangement = Arrangement.spacedBy(Space.M),
             ) {
                 item { LargeTitle("Calendar") }
                 item {
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(Space.S)) {
                         PillButton(
                             if (slots.isEmpty()) "Set timetable" else "Timetable",
                             Icons.Filled.DateRange,
@@ -164,7 +165,7 @@ fun CalendarScreen(
                             "Source: NIT Trichy academic calendar, July 2026 session; entries marked \u201cYours\u201d are your own.",
                         style = MaterialTheme.typography.labelSmall,
                         color = AttendoColors.Muted,
-                        modifier = Modifier.padding(top = 4.dp, bottom = 32.dp),
+                        modifier = Modifier.padding(top = Space.XXS, bottom = Space.XL),
                     )
                 }
             }
@@ -220,12 +221,12 @@ private fun SemesterCard(calendar: AcademicCalendar, today: LocalDate) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.Hero)
-            .padding(22.dp),
+            .padding(Space.L),
     ) {
         Text("JULY 2026 SESSION", style = MaterialTheme.typography.labelMedium, color = AttendoColors.Muted)
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(Space.XS))
         if (start != null && end != null) {
             Text(
                 "${start.format(Short)} – ${end.format(Short)}",
@@ -234,7 +235,7 @@ private fun SemesterCard(calendar: AcademicCalendar, today: LocalDate) {
                 color = AttendoColors.Green,
             )
             Text("Class work", style = MaterialTheme.typography.labelLarge, color = AttendoColors.OnHero)
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(Space.M))
             val total = ChronoUnit.DAYS.between(start, end).coerceAtLeast(1)
             val done = ChronoUnit.DAYS.between(start, today).coerceIn(0, total)
             Box(
@@ -252,7 +253,7 @@ private fun SemesterCard(calendar: AcademicCalendar, today: LocalDate) {
                         .background(AttendoColors.Green),
                 )
             }
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(Space.M))
             val week = (ChronoUnit.DAYS.between(start, today) / 7 + 1).coerceIn(1, total / 7 + 1)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 HeroStat(calendar.classDayCount().toString(), "Class days")
@@ -268,7 +269,7 @@ private fun SemesterCard(calendar: AcademicCalendar, today: LocalDate) {
 private fun Legend() {
     Row(
         Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Space.XS),
     ) {
         LegendChip("Holiday", AttendoColors.Pink, filled = true)
         LegendChip("Weekend", AttendoColors.Pink, filled = false)
@@ -283,9 +284,9 @@ private fun Legend() {
 private fun LegendChip(label: String, color: Color, filled: Boolean) {
     Row(
         Modifier
-            .clip(CircleShape)
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(horizontal = 12.dp, vertical = 7.dp),
+            .padding(horizontal = Space.S, vertical = Space.XS),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
@@ -294,7 +295,7 @@ private fun LegendChip(label: String, color: Color, filled: Boolean) {
                 .clip(CircleShape)
                 .then(if (filled) Modifier.background(color) else Modifier.border(2.dp, color, CircleShape)),
         )
-        Spacer(Modifier.width(6.dp))
+        Spacer(Modifier.width(Space.XS))
         Text(label, style = MaterialTheme.typography.labelMedium)
     }
 }
@@ -306,12 +307,12 @@ private fun ComingUp(calendar: AcademicCalendar, today: LocalDate) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(18.dp),
+            .padding(Space.M),
     ) {
         Text("Coming up", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Space.XS))
         next.forEach { e ->
             val days = ChronoUnit.DAYS.between(today, e.start)
             EventRow(
@@ -338,21 +339,21 @@ private fun YourTodos(todos: List<Todo>, today: LocalDate) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(18.dp),
+            .padding(Space.M),
     ) {
         Text("Your reminders", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Space.XS))
         next.forEach { TodoRow(it) }
     }
 }
 
 @Composable
 private fun TodoRow(todo: Todo) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().padding(vertical = Space.XS), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(10.dp).border(2.dp, AttendoColors.Ink, CircleShape))
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(Space.S))
         Text(
             todo.date.format(Short),
             style = MaterialTheme.typography.labelLarge,
@@ -382,11 +383,11 @@ private fun EventRow(e: CalendarEvent, trailing: String? = null, onEdit: ((Strin
         Modifier
             .fillMaxWidth()
             .then(if (editable) Modifier.iosPress(PressStyle.Highlight, onClickLabel = "Edit ${e.title}") { onEdit?.invoke(e.id!!) } else Modifier)
-            .padding(vertical = 6.dp),
+            .padding(vertical = Space.XS),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.size(10.dp).clip(CircleShape).background(e.kind.color()))
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(Space.S))
         Text(
             if (e.start == e.end) e.start.format(Short) else "${e.start.dayOfMonth}–${e.end.format(Short)}",
             style = MaterialTheme.typography.labelLarge,
@@ -421,9 +422,9 @@ private fun MonthCard(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(16.dp),
+            .padding(Space.M),
     ) {
         Row(verticalAlignment = Alignment.Bottom) {
             Text(
@@ -431,10 +432,10 @@ private fun MonthCard(
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
             )
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(Space.XS))
             Text(month.year.toString(), style = MaterialTheme.typography.titleMedium, color = AttendoColors.Muted)
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Space.S))
         // Weekday header, Monday first.
         Row(Modifier.fillMaxWidth()) {
             DayOfWeek.entries.forEach { d ->
@@ -447,7 +448,7 @@ private fun MonthCard(
                 )
             }
         }
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(Space.XS))
         val leading = month.atDay(1).dayOfWeek.value - 1
         val cells = List(leading) { null } + (1..month.lengthOfMonth()).map { month.atDay(it) }
         cells.chunked(7).forEach { week ->
@@ -466,9 +467,9 @@ private fun MonthCard(
         val monthTodos = todos.filter { YearMonth.from(it.date) == month }
             .sortedWith(compareBy<Todo>({ it.date }, { it.remindAt ?: java.time.LocalTime.MAX }))
         if (monthEvents.isNotEmpty() || monthTodos.isNotEmpty()) {
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(Space.XS))
             Box(Modifier.fillMaxWidth().height(1.dp).background(AttendoColors.CreamDeep))
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(Space.XS))
             monthEvents.forEach { EventRow(it, onEdit = onEditEvent) }
             monthTodos.forEach { TodoRow(it) }
         }
@@ -502,7 +503,7 @@ private fun DayCell(
     Column(
         Modifier
             .fillMaxSize()
-            .padding(2.dp)
+            .padding(Space.XXS)
             .clip(CircleShape)
             .iosPress(PressStyle.Scale, onClickLabel = day.toString()) { onPickDate(day) }
             .background(fill)
@@ -517,7 +518,7 @@ private fun DayCell(
             color = textColor,
         )
         // Markers under the number: yellow = deadline, ring = your to-do.
-        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(Space.XXS)) {
             if (hasDeadline || !hasTodo) {
                 Box(
                     Modifier

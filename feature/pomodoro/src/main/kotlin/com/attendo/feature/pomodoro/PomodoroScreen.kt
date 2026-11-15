@@ -1,5 +1,9 @@
 package com.attendo.feature.pomodoro
 
+import androidx.compose.material.icons.filled.PlayArrow
+import com.attendo.core.designsystem.component.EmptyState
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.ProgressBar
 import com.attendo.core.designsystem.component.HeroStat
 import androidx.compose.material.icons.Icons
@@ -35,7 +39,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -171,10 +174,10 @@ fun PomodoroScreen(
                 Modifier
                     .fillMaxSize()
                     .verticalScroll(scroll)
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = Space.L),
             ) {
                 LargeTitle("Focus")
-                SegmentedControl(pages.map { it.label }, pages.indexOf(page).coerceAtLeast(0), { page = pages[it] }, Modifier.padding(vertical = 8.dp))
+                SegmentedControl(pages.map { it.label }, pages.indexOf(page).coerceAtLeast(0), { page = pages[it] }, Modifier.padding(vertical = Space.XS))
                 AnimatedContent(
                     targetState = page,
                     transitionSpec = {
@@ -226,14 +229,14 @@ private fun TimerTab(
     onFocusMinutes: (Int) -> Unit,
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(Space.XS))
         FocusDial(state, Modifier.fillMaxWidth(0.86f))
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(Space.S))
         SessionDots(state)
-        Spacer(Modifier.height(18.dp))
+        Spacer(Modifier.height(Space.M))
 
         // Controls: reset · play/pause · skip.
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(26.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.L)) {
             RoundControl("Reset", enabled = !state.isFresh, onClick = onReset) {
                 Icon(Icons.Filled.Refresh, contentDescription = null, tint = if (!state.isFresh) AttendoColors.Ink else AttendoColors.Muted)
             }
@@ -258,11 +261,11 @@ private fun TimerTab(
             },
             style = MaterialTheme.typography.labelMedium,
             color = AttendoColors.Muted,
-            modifier = Modifier.padding(top = 8.dp),
+            modifier = Modifier.padding(top = Space.XS),
         )
 
-        Spacer(Modifier.height(18.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Spacer(Modifier.height(Space.M))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Space.S)) {
             val next = nextKind(state)
             InfoCard(
                 label = "UP NEXT",
@@ -316,9 +319,9 @@ private fun SessionDots(state: PomodoroTimerState) {
         repeat(state.config.longBreakEvery) { i ->
             val filled = i < state.focusDoneInCycle
             val color by animateColorAsState(if (filled) AttendoColors.Green else AttendoColors.CreamDeep, label = "dot")
-            Box(Modifier.padding(horizontal = 3.dp).size(if (filled) 10.dp else 8.dp).clip(CircleShape).background(color))
+            Box(Modifier.padding(horizontal = Space.XXS).size(if (filled) 10.dp else 8.dp).clip(CircleShape).background(color))
         }
-        Spacer(Modifier.width(8.dp))
+        Spacer(Modifier.width(Space.XS))
         Text(
             "${state.focusDoneInCycle} of ${state.config.longBreakEvery} before a long break",
             style = MaterialTheme.typography.labelSmall,
@@ -338,7 +341,7 @@ private fun RoundControl(label: String, enabled: Boolean, onClick: () -> Unit, i
                 .background(AttendoColors.CreamCard),
             contentAlignment = Alignment.Center,
         ) { icon() }
-        Text(label, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted, modifier = Modifier.padding(top = 4.dp))
+        Text(label, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted, modifier = Modifier.padding(top = Space.XXS))
     }
 }
 
@@ -360,12 +363,12 @@ private fun SkipGlyph(color: Color) {
 private fun InfoCard(label: String, value: String, detail: String, accent: Color, modifier: Modifier = Modifier) {
     Column(
         modifier
-            .clip(RoundedCornerShape(22.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(16.dp),
+            .padding(Space.M),
     ) {
         Box(Modifier.size(8.dp).clip(CircleShape).background(accent))
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(Space.S))
         Text(label, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted, letterSpacing = 1.sp)
         Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Text(detail, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
@@ -380,7 +383,7 @@ private fun SectionLabel(text: String) {
         text,
         style = MaterialTheme.typography.labelLarge,
         color = AttendoColors.Muted,
-        modifier = Modifier.fillMaxWidth().padding(top = 18.dp, bottom = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(top = Space.M, bottom = Space.XS),
     )
 }
 
@@ -388,7 +391,7 @@ private fun SectionLabel(text: String) {
 private fun ChipRow(content: @Composable () -> Unit) {
     Row(
         Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Space.XS),
     ) { content() }
 }
 
@@ -399,9 +402,9 @@ private fun Chip(label: String, selected: Boolean, enabled: Boolean = true, onCl
     Box(
         Modifier
             .iosPress(PressStyle.Scale, enabled = enabled, onClickLabel = label, onClick = onClick)
-            .clip(CircleShape)
+            .clip(Corner.Shape)
             .background(bg)
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+            .padding(horizontal = Space.M, vertical = Space.S),
     ) {
         Text(label, color = if (enabled || selected) fg else AttendoColors.Muted, style = MaterialTheme.typography.labelLarge)
     }
@@ -415,13 +418,12 @@ private val TimeFormat = DateTimeFormatter.ofPattern("d MMM, HH:mm")
 private fun StatsTab(stats: PomodoroStatsUiState, onExportCsv: () -> Unit) {
     val summary = stats.summary
     Column {
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Space.S))
         if (summary == null || summary.totalFocusMinutes == 0 && stats.recent.isEmpty()) {
-            Text(
-                "No focus sessions yet. Finish a Pomodoro and your stats will show up here.",
-                color = AttendoColors.Muted,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(vertical = 24.dp),
+            EmptyState(
+                icon = Icons.Filled.PlayArrow,
+                title = "No focus sessions yet",
+                message = "Finish a focus session on the Timer page and your study stats show up here.",
             )
         }
         if (summary != null) {
@@ -437,7 +439,7 @@ private fun StatsTab(stats: PomodoroStatsUiState, onExportCsv: () -> Unit) {
         if (stats.recent.isNotEmpty()) {
             SectionLabel("Recent sessions")
             stats.recent.forEach { (s, name) ->
-                Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.fillMaxWidth().padding(vertical = Space.XS), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         Text(
                             if (s.kind == PomodoroKind.FOCUS) name else s.kind.label().lowercase().replaceFirstChar { it.uppercase() },
@@ -450,14 +452,14 @@ private fun StatsTab(stats: PomodoroStatsUiState, onExportCsv: () -> Unit) {
                         )
                     }
                     Text(
-                        "${s.actualSeconds / 60} min " + if (s.completed) "✓" else "·  stopped",
+                        "${s.actualSeconds / 60} min · " + if (s.completed) "completed" else "stopped",
                         style = MaterialTheme.typography.labelLarge,
                         color = if (s.completed) s.kind.color() else AttendoColors.Muted,
                     )
                 }
             }
         }
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(Space.L))
         PrimaryButton("Export pomodoro.csv", onClick = onExportCsv)
     }
 }
@@ -467,16 +469,16 @@ private fun OverviewCard(summary: PomodoroSummary) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.Hero)
-            .padding(24.dp),
+            .padding(Space.L),
     ) {
         Text("FOCUSED TODAY", style = MaterialTheme.typography.labelMedium, color = AttendoColors.Muted)
         Row(verticalAlignment = Alignment.Bottom) {
             AnimatedNumber(summary.todayFocusMinutes, "", MaterialTheme.typography.displayLarge, AttendoColors.Green)
-            Text(" min", style = MaterialTheme.typography.titleMedium, color = AttendoColors.Green, modifier = Modifier.padding(bottom = 10.dp))
+            Text(" min", style = MaterialTheme.typography.titleMedium, color = AttendoColors.Green, modifier = Modifier.padding(bottom = Space.S))
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Space.S))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             HeroStat("${summary.weekFocusMinutes}m", "This week")
             HeroStat("${summary.totalFocusMinutes / 60}h ${summary.totalFocusMinutes % 60}m", "All time")
@@ -493,9 +495,9 @@ private fun WeekChart(summary: PomodoroSummary) {
         Modifier
             .fillMaxWidth()
             .height(150.dp)
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(14.dp),
+            .padding(Space.M),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Bottom,
     ) {
@@ -515,7 +517,7 @@ private fun WeekChart(summary: PomodoroSummary) {
                         cornerRadius = 6.dp,
                     )
                 }
-                Spacer(Modifier.height(6.dp))
+                Spacer(Modifier.height(Space.XS))
                 Text(
                     day.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()).take(2),
                     style = MaterialTheme.typography.labelSmall,
@@ -528,12 +530,12 @@ private fun WeekChart(summary: PomodoroSummary) {
 
 @Composable
 private fun SubjectFocusBar(name: String, minutes: Int, fraction: Float) {
-    Column(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+    Column(Modifier.fillMaxWidth().padding(vertical = Space.XS)) {
         Row {
             Text(name, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f), maxLines = 1)
             Text("$minutes min", style = MaterialTheme.typography.labelLarge, color = AttendoColors.Green)
         }
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(Space.XXS))
         ProgressBar(fraction, AttendoColors.Green, AttendoColors.CreamDeep, Modifier.fillMaxWidth().height(10.dp))
     }
 }

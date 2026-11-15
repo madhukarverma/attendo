@@ -1,5 +1,7 @@
 package com.attendo.feature.dashboard
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.model.formatClock
 import androidx.compose.material.icons.filled.Person
 import com.attendo.core.data.PlannerRepository
@@ -23,7 +25,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -145,8 +146,8 @@ fun DashboardScreen(
                 Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                    .padding(horizontal = Space.L),
+                verticalArrangement = Arrangement.spacedBy(Space.S),
             ) {
                 Header(state, onOpenSettings, onOpenFriends)
                 AttendanceCard(state, onOpenAttendance)
@@ -174,7 +175,7 @@ private fun greeting(now: LocalDateTime): String = when (now.hour) {
 
 @Composable
 private fun Header(state: DashboardUiState, onOpenSettings: () -> Unit, onOpenFriends: () -> Unit) {
-    Row(Modifier.fillMaxWidth().padding(top = 14.dp), verticalAlignment = Alignment.Top) {
+    Row(Modifier.fillMaxWidth().padding(top = Space.M), verticalAlignment = Alignment.Top) {
         Column(Modifier.weight(1f)) {
             Text("${greeting(state.now)},", style = MaterialTheme.typography.headlineLarge)
             Text(
@@ -184,7 +185,7 @@ private fun Header(state: DashboardUiState, onOpenSettings: () -> Unit, onOpenFr
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(Space.XXS))
             Text(state.today.format(LongDate), style = MaterialTheme.typography.labelLarge, color = AttendoColors.Muted)
         }
         Box(
@@ -197,7 +198,7 @@ private fun Header(state: DashboardUiState, onOpenSettings: () -> Unit, onOpenFr
         ) {
             Icon(Icons.Filled.Person, contentDescription = null, tint = AttendoColors.Ink, modifier = Modifier.size(20.dp))
         }
-        Spacer(Modifier.width(8.dp))
+        Spacer(Modifier.width(Space.XS))
         Box(
             Modifier
                 .size(40.dp)
@@ -218,10 +219,10 @@ private fun AttendanceCard(state: DashboardUiState, onOpen: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.Hero)
             .iosPress(PressStyle.Highlight, onClickLabel = "Open classes", onClick = onOpen)
-            .padding(20.dp),
+            .padding(Space.L),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
@@ -246,7 +247,7 @@ private fun AttendanceCard(state: DashboardUiState, onOpen: () -> Unit) {
                 style = MaterialTheme.typography.labelLarge,
                 color = if (inClear) AttendoColors.OnHero else AttendoColors.Pink,
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(Space.XXS))
             Text(
                 todayLine(state),
                 style = MaterialTheme.typography.labelSmall,
@@ -290,7 +291,7 @@ private fun FocusCard(state: DashboardUiState, timer: PomodoroTimerState, onTogg
                 Modifier.size(40.dp).clip(CircleShape).background(AttendoColors.Hero),
                 contentAlignment = Alignment.Center,
             ) { TimerGlyph(color = AttendoColors.OnHero, size = 20.dp) }
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(Space.S))
             Column(Modifier.weight(1f)) {
                 CardLabel("POMODORO", AttendoColors.Muted)
                 if (timer.isFresh) {
@@ -310,11 +311,11 @@ private fun FocusCard(state: DashboardUiState, timer: PomodoroTimerState, onTogg
                         "${timer.kind.label()} · ${formatClock(timer.remainingMillis)}" + if (timer.running) "" else " (paused)",
                         style = MaterialTheme.typography.titleMedium,
                     )
-                    Spacer(Modifier.height(6.dp))
+                    Spacer(Modifier.height(Space.XS))
                     ProgressBar(timer.progress, if (timer.kind == PomodoroKind.FOCUS) AttendoColors.Green else AttendoColors.Blue)
                 }
             }
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(Space.S))
             Box(
                 Modifier
                     .size(44.dp)
@@ -363,11 +364,11 @@ private fun ChecklistLine(item: ChecklistItem, onToggle: (ChecklistItem) -> Unit
     Row(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(Corner.Shape)
             .iosPress(PressStyle.Highlight, onClickLabel = if (item.checked) "Untick ${item.habit.title}" else "Tick ${item.habit.title}") {
                 onToggle(item)
             }
-            .padding(vertical = 6.dp),
+            .padding(vertical = Space.XS),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
@@ -379,7 +380,7 @@ private fun ChecklistLine(item: ChecklistItem, onToggle: (ChecklistItem) -> Unit
         ) {
             if (item.checked) Icon(Icons.Filled.Check, contentDescription = null, tint = AttendoColors.OnAccent, modifier = Modifier.size(14.dp))
         }
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(Space.S))
         Text(
             item.habit.title,
             style = MaterialTheme.typography.bodyMedium,
@@ -398,14 +399,14 @@ private fun BoardCard(state: DashboardUiState, onOpen: () -> Unit) {
     val board = state.board ?: return
     Card(onOpen, "Open board") {
         CardHeader("BOARD", if (board.openCards == 0) null else "${board.openCards} open")
-        Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.fillMaxWidth().padding(vertical = Space.XXS), horizontalArrangement = Arrangement.spacedBy(Space.XS)) {
             board.columns.take(4).forEach { (title, count) ->
                 Column(
                     Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(Corner.Shape)
                         .background(AttendoColors.Cream)
-                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                        .padding(horizontal = Space.S, vertical = Space.XS),
                 ) {
                     Text("$count", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Text(title, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -414,7 +415,7 @@ private fun BoardCard(state: DashboardUiState, onOpen: () -> Unit) {
         }
         board.due.forEach { card ->
             val overdue = card.id in board.overdueIds
-            Row(Modifier.fillMaxWidth().padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.fillMaxWidth().padding(vertical = Space.XXS), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     card.title,
                     style = MaterialTheme.typography.bodyMedium,
@@ -440,9 +441,9 @@ private fun RemindersCard(state: DashboardUiState, onOpen: () -> Unit) {
             EmptyLine("No reminders set. Add one in Tasks › Reminders.")
         }
         state.reminders.forEach { todo ->
-            Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.fillMaxWidth().padding(vertical = Space.XS), verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Filled.Notifications, contentDescription = null, tint = AttendoColors.Green, modifier = Modifier.size(16.dp))
-                Spacer(Modifier.width(10.dp))
+                Spacer(Modifier.width(Space.S))
                 Text(
                     todo.title,
                     style = MaterialTheme.typography.bodyMedium,
@@ -477,9 +478,9 @@ private fun ExamsCard(state: DashboardUiState, onOpen: () -> Unit) {
 
 @Composable
 private fun ExamLine(exam: CalendarEvent, today: LocalDate) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().padding(vertical = Space.XS), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(10.dp).clip(CircleShape).background(AttendoColors.Blue))
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(Space.S))
         Column(Modifier.weight(1f)) {
             Text(exam.title, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(
@@ -513,10 +514,10 @@ private fun Card(onClick: () -> Unit, label: String, content: @Composable Column
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
             .iosPress(PressStyle.Highlight, onClickLabel = label, onClick = onClick)
-            .padding(horizontal = 18.dp, vertical = 16.dp),
+            .padding(horizontal = Space.M, vertical = Space.M),
         content = content,
     )
 }
@@ -528,7 +529,7 @@ private fun CardLabel(text: String, color: Color) {
 
 @Composable
 private fun CardHeader(title: String, trailing: String?, modifier: Modifier = Modifier) {
-    Row(modifier.fillMaxWidth().padding(bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier.fillMaxWidth().padding(bottom = Space.XXS), verticalAlignment = Alignment.CenterVertically) {
         Text(
             title,
             style = MaterialTheme.typography.labelMedium,
@@ -542,7 +543,7 @@ private fun CardHeader(title: String, trailing: String?, modifier: Modifier = Mo
 
 @Composable
 private fun EmptyLine(text: String) {
-    Text(text, style = MaterialTheme.typography.bodyMedium, color = AttendoColors.Muted, modifier = Modifier.padding(vertical = 4.dp))
+    Text(text, style = MaterialTheme.typography.bodyMedium, color = AttendoColors.Muted, modifier = Modifier.padding(vertical = Space.XXS))
 }
 
 @Composable
@@ -567,7 +568,7 @@ private fun ProgressBar(progress: Float, color: Color) {
 /** Two bars (material-icons-core has no pause icon). */
 @Composable
 private fun PauseGlyph(color: Color) {
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        repeat(2) { Box(Modifier.width(4.dp).height(14.dp).clip(RoundedCornerShape(2.dp)).background(color)) }
+    Row(horizontalArrangement = Arrangement.spacedBy(Space.XXS)) {
+        repeat(2) { Box(Modifier.width(4.dp).height(14.dp).clip(Corner.Shape).background(color)) }
     }
 }

@@ -1,5 +1,6 @@
 package com.attendo.core.backup
 
+import com.attendo.core.model.ErrorCode
 import android.accounts.Account
 import android.app.Activity
 import android.content.Context
@@ -305,15 +306,15 @@ class GoogleDriveBackup(
 
     private fun fail(e: Throwable) = _state.update { it.copy(busy = false, message = describe(e), isError = true) }
 
+    /** A message with its code (docs/ERROR_CODES.md); cancelling isn't an error, so it has none. */
     private fun describe(e: Throwable): String = when {
-        e is NeedsSignInException -> "Google needs you to sign in again. Tap Sign in with Google."
-        e is ApiException && e.statusCode == CommonStatusCodes.DEVELOPER_ERROR ->
-            "Google sign-in isn't set up for this build yet (no OAuth client for this app in Google Cloud)."
-        e is ApiException && e.statusCode == CommonStatusCodes.NETWORK_ERROR -> "No internet connection."
+        e is NeedsSignInException -> ErrorCode.BACKUP_SIGN_IN_AGAIN.message()
+        e is ApiException && e.statusCode == CommonStatusCodes.DEVELOPER_ERROR -> ErrorCode.BACKUP_NOT_SET_UP.message()
+        e is ApiException && e.statusCode == CommonStatusCodes.NETWORK_ERROR -> ErrorCode.BACKUP_OFFLINE.message()
         e is ApiException && e.statusCode == CommonStatusCodes.CANCELED -> "Sign-in cancelled."
-        e is DriveHttpException && e.code == 403 -> "Google Drive refused access. Is the Drive API enabled for the app's project?"
-        e is IOException && e !is DriveHttpException -> "No internet connection. Backup will retry after your next change."
-        else -> "Something went wrong: ${e.message ?: e.javaClass.simpleName}"
+        e is DriveHttpException && e.code == 403 -> ErrorCode.BACKUP_DRIVE_REFUSED.message()
+        e is IOException && e !is DriveHttpException -> ErrorCode.BACKUP_OFFLINE.message()
+        else -> ErrorCode.BACKUP_UNEXPECTED.message(e.message ?: e.javaClass.simpleName)
     }
 
     private suspend fun saveAccount(email: String, name: String?) {

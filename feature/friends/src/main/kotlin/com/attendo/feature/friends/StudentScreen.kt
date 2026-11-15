@@ -1,5 +1,7 @@
 package com.attendo.feature.friends
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -78,14 +79,14 @@ fun StudentScreen(social: SocialService, uid: String, onOpenStudent: (String) ->
         CollapsingTopBar(title = view?.profile?.name ?: "Student", collapseFraction = { collapse }, onBack = onClose, backLabel = "Back")
         BounceContainer(Modifier.fillMaxSize()) {
             LazyColumn(
-                Modifier.fillMaxSize().padding(horizontal = 20.dp),
+                Modifier.fillMaxSize().padding(horizontal = Space.L),
                 state = listState,
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(Space.S),
             ) {
                 val v = view
                 if (v == null) {
                     item {
-                        Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                        Box(Modifier.fillMaxWidth().padding(Space.XL), contentAlignment = Alignment.Center) {
                             if (error != null) Muted(error!!) else CircularProgressIndicator(color = AttendoColors.Green)
                         }
                     }
@@ -140,7 +141,7 @@ fun StudentScreen(social: SocialService, uid: String, onOpenStudent: (String) ->
                 state.message?.takeIf { state.isError }?.let { msg ->
                     item { Text(msg, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Pink) }
                 }
-                item { Spacer(Modifier.height(32.dp)) }
+                item { Spacer(Modifier.height(Space.XL)) }
             }
         }
     }
@@ -159,12 +160,12 @@ private fun AttendanceCard(attendance: SharedAttendance?, name: String) {
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
             )
-            Spacer(Modifier.width(8.dp))
-            Text("overall", style = MaterialTheme.typography.labelLarge, color = AttendoColors.Muted, modifier = Modifier.padding(bottom = 4.dp))
+            Spacer(Modifier.width(Space.XS))
+            Text("overall", style = MaterialTheme.typography.labelLarge, color = AttendoColors.Muted, modifier = Modifier.padding(bottom = Space.XXS))
         }
         attendance.subjects.forEach { s ->
             val onTrack = s.held == 0 || s.percent >= s.target
-            Column(Modifier.padding(top = 10.dp)) {
+            Column(Modifier.padding(top = Space.S)) {
                 Row {
                     Text(s.name, style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
                     Text(
@@ -173,7 +174,7 @@ private fun AttendanceCard(attendance: SharedAttendance?, name: String) {
                         color = if (onTrack) AttendoColors.Ink else AttendoColors.Pink,
                     )
                 }
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(Space.XXS))
                 Bar((s.percent / 100).toFloat(), if (onTrack) AttendoColors.Green else AttendoColors.Pink)
             }
         }
@@ -188,7 +189,7 @@ private fun GradesCard(grades: SharedGrades) {
             Text("${it.roundToInt()}% overall", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         }
         grades.subjects.forEach { s ->
-            Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.fillMaxWidth().padding(top = Space.XS), verticalAlignment = Alignment.CenterVertically) {
                 Text(s.name, style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
                 Text("${s.percent.roundToInt()}%  ${s.grade}", style = MaterialTheme.typography.labelLarge)
             }
@@ -204,7 +205,7 @@ private fun UpdatedAt(millis: Long) {
         "Updated ${Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).format(Updated)}",
         style = MaterialTheme.typography.labelSmall,
         color = AttendoColors.Muted,
-        modifier = Modifier.padding(top = 10.dp),
+        modifier = Modifier.padding(top = Space.S),
     )
 }
 
@@ -221,7 +222,7 @@ private fun Bar(fraction: Float, color: androidx.compose.ui.graphics.Color) {
             Modifier
                 .fillMaxHeight()
                 .fillMaxWidth(fraction.coerceIn(0f, 1f))
-                .clip(RoundedCornerShape(3.dp))
+                .clip(Corner.Shape)
                 .background(color),
         )
     }

@@ -45,6 +45,7 @@ flowchart TD
     Friends --> Fire[(Firebase<br/>Auth + Firestore)]
     Friends -- Delete profile --> Fire
     Home -- gear --> Settings[Settings<br/>profile · theme · animations · launch image<br/>Backup: Google account · CSV export / restore]
+    Settings -- Support --> Feedback[Send feedback<br/>rating · category · message] --> FireFb[(Firestore<br/>feedback, write-only)]
     Settings -- sign in --> Drive[(Google Drive<br/>app-data folder<br/>attendo-backup.zip)]
     Onb -- Restore from Google --> Drive
     Home -- exams card --> Cal[Academic calendar<br/>events + your reminders]

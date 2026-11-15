@@ -1,5 +1,7 @@
 package com.attendo.feature.settings
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -15,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -47,9 +48,9 @@ internal fun LaunchImageSection(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = Space.M, vertical = Space.S),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -59,7 +60,7 @@ internal fun LaunchImageSection(
                     .background(backgroundHex?.let(::parseHexColor) ?: LaunchBackground)
                     .border(1.dp, AttendoColors.CreamDeep, CircleShape),
             )
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(Space.S))
             Column(Modifier.weight(1f)) {
                 Text("Launch image", style = MaterialTheme.typography.titleMedium)
                 Text(
