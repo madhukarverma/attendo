@@ -64,7 +64,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.attendo.core.designsystem.component.TriangleMascot
+import com.attendo.core.designsystem.component.RectangleMascot
 import com.attendo.core.designsystem.motion.BounceContainer
 import com.attendo.core.designsystem.motion.PressStyle
 import com.attendo.core.designsystem.motion.iosPress
@@ -233,7 +233,7 @@ private fun AddTodoCard(today: LocalDate, now: LocalDateTime, onAdd: (String, Lo
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .background(AttendoColors.CreamCard)
             .padding(Space.M),
     ) {
@@ -437,7 +437,7 @@ private fun NotificationsBanner(onEnable: () -> Unit, modifier: Modifier = Modif
 @Composable
 private fun EmptyState(modifier: Modifier = Modifier) {
     Column(modifier.fillMaxWidth().padding(top = Space.L), horizontalAlignment = Alignment.CenterHorizontally) {
-        TriangleMascot(Modifier.size(120.dp))
+        RectangleMascot(Modifier.size(120.dp))
         Spacer(Modifier.height(Space.S))
         Text("No reminders yet.", style = MaterialTheme.typography.titleMedium)
         Text(

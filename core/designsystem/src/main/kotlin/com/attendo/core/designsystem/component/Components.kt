@@ -1,5 +1,6 @@
 package com.attendo.core.designsystem.component
 
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -57,7 +58,7 @@ fun SpeechBubble(
         if (tail == TailSide.TopCenter) BubbleTail(color, pointingUp = true, Modifier.align(Alignment.CenterHorizontally))
         Box(
             Modifier
-                .clip(Corner.Shape)
+                .clip(CircleShape)
                 .background(color)
                 .padding(horizontal = Space.L, vertical = Space.M),
         ) {
@@ -114,7 +115,7 @@ fun AttendoCard(
     Row(
         modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .background(AttendoColors.CreamCard)
             .then(if (onClick != null) Modifier.iosPress(PressStyle.Highlight, onClick = onClick) else Modifier)
             .padding(horizontal = Space.M, vertical = Space.M),

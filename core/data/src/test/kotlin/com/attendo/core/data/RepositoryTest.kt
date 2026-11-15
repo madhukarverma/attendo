@@ -1,5 +1,6 @@
 package com.attendo.core.data
 
+import com.attendo.core.model.FontChoice
 import com.attendo.core.model.UnitKey
 import com.attendo.core.model.AcademicCalendar
 import com.attendo.core.model.DayKind
@@ -59,6 +60,9 @@ class RepositoryTest {
         reloaded.settings.setCustomColors(mapOf("accent" to "#00AAFF"))
         val s = reloaded.settings.settings.first()!!
         assertEquals(ThemeMode.CUSTOM, s.theme)
+        assertEquals(FontChoice.THEME, s.font) // not set yet: the theme's own font
+        reloaded.settings.setFont(FontChoice.POPPINS)
+        assertEquals(FontChoice.POPPINS, reloaded.settings.settings.first()?.font)
         assertEquals(mapOf("background" to "#101010", "accent" to "#00AAFF"), s.customColors)
         assertEquals(setOf("subjects.csv", "attendance.csv", "settings.csv"), dir.list()!!.toSet())
 

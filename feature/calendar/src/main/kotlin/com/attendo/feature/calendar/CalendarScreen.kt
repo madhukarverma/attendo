@@ -221,7 +221,7 @@ private fun SemesterCard(calendar: AcademicCalendar, today: LocalDate) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .background(AttendoColors.Hero)
             .padding(Space.L),
     ) {

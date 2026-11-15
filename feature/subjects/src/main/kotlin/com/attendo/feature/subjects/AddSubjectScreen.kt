@@ -1,5 +1,6 @@
 package com.attendo.feature.subjects
 
+import com.attendo.core.designsystem.component.CircleMascot
 import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.attendoFilledFieldColors
@@ -46,7 +47,6 @@ import com.attendo.core.data.SubjectRepository
 import com.attendo.core.designsystem.component.PrimaryButton
 import com.attendo.core.designsystem.component.SpeechBubble
 import com.attendo.core.designsystem.component.TailSide
-import com.attendo.core.designsystem.component.TriangleMascot
 import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.core.designsystem.theme.AttendoTheme
 import com.attendo.core.model.Subject
@@ -119,7 +119,7 @@ fun AddSubjectScreen(
             }
         }
         Row(Modifier.fillMaxWidth().padding(vertical = Space.S), verticalAlignment = Alignment.Bottom) {
-            TriangleMascot(Modifier.size(150.dp))
+            CircleMascot(Modifier.size(150.dp))
             SpeechBubble("Which class are we tracking?", tail = TailSide.BottomStart, modifier = Modifier.padding(bottom = Space.XXL + Space.XL))
         }
 

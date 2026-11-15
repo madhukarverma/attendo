@@ -437,7 +437,7 @@ private fun ColumnShell(
                     style = MaterialTheme.typography.labelMedium,
                     color = if (column.done) AttendoColors.Green else AttendoColors.Muted,
                     modifier = Modifier
-                        .clip(Corner.Shape)
+                        .clip(CircleShape)
                         .background(AttendoColors.Cream)
                         .padding(horizontal = Space.XS, vertical = Space.XXS),
                 )

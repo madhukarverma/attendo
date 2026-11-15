@@ -199,10 +199,10 @@ private fun Choice(
     val content = if (selected) AttendoColors.Cream else AttendoColors.Ink
     Row(
         Modifier
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .iosPress(PressStyle.Dim, onClickLabel = label, onClick = onClick)
             .background(if (selected) AttendoColors.Ink else AttendoColors.CreamCard)
-            .border(1.dp, if (selected) AttendoColors.Ink else AttendoColors.CreamDeep, Corner.Shape)
+            .border(1.dp, if (selected) AttendoColors.Ink else AttendoColors.CreamDeep, CircleShape)
             .padding(horizontal = Space.S, vertical = Space.XS),
         verticalAlignment = Alignment.CenterVertically,
     ) {

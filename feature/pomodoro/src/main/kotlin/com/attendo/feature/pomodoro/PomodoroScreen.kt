@@ -1,5 +1,6 @@
 package com.attendo.feature.pomodoro
 
+import com.attendo.core.designsystem.motion.PageHeader
 import androidx.compose.material.icons.filled.PlayArrow
 import com.attendo.core.designsystem.component.EmptyState
 import com.attendo.core.designsystem.theme.Corner
@@ -168,7 +169,8 @@ fun PomodoroScreen(
             .background(AttendoColors.Cream)
             .safeDrawingPadding(),
     ) {
-        CollapsingTopBar(title = "Focus", collapseFraction = { collapse }, onBack = onClose, backLabel = "Home")
+        // As a tab it has no back bar, so its title lines up with the other tabs (PageHeader).
+        if (onClose != null) CollapsingTopBar(title = "Focus", collapseFraction = { collapse }, onBack = onClose, backLabel = "Home")
         BounceContainer(Modifier.fillMaxSize()) {
             Column(
                 Modifier
@@ -176,7 +178,7 @@ fun PomodoroScreen(
                     .verticalScroll(scroll)
                     .padding(horizontal = Space.L),
             ) {
-                LargeTitle("Focus")
+                if (onClose != null) LargeTitle("Focus") else PageHeader("Focus")
                 SegmentedControl(pages.map { it.label }, pages.indexOf(page).coerceAtLeast(0), { page = pages[it] }, Modifier.padding(vertical = Space.XS))
                 AnimatedContent(
                     targetState = page,
@@ -363,7 +365,7 @@ private fun SkipGlyph(color: Color) {
 private fun InfoCard(label: String, value: String, detail: String, accent: Color, modifier: Modifier = Modifier) {
     Column(
         modifier
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .background(AttendoColors.CreamCard)
             .padding(Space.M),
     ) {

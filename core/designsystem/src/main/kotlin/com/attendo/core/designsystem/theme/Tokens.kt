@@ -1,12 +1,8 @@
 package com.attendo.core.designsystem.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.attendo.core.designsystem.R
 
 /**
  * The spacing scale (DEC-024). Every padding and gap in the app is one of these steps; values in
@@ -26,22 +22,11 @@ object Space {
 }
 
 /**
- * The one corner radius (DEC-024): cards, buttons, fields, chips, sheets and dialogs all use it.
- * Only things that are circles (dots, avatars, round icon buttons) use `CircleShape`.
+ * The corner radius for every rounded surface: cards, fields, sheets and dialogs (DEC-024).
+ * Buttons, chips and the tab bar are capsules and round things are circles (`CircleShape`), as in
+ * Apple's design (DEC-026).
  */
 object Corner {
     val Radius: Dp = 16.dp
     val Shape: RoundedCornerShape = RoundedCornerShape(Radius)
 }
-
-/**
- * Plus Jakarta Sans, the app's typeface (SIL Open Font License, `core/designsystem/fonts/`).
- * One variable font file; each weight picks its point on the font's weight axis.
- */
-val AttendoSans: FontFamily = FontFamily(
-    Font(R.font.plus_jakarta_sans, FontWeight.Normal),
-    Font(R.font.plus_jakarta_sans, FontWeight.Medium),
-    Font(R.font.plus_jakarta_sans, FontWeight.SemiBold),
-    Font(R.font.plus_jakarta_sans, FontWeight.Bold),
-    Font(R.font.plus_jakarta_sans, FontWeight.ExtraBold),
-)

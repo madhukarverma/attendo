@@ -448,7 +448,7 @@ private fun DayCard(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .background(AttendoColors.CreamCard)
             .padding(vertical = Space.XS),
     ) {
@@ -597,7 +597,7 @@ private fun Chip(text: String, selected: Boolean, dot: Color? = null, onClick: (
             .clip(Corner.Shape)
             .iosPress(PressStyle.Dim, onClickLabel = text, onClick = onClick)
             .background(if (selected) AttendoColors.Ink else AttendoColors.CreamCard)
-            .border(1.dp, if (selected) AttendoColors.Ink else AttendoColors.CreamDeep, Corner.Shape)
+            .border(1.dp, if (selected) AttendoColors.Ink else AttendoColors.CreamDeep, CircleShape)
             .padding(horizontal = Space.S, vertical = Space.XS),
         verticalAlignment = Alignment.CenterVertically,
     ) {

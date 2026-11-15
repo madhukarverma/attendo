@@ -41,8 +41,9 @@ can open in Excel or Google Sheets.
 - **See your percentage for every subject**, and how it compares with your target.
 - **Know your limits.** "You can miss 3 more" or "attend the next 5" appears for every subject,
   plus how things will look by the end of the course.
-- **A little green mascot** whose mood follows your attendance: it bounces when you're on track
-  and sways when you fall behind.
+- **Little mascots** whose mood follows your attendance: they hop when you're on track and sway
+  when you fall behind. They're the three parts of DNA: a pentagon (sugar) on Home, a circle
+  (phosphate) on Classes and a rectangle (base) on Tasks.
 - **Fix mistakes easily.** Go back to any day and change what you marked.
 
 ### Plan your days
@@ -66,6 +67,8 @@ can open in Excel or Google Sheets.
 
 ### Make it yours
 - **Seven themes**, including dark mode and your own colours.
+- **Pick a font** for the whole app: your phone's own, Roboto, Open Sans, Montserrat, Lato,
+  Poppins, Plus Jakarta Sans, or the code, typewriter and handwritten fonts from the themes.
 - **Animation styles:** smooth, iPhone-like, classic Android, or none at all.
 - **Your own launch picture**, shown when the app opens.
 
@@ -291,7 +294,7 @@ A file that can't be read is kept as `<name>.unreadable-<time>` before anything 
 - [Project context, decisions and open issues](docs/context/)
 - [Error codes](docs/ERROR_CODES.md) and [where feedback goes](docs/FEEDBACK.md)
 - README images are drawn by [docs/images/make_images.py](docs/images/make_images.py)
-- Font: [Plus Jakarta Sans](https://github.com/tokotype/PlusJakartaSans), SIL Open Font License
-  ([licence](core/designsystem/fonts/OFL-PlusJakartaSans.txt))
+- Fonts in Settings › Font: Roboto, Open Sans, Montserrat, Lato, Poppins and Plus Jakarta Sans,
+  all under the SIL Open Font License ([licences](core/designsystem/fonts/))
 
 </details>

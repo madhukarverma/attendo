@@ -1,5 +1,6 @@
 package com.attendo.feature.settings
 
+import com.attendo.core.model.FontChoice
 import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import androidx.compose.material.icons.filled.Person
@@ -74,6 +75,10 @@ class SettingsViewModel(private val settings: SettingsRepository) : ViewModel() 
         viewModelScope.launch { settings.setTheme(mode) }
     }
 
+    fun setFont(font: FontChoice) {
+        viewModelScope.launch { settings.setFont(font) }
+    }
+
     fun setCustomColors(colors: Map<String, String>) {
         viewModelScope.launch { settings.setCustomColors(colors) }
     }
@@ -112,6 +117,8 @@ fun SettingsRoute(
         theme = state?.theme ?: ThemeMode.LIGHT,
         customColors = state?.customColors.orEmpty(),
         onThemeChange = vm::setTheme,
+        font = state?.font ?: FontChoice.THEME,
+        onFontChange = vm::setFont,
         onCustomColorsChange = vm::setCustomColors,
         launchSection = {
             LaunchImageSection(
@@ -146,6 +153,8 @@ fun SettingsScreen(
     customColors: Map<String, String> = emptyMap(),
     onThemeChange: (ThemeMode) -> Unit = {},
     onCustomColorsChange: (Map<String, String>) -> Unit = {},
+    font: FontChoice = FontChoice.THEME,
+    onFontChange: (FontChoice) -> Unit = {},
     launchSection: @Composable () -> Unit = {},
     backupSection: @Composable () -> Unit = { PrimaryButton("Export CSV files", onClick = onExportCsv) },
     onOpenFriends: (() -> Unit)? = null,
@@ -197,6 +206,9 @@ fun SettingsScreen(
                         enabled = name.isNotBlank() && name.trim() != savedName,
                     ) { Text("Save name") }
                 }
+
+                SectionTitle("Font")
+                FontSection(font, onFontChange)
 
                 SectionTitle("Theme")
                 ThemeSection(theme, customColors, onThemeChange, onCustomColorsChange)

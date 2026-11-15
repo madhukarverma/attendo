@@ -253,7 +253,7 @@ private fun ProfileCard(me: StudentProfile, state: SocialState, onSignOut: () ->
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .background(AttendoColors.Hero)
             .padding(Space.M),
     ) {

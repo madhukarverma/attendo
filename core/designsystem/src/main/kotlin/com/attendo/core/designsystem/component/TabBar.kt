@@ -1,6 +1,6 @@
 package com.attendo.core.designsystem.component
 
-import com.attendo.core.designsystem.theme.Corner
+import androidx.compose.foundation.shape.CircleShape
 import com.attendo.core.designsystem.theme.Space
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -64,7 +64,7 @@ fun AttendoTabBar(
     Row(
         modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .then(
                 if (backdrop != null) Modifier.glass(backdrop, AttendoColors.Hero.copy(alpha = 0.72f))
                 else Modifier.background(AttendoColors.Hero),
@@ -72,7 +72,7 @@ fun AttendoTabBar(
             .border(
                 0.75.dp,
                 Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.22f), Color.White.copy(alpha = 0.04f))),
-                Corner.Shape,
+                CircleShape,
             )
             .padding(Space.XS),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -96,7 +96,7 @@ private fun TabButton(tab: TabItem, selected: Boolean, onClick: () -> Unit) {
                 role = Role.Tab
                 this.selected = selected
             }
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .background(background)
             .padding(horizontal = Space.S),
         verticalAlignment = Alignment.CenterVertically,

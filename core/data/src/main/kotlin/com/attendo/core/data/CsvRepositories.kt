@@ -1,5 +1,6 @@
 package com.attendo.core.data
 
+import com.attendo.core.model.FontChoice
 import com.attendo.core.data.csv.CsvStore
 import com.attendo.core.data.csv.CsvTable
 import com.attendo.core.model.AnimationMode
@@ -44,6 +45,7 @@ internal class CsvSettingsRepository(
                     ?: if (m[KEY_IOS_MOTION] == "false") AnimationMode.NONE else AnimationMode.IOS,
                 tinderMode = m[KEY_TINDER_MODE] == "true",
                 theme = m[KEY_THEME]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() } ?: ThemeMode.LIGHT,
+                font = m[KEY_FONT]?.let { runCatching { FontChoice.valueOf(it) }.getOrNull() } ?: FontChoice.THEME,
                 customColors = m.filterKeys { it.startsWith(COLOR_PREFIX) }
                     .mapKeys { (k, _) -> k.removePrefix(COLOR_PREFIX) },
                 launchImage = m[KEY_LAUNCH_IMAGE] == "true",
@@ -59,6 +61,8 @@ internal class CsvSettingsRepository(
         }
 
     override suspend fun setTheme(mode: ThemeMode) = put(KEY_THEME, mode.name)
+
+    override suspend fun setFont(font: FontChoice) = put(KEY_FONT, font.name)
 
     override suspend fun setCustomColors(colors: Map<String, String>) =
         store.update { list ->
@@ -84,6 +88,7 @@ internal class CsvSettingsRepository(
         const val KEY_ANIMATION_MODE = "animation_mode"
         const val KEY_TINDER_MODE = "tinder_mode"
         const val KEY_THEME = "theme"
+        const val KEY_FONT = "font"
         const val COLOR_PREFIX = "color."
         const val KEY_LAUNCH_IMAGE = "launch_image"
         const val KEY_LAUNCH_BG = "launch_background"

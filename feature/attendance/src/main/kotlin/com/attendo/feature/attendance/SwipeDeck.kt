@@ -1,5 +1,9 @@
 package com.attendo.feature.attendance
 
+import com.attendo.core.designsystem.component.CircleMascot
+import com.attendo.core.designsystem.component.TabBarClearance
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.material3.Icon
 import com.attendo.core.designsystem.component.AttendoIcons
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -48,7 +52,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.attendo.core.designsystem.component.Mood
-import com.attendo.core.designsystem.component.TriangleMascot
 import com.attendo.core.designsystem.motion.Motion
 import com.attendo.core.designsystem.motion.PressStyle
 import com.attendo.core.designsystem.motion.iosPress
@@ -91,12 +94,18 @@ internal fun SwipeDeck(
     onUndo: () -> Unit,
     colorFor: (subjectId: String) -> Color,
     modifier: Modifier = Modifier,
+    /** Room from the deck's top down to the bottom of the screen; the cards shrink so the buttons stay above the tab bar. */
+    availableHeight: Dp? = null,
 ) {
     val haptics = rememberHaptics()
+    val deckHeight = availableHeight
+        ?.let { (it - TabBarClearance - DeckControlsHeight).coerceIn(MinDeckHeight, MaxDeckHeight) }
+        ?: MaxDeckHeight
+    val compact = deckHeight < CompactDeckHeight
     var requested by remember { mutableStateOf<SwipeAction?>(null) }
 
     Column(modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        BoxWithConstraints(Modifier.fillMaxWidth().height(430.dp), contentAlignment = Alignment.Center) {
+        BoxWithConstraints(Modifier.fillMaxWidth().height(deckHeight), contentAlignment = Alignment.Center) {
             val widthPx = with(LocalDensity.current) { maxWidth.toPx() }
             val heightPx = with(LocalDensity.current) { maxHeight.toPx() }
             val top = cards.firstOrNull()
@@ -165,6 +174,7 @@ internal fun SwipeDeck(
                         SubjectProfileCard(
                             next,
                             colorFor(next.summary.subject.id),
+                            compact,
                             Modifier.graphicsLayer {
                                 val p = progress()
                                 val s = 0.92f + 0.08f * p
@@ -177,6 +187,7 @@ internal fun SwipeDeck(
                     SubjectProfileCard(
                         top,
                         colorFor(top.summary.subject.id),
+                        compact,
                         Modifier
                             .graphicsLayer {
                                 translationX = x.value
@@ -273,13 +284,13 @@ internal fun SwipeDeck(
         }
 
         Text(
-            if (cards.isEmpty()) " " else "${cards.size} of $totalToday left · swipe left absent, right present, down no class, up ×2",
+            if (cards.isEmpty()) " " else "${cards.size} of $totalToday left",
             style = MaterialTheme.typography.labelSmall,
             color = AttendoColors.Muted,
             modifier = Modifier.padding(top = Space.S, bottom = Space.S),
         )
         Row(horizontalArrangement = Arrangement.spacedBy(Space.S), verticalAlignment = Alignment.CenterVertically) {
-            RoundAction(AttendoIcons.Undo, AttendoColors.Yellow, 46.dp, enabled = canUndo, label = "Undo last swipe", onClick = onUndo)
+            RoundAction(AttendoIcons.Undo, AttendoColors.Yellow, 46.dp, enabled = canUndo, label = "Undo last mark", onClick = onUndo)
             RoundAction(AttendoIcons.Cross, AttendoColors.Pink, 62.dp, enabled = cards.isNotEmpty(), label = "Absent") {
                 requested = SwipeAction.ABSENT
             }
@@ -301,6 +312,8 @@ internal fun SwipeDeck(
 private fun SubjectProfileCard(
     item: SubjectDayItem,
     color: Color,
+    /** A short deck (small screens): smaller abbreviation so the details still fit. */
+    compact: Boolean,
     modifier: Modifier = Modifier,
     stamps: @Composable androidx.compose.foundation.layout.BoxScope.() -> Unit = {},
 ) {
@@ -310,7 +323,7 @@ private fun SubjectProfileCard(
     Box(
         modifier
             .fillMaxWidth(0.88f)
-            .height(410.dp)
+            .fillMaxHeight(0.95f)
             .shadow(14.dp, Corner.Shape)
             .clip(Corner.Shape)
             .background(color),
@@ -318,12 +331,12 @@ private fun SubjectProfileCard(
         // Big abbreviation as the card's "face".
         Text(
             CourseCatalog.shortName(subject),
-            fontSize = 64.sp,
-            lineHeight = 66.sp,
+            fontSize = if (compact) 44.sp else 64.sp,
+            lineHeight = if (compact) 46.sp else 66.sp,
             fontWeight = FontWeight.Black,
             color = onCard,
             textAlign = TextAlign.Center,
-            modifier = Modifier.align(Alignment.Center).padding(horizontal = Space.L).padding(bottom = Space.XXL * 2),
+            modifier = Modifier.align(Alignment.Center).padding(horizontal = Space.L).padding(bottom = if (compact) Space.XXL + Space.M else Space.XXL * 2),
         )
         Column(Modifier.align(Alignment.BottomStart).padding(Space.L)) {
             Text(
@@ -364,6 +377,16 @@ private fun SubjectProfileCard(
  */
 private fun contentColorFor(background: Color): Color =
     if (background.luminance() > 0.45f) Color(0xFF232323) else Color(0xFFF8FAED)
+
+/** Tallest the card area gets (big screens), and the shortest before it would stop reading well. */
+private val MaxDeckHeight = 430.dp
+private val MinDeckHeight = 280.dp
+
+/** Below this the card text shrinks. */
+private val CompactDeckHeight = 360.dp
+
+/** The count line and the row of round buttons under the cards. */
+private val DeckControlsHeight = 112.dp
 
 /** Ten clearly different colours; shuffled once with a fixed seed so they look random but stay stable. */
 private val CardPalette: List<Color> = listOf(
@@ -435,7 +458,7 @@ private fun RoundAction(
 @Composable
 private fun AllCaughtUp(total: Int) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        TriangleMascot(Modifier.size(160.dp), mood = Mood.Happy)
+        CircleMascot(Modifier.size(160.dp), mood = Mood.Happy)
         Text("All caught up!", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         Text(
             if (total == 0) "Add subjects to start swiping." else "All $total subjects are marked for this day.",

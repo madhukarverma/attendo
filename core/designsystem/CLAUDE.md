@@ -5,14 +5,15 @@ Look and feel shared by every screen. Sources are in
 
 | File | What it is | Open it for |
 |---|---|---|
-| `theme/Tokens.kt` | `Space` (the spacing scale), `Corner` (the one radius), `AttendoSans` (bundled Plus Jakarta Sans) | any padding, gap, corner or font |
+| `theme/Tokens.kt` | `Space` (the spacing scale), `Corner` (the radius for cards, fields, sheets) | any padding, gap or corner |
+| `theme/Fonts.kt` | Settings › Font: the bundled fonts (`res/font`, licences in `fonts/`) and `withFont` | adding or changing a font |
 | `theme/Theme.kt` | Theme fonts, colour palettes for each theme, `AttendoColors`, `AttendoTheme`, contrast helpers | colours, adding a theme |
 | `motion/Motion.kt` | Springs for each Animations mode (`push`, `sheet`, `settle`, `snappy`, `release`), `LocalAnimationMode` | how fast or bouncy things move |
 | `motion/AppMotionScale.kt` | App-wide animation speed, follows the system animator scale | global animation speed |
 | `motion/IosPress.kt` | `Modifier.iosPress`: the press-and-shrink effect | tap feedback |
 | `motion/BounceScroll.kt` | `BounceContainer`: rubber-band overscroll (Apple's formula) | scroll bounce |
 | `motion/Haptics.kt` | `rememberHaptics()`: `tick`, `confirm`, `grab` | vibration feedback |
-| `motion/LargeTitle.kt` | Large titles that collapse into a top bar with a scroll-edge fade | screen headers |
+| `motion/LargeTitle.kt` | `PageHeader` (the title row every tab shares, so titles line up), large titles that collapse into a top bar with a scroll-edge fade | screen headers |
 | `component/Components.kt` | Cards, buttons, speech bubble, squiggle, animated numbers, small glyphs | shared building blocks |
 | `component/Glass.kt` | Frosted glass: `rememberBackdrop`, `backdropSource`, `glass` (blur on Android 12+) | translucent surfaces |
 | `component/Controls.kt` | `PillButton`, `NavigationRow` (plain row that opens a screen), `HeroStat`, `ProgressBar` (animated in the draw phase), text-field colours, date and time pickers | buttons, rows, bars, forms, pickers |
@@ -21,13 +22,17 @@ Look and feel shared by every screen. Sources are in
 | `component/TabBar.kt` | The bottom tab bar and `TabBarClearance` | tab bar look |
 | `component/SegmentedControl.kt` | Segmented switcher (the Focus and Tasks tab pages) | page switchers |
 | `component/DayStrip.kt` | Horizontal strip of days | picking a day |
-| `component/Mascots.kt` | Mascot shapes and mood faces | mascots |
+| `component/Mascots.kt` | The DNA mascots (pentagon on Home, circle on Classes, rectangle on Tasks), the onboarding blob, mood faces and the shared idle animation | mascots |
 | `component/Confetti.kt` | Confetti burst | celebrations |
 | `component/LaunchArt.kt` | Launch-screen background, batch label, "developed by" line | launch screen |
 
 ## Rules
-- Spacing comes from `Space` only (4, 8, 12, 16, 24, 32, 48 dp); every rounded shape is `Corner.Shape`
-  (16 dp), and `CircleShape` only for things that are circles (DEC-024).
+- Spacing comes from `Space` only (4, 8, 12, 16, 24, 32, 48 dp). Cards, fields and sheets use
+  `Corner.Shape` (16 dp); buttons, chips and the tab bar are capsules and round things circles
+  (`CircleShape`), as in Apple's design (DEC-024, DEC-026).
+- Every tab starts with `PageHeader`, so titles sit at the same height on all five.
+- The default font is the phone's own (apple-design skill: system font first); bundled fonts
+  are only used when chosen in Settings › Font.
 - Icons, not text symbols or emoji: Material `Icons.Filled` or `AttendoIcons`. Empty lists use
   `EmptyState`; errors show their `ErrorCode` (docs/ERROR_CODES.md).
 - Take colours from `AttendoColors` so every theme works. Don't add new raw `Color(0x…)` values

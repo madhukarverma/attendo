@@ -179,7 +179,8 @@
   build). No server-side rate limiting: the free Firebase plan can't do it (`docs/SECURITY.md`).
 
 ## DEC-024 — One spacing scale, one radius, one font, icons, coded errors
-- Date: 2026-11-15 · Status: Active
+- Date: 2026-11-15 · Status: Partly replaced by DEC-026 (font and capsules); spacing, icons, empty
+  states and error codes still apply
 - Decision: paddings and gaps use only `Space` (4, 8, 12, 16, 24, 32, 48 dp; old values were
   rounded to the nearest step, ties up). Every rounded shape is `Corner.Shape` (16 dp), buttons
   and chips included; `CircleShape` is kept only for circles (dots, avatars, round buttons, the
@@ -197,3 +198,14 @@
   developer reads it in the Firebase console. No email or ticket service, and no user id stored.
 - Consequence: no new account or cost. The trade-off is that unauthenticated writes could be
   scripted (docs/FEEDBACK.md); requiring sign-in is a one-line rules change if needed.
+
+## DEC-026 — Keep the Apple look: system font, capsule controls, font is a setting
+- Date: 2026-11-15 · Status: Active
+- Decision: the app stays on the apple-design skill. The default font is the phone's own
+  ("default to the platform's system font"), and other fonts are a choice in Settings › Font:
+  the five most used Google Fonts (Roboto, Open Sans, Montserrat, Lato, Poppins), Plus Jakarta Sans,
+  and the fonts the themes use. Buttons, chips, the tab bar and the day strip are capsules again;
+  cards, fields and sheets keep the 16 dp radius. Bundled fonts ship as separate files per weight,
+  because some phones ignored the variable font's weight (bold titles showed as regular).
+- Consequence: about 2 MB of fonts in the APK (Lato's licence forbids trimming it; the others are
+  cut to Latin text, other scripts fall back to the phone's font).

@@ -1,5 +1,6 @@
 package com.attendo.core.designsystem.motion
 
+import androidx.compose.foundation.layout.RowScope
 import com.attendo.core.designsystem.theme.Space
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -120,6 +121,46 @@ fun CollapsingTopBar(
 
 /** How far below the bar the scroll edge fade reaches. */
 private val EdgeFade = 18.dp
+
+/** Height of the title row on every tab, so all five titles sit at exactly the same place. */
+val PageHeaderHeight = 48.dp
+
+/**
+ * The title row at the top of each tab (Home, Classes, Tasks, Timer, Stats): the large bold title,
+ * vertically centred in a [PageHeaderHeight] row that starts [Space.XS] below the status bar, with
+ * optional buttons on the right. Every tab uses it, so titles line up when switching tabs.
+ */
+@Composable
+fun PageHeader(title: String, modifier: Modifier = Modifier, trailing: @Composable RowScope.() -> Unit = {}) {
+    PageHeaderRow(modifier, trailing) {
+        Text(
+            title,
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+/** [PageHeader] with a custom first line (Home's greeting). */
+@Composable
+fun PageHeaderRow(
+    modifier: Modifier = Modifier,
+    trailing: @Composable RowScope.() -> Unit = {},
+    title: @Composable () -> Unit,
+) {
+    Row(
+        modifier
+            .fillMaxWidth()
+            .padding(top = Space.XS)
+            .height(PageHeaderHeight),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) { title() }
+        trailing()
+    }
+}
 
 /** The big bold page title that sits at the top of the scrolling content. */
 @Composable

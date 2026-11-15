@@ -161,7 +161,7 @@ fun SubjectSyllabusSection(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .background(AttendoColors.CreamCard)
             .padding(start = Space.M, end = Space.M, top = Space.M, bottom = Space.XXS),
     ) {
@@ -246,7 +246,7 @@ private fun CourseCard(
                         style = MaterialTheme.typography.labelSmall,
                         color = AttendoColors.Muted,
                         modifier = Modifier
-                            .clip(Corner.Shape)
+                            .clip(CircleShape)
                             .background(AttendoColors.Cream)
                             .padding(horizontal = Space.XS, vertical = Space.XXS),
                     )

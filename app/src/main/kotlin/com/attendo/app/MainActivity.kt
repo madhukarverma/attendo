@@ -1,5 +1,6 @@
 package com.attendo.app
 
+import com.attendo.core.designsystem.theme.withFont
 import android.content.Intent
 import com.attendo.app.reminders.ReminderNotifications
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -83,8 +84,8 @@ class MainActivity : ComponentActivity() {
             setParentCompositionContext(recomposer)
             setContent {
                 val settings by container.data.settings.settings.collectAsStateWithLifecycle(initialValue = null)
-                // Theme: Light / Dark / Custom palette from settings.csv, applied app-wide.
-                val palette = settings?.let { AttendoPalette.forMode(it.theme, it.customColors) } ?: AttendoPalette.Light
+                // Theme and font from settings.csv, applied app-wide.
+                val palette = settings?.let { AttendoPalette.forMode(it.theme, it.customColors).withFont(it.font) } ?: AttendoPalette.Light
                 SideEffect { AttendoColors.palette = palette }
                 LaunchedEffect(palette.isDark) {
                     val bars = if (palette.isDark) {
