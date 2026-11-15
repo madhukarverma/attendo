@@ -15,6 +15,7 @@ Guides and project memory. `context/` follows the user's AI context framework.
 | `RELEASE_SIGNING.md` | Where the release key is, backing it up, Firebase fingerprints, moving a phone to the release-signed app | releasing, signing errors, a new PC |
 | `SECURITY.md` | What protects the data, Firestore privacy, the last audit, known risks | security or privacy changes |
 | `TEST_REPORT.md` | Every unit test, last results, what isn't tested | test questions; refresh after test changes |
+| `images/` | README banner and charts (light and dark SVGs), drawn by `make_images.py` | changing the README pictures (edit the script, run it, commit the SVGs) |
 
 ## Rules
 - After every feature, update in the same branch: `CHANGELOG.md` (new version on top),
