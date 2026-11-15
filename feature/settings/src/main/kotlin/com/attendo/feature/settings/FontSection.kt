@@ -1,5 +1,6 @@
 package com.attendo.feature.settings
 
+import com.attendo.core.designsystem.theme.ContinuousShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -30,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import com.attendo.core.designsystem.motion.PressStyle
 import com.attendo.core.designsystem.motion.iosPress
 import com.attendo.core.designsystem.theme.AttendoColors
-import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.theme.fontPreview
 import com.attendo.core.model.FontChoice
@@ -46,7 +46,7 @@ internal fun FontSection(font: FontChoice, onFontChange: (FontChoice) -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(20.dp))
             .background(AttendoColors.CreamCard)
             .padding(Space.M),
     ) {
@@ -54,10 +54,10 @@ internal fun FontSection(font: FontChoice, onFontChange: (FontChoice) -> Unit) {
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .clip(Corner.Shape)
+                    .clip(ContinuousShape(16.dp))
                     .iosPress(PressStyle.Highlight, onClickLabel = "Choose font") { open = true }
                     .background(AttendoColors.Cream)
-                    .border(1.dp, AttendoColors.CreamDeep, Corner.Shape)
+                    .border(1.dp, AttendoColors.CreamDeep, ContinuousShape(16.dp))
                     .padding(horizontal = Space.M, vertical = Space.S),
                 verticalAlignment = Alignment.CenterVertically,
             ) {

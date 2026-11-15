@@ -1,7 +1,7 @@
 package com.attendo.feature.dashboard
 
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.motion.PageHeaderRow
-import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.model.formatClock
 import androidx.compose.material.icons.filled.Person
@@ -227,7 +227,7 @@ private fun AttendanceCard(state: DashboardUiState, onOpen: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(28.dp))
             .background(AttendoColors.Hero)
             .iosPress(PressStyle.Highlight, onClickLabel = "Open classes", onClick = onOpen)
             .padding(Space.L),
@@ -372,7 +372,7 @@ private fun ChecklistLine(item: ChecklistItem, onToggle: (ChecklistItem) -> Unit
     Row(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(12.dp))
             .iosPress(PressStyle.Highlight, onClickLabel = if (item.checked) "Untick ${item.habit.title}" else "Tick ${item.habit.title}") {
                 onToggle(item)
             }
@@ -412,7 +412,7 @@ private fun BoardCard(state: DashboardUiState, onOpen: () -> Unit) {
                 Column(
                     Modifier
                         .weight(1f)
-                        .clip(Corner.Shape)
+                        .clip(ContinuousShape(12.dp))
                         .background(AttendoColors.Cream)
                         .padding(horizontal = Space.S, vertical = Space.XS),
                 ) {
@@ -522,7 +522,7 @@ private fun Card(onClick: () -> Unit, label: String, content: @Composable Column
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(24.dp))
             .background(AttendoColors.CreamCard)
             .iosPress(PressStyle.Highlight, onClickLabel = label, onClick = onClick)
             .padding(horizontal = Space.M, vertical = Space.M),
@@ -577,6 +577,6 @@ private fun ProgressBar(progress: Float, color: Color) {
 @Composable
 private fun PauseGlyph(color: Color) {
     Row(horizontalArrangement = Arrangement.spacedBy(Space.XXS)) {
-        repeat(2) { Box(Modifier.width(4.dp).height(14.dp).clip(Corner.Shape).background(color)) }
+        repeat(2) { Box(Modifier.width(4.dp).height(14.dp).clip(ContinuousShape(2.dp)).background(color)) }
     }
 }

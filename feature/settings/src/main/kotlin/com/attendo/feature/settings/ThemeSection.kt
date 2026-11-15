@@ -1,6 +1,6 @@
 package com.attendo.feature.settings
 
-import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.attendoFieldColors
 import androidx.compose.foundation.background
@@ -70,7 +70,7 @@ internal fun ThemeSection(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(20.dp))
             .background(AttendoColors.CreamCard)
             .padding(Space.M),
     ) {
@@ -78,10 +78,10 @@ internal fun ThemeSection(
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .clip(Corner.Shape)
+                    .clip(ContinuousShape(16.dp))
                     .iosPress(PressStyle.Highlight, onClickLabel = "Choose theme") { open = true }
                     .background(AttendoColors.Cream)
-                    .border(1.dp, AttendoColors.CreamDeep, Corner.Shape)
+                    .border(1.dp, AttendoColors.CreamDeep, ContinuousShape(16.dp))
                     .padding(horizontal = Space.M, vertical = Space.S),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -196,7 +196,7 @@ private fun HexColorRow(label: String, hex: String, onValid: (String) -> Unit) {
             isError = parsed == null,
             textStyle = MaterialTheme.typography.labelLarge,
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters),
-            shape = Corner.Shape,
+            shape = ContinuousShape(12.dp),
             colors = attendoFieldColors(),
             modifier = Modifier.width(118.dp),
         )

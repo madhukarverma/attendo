@@ -1,6 +1,6 @@
 package com.attendo.feature.calendar
 
-import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.PillButton
 import com.attendo.core.designsystem.component.HeroStat
@@ -221,7 +221,7 @@ private fun SemesterCard(calendar: AcademicCalendar, today: LocalDate) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(CircleShape)
+            .clip(ContinuousShape(28.dp))
             .background(AttendoColors.Hero)
             .padding(Space.L),
     ) {
@@ -284,7 +284,7 @@ private fun Legend() {
 private fun LegendChip(label: String, color: Color, filled: Boolean) {
     Row(
         Modifier
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .background(AttendoColors.CreamCard)
             .padding(horizontal = Space.S, vertical = Space.XS),
         verticalAlignment = Alignment.CenterVertically,
@@ -307,7 +307,7 @@ private fun ComingUp(calendar: AcademicCalendar, today: LocalDate) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(24.dp))
             .background(AttendoColors.CreamCard)
             .padding(Space.M),
     ) {
@@ -339,7 +339,7 @@ private fun YourTodos(todos: List<Todo>, today: LocalDate) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(24.dp))
             .background(AttendoColors.CreamCard)
             .padding(Space.M),
     ) {
@@ -422,7 +422,7 @@ private fun MonthCard(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(28.dp))
             .background(AttendoColors.CreamCard)
             .padding(Space.M),
     ) {

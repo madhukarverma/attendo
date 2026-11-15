@@ -5,7 +5,8 @@ Look and feel shared by every screen. Sources are in
 
 | File | What it is | Open it for |
 |---|---|---|
-| `theme/Tokens.kt` | `Space` (the spacing scale), `Corner` (the radius for cards, fields, sheets) | any padding, gap or corner |
+| `theme/Tokens.kt` | `Space` (the spacing scale) | any padding or gap |
+| `theme/ContinuousShape.kt` | Apple's continuous corner (`ContinuousShape(radius)`), used for every rounded box | corners |
 | `theme/Fonts.kt` | Settings › Font: the bundled fonts (`res/font`, licences in `fonts/`) and `withFont` | adding or changing a font |
 | `theme/Theme.kt` | Theme fonts, colour palettes for each theme, `AttendoColors`, `AttendoTheme`, contrast helpers | colours, adding a theme |
 | `motion/Motion.kt` | Springs for each Animations mode (`push`, `sheet`, `settle`, `snappy`, `release`), `LocalAnimationMode` | how fast or bouncy things move |
@@ -27,9 +28,10 @@ Look and feel shared by every screen. Sources are in
 | `component/LaunchArt.kt` | Launch-screen background, batch label, "developed by" line | launch screen |
 
 ## Rules
-- Spacing comes from `Space` only (4, 8, 12, 16, 24, 32, 48 dp). Cards, fields and sheets use
-  `Corner.Shape` (16 dp); buttons, chips and the tab bar are capsules and round things circles
-  (`CircleShape`), as in Apple's design (DEC-024, DEC-026).
+- Spacing comes from `Space` only (4, 8, 12, 16, 24, 32, 48 dp) (DEC-024).
+- Rounded boxes use `ContinuousShape(radius)` with the radius that suits that box; there is no
+  single app-wide radius. Nested boxes: inner radius = outer radius − padding. Buttons, chips and
+  the tab bar are capsules, round things circles (`CircleShape`) (DEC-026, DEC-027).
 - Every tab starts with `PageHeader`, so titles sit at the same height on all five.
 - The default font is the phone's own (apple-design skill: system font first); bundled fonts
   are only used when chosen in Settings › Font.

@@ -1,10 +1,10 @@
 package com.attendo.core.designsystem.component
 
+import com.attendo.core.designsystem.theme.ContinuousShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateIntAsState
@@ -58,7 +58,7 @@ fun SpeechBubble(
         if (tail == TailSide.TopCenter) BubbleTail(color, pointingUp = true, Modifier.align(Alignment.CenterHorizontally))
         Box(
             Modifier
-                .clip(CircleShape)
+                .clip(ContinuousShape(32.dp))
                 .background(color)
                 .padding(horizontal = Space.L, vertical = Space.M),
         ) {
@@ -115,7 +115,7 @@ fun AttendoCard(
     Row(
         modifier
             .fillMaxWidth()
-            .clip(CircleShape)
+            .clip(ContinuousShape(20.dp))
             .background(AttendoColors.CreamCard)
             .then(if (onClick != null) Modifier.iosPress(PressStyle.Highlight, onClick = onClick) else Modifier)
             .padding(horizontal = Space.M, vertical = Space.M),
@@ -133,7 +133,7 @@ fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifi
             .fillMaxWidth()
             .height(58.dp)
             .iosPress(PressStyle.Dim, enabled = enabled, onClick = onClick)
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .background(container),
         contentAlignment = Alignment.Center,
     ) {
@@ -190,7 +190,7 @@ fun PercentPill(text: String, modifier: Modifier = Modifier, color: Color = Atte
     Box(
         modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .background(color)
             .padding(vertical = Space.M),
         contentAlignment = Alignment.Center,

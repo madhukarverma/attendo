@@ -1,5 +1,6 @@
 package com.attendo.core.designsystem.component
 
+import com.attendo.core.designsystem.theme.ContinuousShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +26,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.attendo.core.designsystem.theme.AttendoColors
-import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 
 /**
@@ -75,7 +75,7 @@ fun ErrorNote(message: String, modifier: Modifier = Modifier) {
     Row(
         modifier
             .fillMaxWidth()
-            .background(AttendoColors.PinkFill.copy(alpha = 0.16f), Corner.Shape)
+            .background(AttendoColors.PinkFill.copy(alpha = 0.16f), ContinuousShape(16.dp))
             .padding(Space.S)
             .semantics { liveRegion = LiveRegionMode.Polite },
         horizontalArrangement = Arrangement.Start,

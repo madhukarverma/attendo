@@ -178,18 +178,13 @@
 - Consequence: the test suite adds Node tooling under `firebase/test/` (not part of the Android
   build). No server-side rate limiting: the free Firebase plan can't do it (`docs/SECURITY.md`).
 
-## DEC-024 — One spacing scale, one radius, one font, icons, coded errors
-- Date: 2026-11-15 · Status: Partly replaced by DEC-026 (font and capsules); spacing, icons, empty
-  states and error codes still apply
+## DEC-024 — One spacing scale, icons, empty states, coded errors
+- Date: 2026-11-15 · Status: Active. Its font and corner-radius parts were withdrawn at the user's
+  request (see DEC-026 and DEC-027) and removed from this entry.
 - Decision: paddings and gaps use only `Space` (4, 8, 12, 16, 24, 32, 48 dp; old values were
-  rounded to the nearest step, ties up). Every rounded shape is `Corner.Shape` (16 dp), buttons
-  and chips included; `CircleShape` is kept only for circles (dots, avatars, round buttons, the
-  dial). The app font is Plus Jakarta Sans, bundled as one variable font (Ledger and VS Code
-  themes keep their monospace faces). Marks use icons, never text symbols or emoji. Empty lists
-  use `EmptyState`. Every error the user sees comes from `ErrorCode` and ends with its code.
-- Consequence: the look changed (rounded rectangles instead of pills, a little more space) without
-  being checked on a phone; review screenshots before the next visual change. Chart marks keep
-  their own small radii (data, not chrome).
+  rounded to the nearest step, ties up). Marks use icons, never text symbols or emoji. Empty
+  lists use `EmptyState`. Every error the user sees comes from `ErrorCode` and ends with its code.
+- Consequence: a little more space everywhere. Review screenshots before the next visual change.
 
 ## DEC-025 — Feedback goes to Firestore, write-only, no sign-in
 - Date: 2026-11-15 · Status: Active
@@ -204,8 +199,19 @@
 - Decision: the app stays on the apple-design skill. The default font is the phone's own
   ("default to the platform's system font"), and other fonts are a choice in Settings › Font:
   the five most used Google Fonts (Roboto, Open Sans, Montserrat, Lato, Poppins), Plus Jakarta Sans,
-  and the fonts the themes use. Buttons, chips, the tab bar and the day strip are capsules again;
-  cards, fields and sheets keep the 16 dp radius. Bundled fonts ship as separate files per weight,
+  and the fonts the themes use. Buttons, chips, the tab bar and the day strip are capsules again
+  (corner radii: DEC-027). Bundled fonts ship as separate files per weight,
   because some phones ignored the variable font's weight (bold titles showed as regular).
 - Consequence: about 2 MB of fonts in the APK (Lato's licence forbids trimming it; the others are
   cut to Latin text, other scripts fall back to the phone's font).
+
+## DEC-027 — Each box keeps its own radius, with Apple's continuous corners
+- Date: 2026-11-15 · Status: Active
+- Decision: there is no single app-wide corner radius. Every box has the radius it was designed with
+  (restored exactly from before v0.35.0), drawn with `ContinuousShape`: Apple's continuous corner,
+  which eases into the straight edge like iOS cards instead of a circular arc. Capsules (buttons,
+  chips, tab bar, day strip) and circles stay `CircleShape`. Material's own surfaces (dialogs,
+  menus) keep `RoundedCornerShape`, which Material requires. For new nested boxes, prefer
+  concentric corners (inner radius = outer radius − the padding between them).
+- Consequence: corner clipping uses a path, a little more work than a plain rounded rectangle; it
+  falls back to a normal round corner when a box is too small for the full curve.

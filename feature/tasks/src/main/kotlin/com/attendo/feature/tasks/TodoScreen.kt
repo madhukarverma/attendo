@@ -1,6 +1,6 @@
 package com.attendo.feature.tasks
 
-import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.AttendoTimePicker
 import com.attendo.core.designsystem.component.AttendoDatePicker
@@ -233,7 +233,7 @@ private fun AddTodoCard(today: LocalDate, now: LocalDateTime, onAdd: (String, Lo
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(CircleShape)
+            .clip(ContinuousShape(24.dp))
             .background(AttendoColors.CreamCard)
             .padding(Space.M),
     ) {
@@ -243,7 +243,7 @@ private fun AddTodoCard(today: LocalDate, now: LocalDateTime, onAdd: (String, Lo
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             placeholder = { Text("Remind me to…") },
-            shape = Corner.Shape,
+            shape = ContinuousShape(16.dp),
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { submit() }),
             colors = attendoFilledFieldColors(AttendoColors.Cream),
@@ -311,7 +311,7 @@ private fun OptionChip(
 ) {
     Row(
         Modifier
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .iosPress(PressStyle.Dim, onClickLabel = label, onClick = onClick)
             .background(if (selected) AttendoColors.Green else AttendoColors.Cream)
             .padding(start = Space.S, end = if (onClear != null) Space.XS else Space.S, top = Space.XS, bottom = Space.XS),
@@ -350,7 +350,7 @@ private fun TodoRow(
     Row(
         modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(20.dp))
             .background(AttendoColors.CreamCard)
             .iosPress(PressStyle.Highlight, onClickLabel = if (todo.done) "Mark not done" else "Mark done") { onToggle(todo) }
             .padding(start = Space.M, end = Space.XXS, top = Space.S, bottom = Space.S),
@@ -418,7 +418,7 @@ private fun NotificationsBanner(onEnable: () -> Unit, modifier: Modifier = Modif
     Row(
         modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(20.dp))
             .background(AttendoColors.Pink.copy(alpha = 0.14f))
             .padding(start = Space.M, end = Space.XXS, top = Space.XS, bottom = Space.XS),
         verticalAlignment = Alignment.CenterVertically,

@@ -1,5 +1,6 @@
 package com.attendo.feature.attendance
 
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.component.CircleMascot
 import com.attendo.core.designsystem.component.TabBarClearance
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -7,7 +8,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.material3.Icon
 import com.attendo.core.designsystem.component.AttendoIcons
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
@@ -324,8 +324,8 @@ private fun SubjectProfileCard(
         modifier
             .fillMaxWidth(0.88f)
             .fillMaxHeight(0.95f)
-            .shadow(14.dp, Corner.Shape)
-            .clip(Corner.Shape)
+            .shadow(14.dp, ContinuousShape(28.dp))
+            .clip(ContinuousShape(28.dp))
             .background(color),
     ) {
         // Big abbreviation as the card's "face".
@@ -420,7 +420,7 @@ private fun androidx.compose.foundation.layout.BoxScope.Stamp(
                 this.alpha = alpha()
                 rotationZ = angle
             }
-            .border(4.dp, color, Corner.Shape)
+            .border(4.dp, color, ContinuousShape(10.dp))
             .padding(horizontal = Space.S, vertical = Space.XXS),
     )
 }

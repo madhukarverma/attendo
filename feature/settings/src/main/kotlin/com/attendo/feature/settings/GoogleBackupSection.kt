@@ -1,6 +1,6 @@
 package com.attendo.feature.settings
 
-import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.PillButton
 import androidx.compose.foundation.background
@@ -69,7 +69,7 @@ internal fun GoogleBackupSection(backup: GoogleDriveBackup) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(20.dp))
             .background(AttendoColors.CreamCard)
             .padding(Space.M),
     ) {

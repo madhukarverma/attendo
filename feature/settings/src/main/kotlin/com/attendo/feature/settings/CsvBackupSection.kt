@@ -1,6 +1,6 @@
 package com.attendo.feature.settings
 
-import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.model.ErrorCode
 import com.attendo.core.designsystem.component.PillButton
@@ -75,7 +75,7 @@ internal fun CsvBackupSection(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(20.dp))
             .background(AttendoColors.CreamCard)
             .padding(Space.M),
     ) {

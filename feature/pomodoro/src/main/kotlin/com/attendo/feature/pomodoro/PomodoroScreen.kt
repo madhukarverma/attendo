@@ -1,9 +1,9 @@
 package com.attendo.feature.pomodoro
 
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.motion.PageHeader
 import androidx.compose.material.icons.filled.PlayArrow
 import com.attendo.core.designsystem.component.EmptyState
-import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.ProgressBar
 import com.attendo.core.designsystem.component.HeroStat
@@ -365,7 +365,7 @@ private fun SkipGlyph(color: Color) {
 private fun InfoCard(label: String, value: String, detail: String, accent: Color, modifier: Modifier = Modifier) {
     Column(
         modifier
-            .clip(CircleShape)
+            .clip(ContinuousShape(22.dp))
             .background(AttendoColors.CreamCard)
             .padding(Space.M),
     ) {
@@ -404,7 +404,7 @@ private fun Chip(label: String, selected: Boolean, enabled: Boolean = true, onCl
     Box(
         Modifier
             .iosPress(PressStyle.Scale, enabled = enabled, onClickLabel = label, onClick = onClick)
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .background(bg)
             .padding(horizontal = Space.M, vertical = Space.S),
     ) {
@@ -471,7 +471,7 @@ private fun OverviewCard(summary: PomodoroSummary) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(28.dp))
             .background(AttendoColors.Hero)
             .padding(Space.L),
     ) {
@@ -497,7 +497,7 @@ private fun WeekChart(summary: PomodoroSummary) {
         Modifier
             .fillMaxWidth()
             .height(150.dp)
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(20.dp))
             .background(AttendoColors.CreamCard)
             .padding(Space.M),
         horizontalArrangement = Arrangement.SpaceBetween,

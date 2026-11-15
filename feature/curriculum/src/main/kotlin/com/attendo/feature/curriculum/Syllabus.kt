@@ -1,6 +1,6 @@
 package com.attendo.feature.curriculum
 
-import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.ProgressBar
 import com.attendo.core.designsystem.component.HeroStat
@@ -161,7 +161,7 @@ fun SubjectSyllabusSection(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(CircleShape)
+            .clip(ContinuousShape(22.dp))
             .background(AttendoColors.CreamCard)
             .padding(start = Space.M, end = Space.M, top = Space.M, bottom = Space.XXS),
     ) {
@@ -184,7 +184,7 @@ private fun Overview(curriculum: Curriculum, covered: Set<UnitKey>) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(26.dp))
             .background(AttendoColors.Hero)
             .padding(Space.L),
     ) {
@@ -225,7 +225,7 @@ private fun CourseCard(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(24.dp))
             .background(AttendoColors.CreamCard),
     ) {
         Row(
@@ -395,7 +395,7 @@ private fun Outcomes(outcomes: List<String>) {
         Modifier
             .padding(top = Space.S)
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(16.dp))
             .background(AttendoColors.Cream)
             .padding(Space.M),
     ) {
@@ -415,7 +415,7 @@ private fun FocusButton(name: String, onClick: () -> Unit) {
         Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .iosPress(PressStyle.Scale, onClickLabel = "Focus on $name", onClick = onClick)
             .background(AttendoColors.Hero),
         horizontalArrangement = Arrangement.Center,

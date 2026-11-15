@@ -1,6 +1,6 @@
 package com.attendo.feature.calendar
 
-import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.PillButton
 import com.attendo.core.designsystem.component.AttendoTimePicker
@@ -281,7 +281,7 @@ internal fun EventDialog(
                     placeholder = { Text("e.g. DSA class test") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = Corner.Shape,
+                    shape = ContinuousShape(14.dp),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     colors = attendoFieldColors(),
                 )
@@ -302,7 +302,7 @@ internal fun EventDialog(
                     label = { Text("Note (optional)") },
                     maxLines = 3,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = Corner.Shape,
+                    shape = ContinuousShape(14.dp),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     colors = attendoFieldColors(),
                 )
@@ -448,7 +448,7 @@ private fun DayCard(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(CircleShape)
+            .clip(ContinuousShape(22.dp))
             .background(AttendoColors.CreamCard)
             .padding(vertical = Space.XS),
     ) {
@@ -552,7 +552,7 @@ private fun SlotDialog(
                     label = { Text("Room (optional)") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = Corner.Shape,
+                    shape = ContinuousShape(14.dp),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters),
                     colors = attendoFieldColors(),
                 )
@@ -594,7 +594,7 @@ private fun Chip(text: String, selected: Boolean, dot: Color? = null, onClick: (
     val content = if (selected) AttendoColors.Cream else AttendoColors.Ink
     Row(
         Modifier
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .iosPress(PressStyle.Dim, onClickLabel = text, onClick = onClick)
             .background(if (selected) AttendoColors.Ink else AttendoColors.CreamCard)
             .border(1.dp, if (selected) AttendoColors.Ink else AttendoColors.CreamDeep, CircleShape)

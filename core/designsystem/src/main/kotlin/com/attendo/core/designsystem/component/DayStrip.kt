@@ -1,5 +1,6 @@
 package com.attendo.core.designsystem.component
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.attendo.core.designsystem.theme.Space
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
@@ -96,7 +97,7 @@ fun DayStrip(
             Column(
                 Modifier
                     .iosPress(PressStyle.Scale, onClickLabel = day.toString()) { onSelect(day) }
-                    .clip(CircleShape)
+                    .clip(RoundedCornerShape(50))
                     .background(pill)
                     .padding(horizontal = Space.XS, vertical = Space.XS)
                     .width(30.dp),

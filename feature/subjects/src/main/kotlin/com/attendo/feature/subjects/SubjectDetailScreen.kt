@@ -1,7 +1,7 @@
 package com.attendo.feature.subjects
 
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.component.CircleMascot
-import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.attendoFieldColors
 import com.attendo.core.data.PlannerRepository
@@ -332,7 +332,7 @@ private fun CourseHours(summary: AttendanceSummary, onEdit: () -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(20.dp))
             .background(AttendoColors.CreamCard)
             .padding(horizontal = Space.M, vertical = Space.M),
     ) {
@@ -402,7 +402,7 @@ private fun LectureHoursDialog(current: Int?, onDismiss: () -> Unit, onSave: (In
                     singleLine = true,
                     placeholder = { Text("e.g. 45") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    shape = Corner.Shape,
+                    shape = ContinuousShape(16.dp),
                     colors = attendoFieldColors(),
                 )
             }

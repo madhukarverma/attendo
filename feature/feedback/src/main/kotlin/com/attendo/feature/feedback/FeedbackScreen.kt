@@ -1,5 +1,6 @@
 package com.attendo.feature.feedback
 
+import com.attendo.core.designsystem.theme.ContinuousShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -56,7 +57,6 @@ import com.attendo.core.designsystem.motion.LargeTitle
 import com.attendo.core.designsystem.motion.rememberCollapseFraction
 import com.attendo.core.designsystem.motion.rememberHaptics
 import com.attendo.core.designsystem.theme.AttendoColors
-import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.model.Feedback
 import com.attendo.core.model.FeedbackCategory
@@ -216,7 +216,7 @@ private fun Form(
         placeholder = { Text(state.category.prompt) },
         minLines = 5,
         maxLines = 10,
-        shape = Corner.Shape,
+        shape = ContinuousShape(20.dp),
         colors = attendoFilledFieldColors(AttendoColors.CreamCard),
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         supportingText = {
@@ -233,7 +233,7 @@ private fun Form(
         singleLine = true,
         placeholder = { Text("you@example.com") },
         isError = badEmail && state.result != null,
-        shape = Corner.Shape,
+        shape = ContinuousShape(20.dp),
         colors = attendoFilledFieldColors(AttendoColors.CreamCard),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done),
         supportingText = { Text("Only if you'd like a reply. It's never shown to anyone else.") },
@@ -323,7 +323,7 @@ private fun CategoryChip(label: String, selected: Boolean, onClick: () -> Unit) 
     Box(
         Modifier
             .height(40.dp)
-            .background(if (selected) AttendoColors.Ink else AttendoColors.CreamCard, Corner.Shape)
+            .background(if (selected) AttendoColors.Ink else AttendoColors.CreamCard, CircleShape)
             .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
             .padding(horizontal = Space.M),
         contentAlignment = Alignment.Center,
@@ -378,7 +378,7 @@ private fun ThankYou(reference: String, queued: Boolean, onDone: () -> Unit, onS
             style = MaterialTheme.typography.labelLarge,
             color = AttendoColors.Ink,
             modifier = Modifier
-                .background(AttendoColors.CreamCard, Corner.Shape)
+                .background(AttendoColors.CreamCard, CircleShape)
                 .padding(horizontal = Space.S, vertical = Space.XS),
         )
         Spacer(Modifier.height(Space.XL))

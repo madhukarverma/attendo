@@ -1,8 +1,8 @@
 package com.attendo.feature.friends
 
+import com.attendo.core.designsystem.theme.ContinuousShape
 import androidx.compose.material.icons.filled.Person
 import com.attendo.core.designsystem.component.EmptyState
-import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.attendoFilledFieldColors
 import android.app.Activity
@@ -253,7 +253,7 @@ private fun ProfileCard(me: StudentProfile, state: SocialState, onSignOut: () ->
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(CircleShape)
+            .clip(ContinuousShape(24.dp))
             .background(AttendoColors.Hero)
             .padding(Space.M),
     ) {
@@ -316,7 +316,7 @@ private fun SearchField(query: String, searching: Boolean, onChange: (String) ->
         placeholder = { Text("Find classmates by name or friend code") },
         leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null, tint = AttendoColors.Muted) },
         trailingIcon = { if (searching) CircularProgressIndicator(Modifier.size(18.dp), color = AttendoColors.Green, strokeWidth = 2.dp) },
-        shape = Corner.Shape,
+        shape = ContinuousShape(18.dp),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = {}),
         colors = attendoFilledFieldColors(AttendoColors.CreamCard),
@@ -340,7 +340,7 @@ internal fun StudentRow(student: StudentProfile, onClick: (() -> Unit)? = null, 
     Row(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(18.dp))
             .background(AttendoColors.CreamCard)
             .then(if (onClick != null) Modifier.iosPress(PressStyle.Highlight, onClickLabel = "Open ${student.name}", onClick = onClick) else Modifier)
             .padding(horizontal = Space.M, vertical = Space.S),
@@ -376,7 +376,7 @@ internal fun SmallPill(text: String, primary: Boolean, enabled: Boolean = true, 
             else -> AttendoColors.Ink
         },
         modifier = Modifier
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .iosPress(PressStyle.Scale, enabled = enabled, onClickLabel = text, onClick = onClick)
             .background(if (!enabled) AttendoColors.CreamDeep else if (primary) AttendoColors.GreenFill else AttendoColors.CreamCard)
             .padding(horizontal = Space.M, vertical = Space.XS),
@@ -388,7 +388,7 @@ internal fun Card(content: @Composable () -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(22.dp))
             .background(AttendoColors.CreamCard)
             .padding(Space.M),
     ) { content() }

@@ -1,6 +1,6 @@
 package com.attendo.feature.tasks
 
-import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.theme.Space
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -370,7 +370,7 @@ internal fun BoardPage(board: KanbanBoard?, today: LocalDate, actions: BoardActi
     }
 }
 
-private val CardShape = Corner.Shape
+private val CardShape = ContinuousShape(16.dp)
 private val DueFormat = DateTimeFormatter.ofPattern("d MMM")
 
 internal fun CardPriority.color(): Color = when (this) {
@@ -413,9 +413,9 @@ private fun ColumnShell(
     var menu by remember { mutableStateOf(false) }
     Column(
         modifier
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(20.dp))
             .background(AttendoColors.CreamCard)
-            .then(if (isDropTarget) Modifier.border(2.dp, AttendoColors.Green, Corner.Shape) else Modifier),
+            .then(if (isDropTarget) Modifier.border(2.dp, AttendoColors.Green, ContinuousShape(20.dp)) else Modifier),
     ) {
         Row(
             Modifier.fillMaxWidth().padding(start = Space.M, end = Space.XXS, top = Space.XS),
@@ -503,9 +503,9 @@ private fun DropLine() {
 private fun AddColumnTile(modifier: Modifier, onClick: () -> Unit) {
     Row(
         modifier
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(20.dp))
             .iosPress(PressStyle.Highlight, onClickLabel = "Add a column", onClick = onClick)
-            .border(1.5.dp, AttendoColors.CreamDeep, Corner.Shape)
+            .border(1.5.dp, AttendoColors.CreamDeep, ContinuousShape(20.dp))
             .padding(horizontal = Space.M, vertical = Space.M),
         verticalAlignment = Alignment.CenterVertically,
     ) {
