@@ -14,8 +14,9 @@ calendar and friends. All data is CSV. Private repo `madhukarverma/attendo`, bra
 | `core/designsystem/` | Themes, type scale, colours, motion and haptics, frosted glass, mascots, shared controls, tab bar. See `core/designsystem/CLAUDE.md` | look and feel, animations |
 | `core/backup/` | Google Drive backup: `GoogleDriveBackup.kt` (sync, change watcher), `DriveAppDataClient.kt` (HTTP), `GoogleSignIn.kt` | backup problems |
 | `core/social/` | Friends backend on Firebase: `SocialService.kt` (sign-in, requests, sharing), `SocialModels.kt` | friends logic, what's shared |
-| `feature/` | One module per screen, 12 in all. See `feature/CLAUDE.md` | changing a screen |
+| `feature/` | One module per screen, 13 in all. See `feature/CLAUDE.md` | changing a screen |
 | `firebase/firestore.rules` | Server-side privacy rules for friends | changing who sees what (re-publish in the Firebase console) |
+| `docs/ERROR_CODES.md` | Every error code the app shows (`ST-`, `IM-`, `BK-`, `FR-`, `FB-`) and what to do | a user quotes a code, adding an error |
 | `firebase/test/` | Tests for those rules on the local Firestore emulator (`npm install`, `npm test`; Node + Java) | after any rules change, before publishing |
 | `docs/` | Setup guides, security notes, test report, flowcharts, project memory. See `docs/CLAUDE.md` | setup, history, decisions, recording a feature |
 | `gradle/libs.versions.toml` | Every library and plugin version | adding or updating a library |
@@ -72,18 +73,22 @@ and `core/model/src/test/…/X.kt` is the same path under `src/test`.
    → `app/build.gradle.kts` (dependency) → `app/…/navigation/AttendoNavHost.kt` (`Routes` and the composable).
 5. **Add or change a theme:** `core/designsystem/…/theme/Theme.kt` → `core/model/…/AppSettings.kt`
    → `feature/settings/…/ThemeSection.kt`.
-6. **Change animations or gestures:** `core/designsystem/…/motion/Motion.kt` → `core/model/…/Physics.kt` (flick projection,
+6. **Change spacing, corners, fonts or icons:** `core/designsystem/…/theme/Tokens.kt` (`Space`, `Corner`,
+   `AttendoSans`) → `component/AttendoIcons.kt` → `component/EmptyState.kt` (empty states, `ErrorNote`). DEC-024.
+7. **Change animations or gestures:** `core/designsystem/…/motion/Motion.kt` → `core/model/…/Physics.kt` (flick projection,
    rubber band) → `motion/IosPress.kt`, `motion/BounceScroll.kt` or `motion/Haptics.kt`
    → `app/…/navigation/Transitions.kt`.
-7. **Change the tabs or navigation:** `app/…/navigation/AttendoNavHost.kt` → `core/designsystem/…/component/TabBar.kt`.
-8. **Change the timer:** `feature/pomodoro/…/FocusDial.kt` (the dial) or `PomodoroScreen.kt` (controls, pages)
+8. **Change the tabs or navigation:** `app/…/navigation/AttendoNavHost.kt` → `core/designsystem/…/component/TabBar.kt`.
+9. **Change the timer:** `feature/pomodoro/…/FocusDial.kt` (the dial) or `PomodoroScreen.kt` (controls, pages)
    → `core/data/…/pomodoro/PomodoroTimer.kt` (timing) → `core/data/src/test/…/PomodoroTimerTest.kt`.
-9. **Change reminders:** `feature/tasks/…/TodoScreen.kt` → `app/…/reminders/ReminderScheduler.kt`,
+10. **Change reminders:** `feature/tasks/…/TodoScreen.kt` → `app/…/reminders/ReminderScheduler.kt`,
    `ReminderReceiver.kt`, `ReminderNotifications.kt` → `app/src/main/AndroidManifest.xml`.
-10. **Change friends:** `core/social/…/SocialService.kt` → `firebase/firestore.rules` → `firebase/test/rules.test.mjs`
+11. **Change friends:** `core/social/…/SocialService.kt` → `firebase/firestore.rules` → `firebase/test/rules.test.mjs`
     (`npm test`) → `feature/friends/…/FriendsScreen.kt`, `StudentScreen.kt`.
-11. **Change the Google backup:** `core/backup/…/GoogleDriveBackup.kt` → `feature/settings/…/GoogleBackupSection.kt`.
-12. **Release a version:** `app/build.gradle.kts` → `docs/context/CHANGELOG.md` → build and test → tag `vX.Y.Z`
+12. **Change the Google backup:** `core/backup/…/GoogleDriveBackup.kt` → `feature/settings/…/GoogleBackupSection.kt`.
+13. **Read or change feedback:** `docs/FEEDBACK.md` (where to read it) → `feature/feedback/…/FeedbackScreen.kt`
+    → `core/social/…/FirestoreFeedbackSender.kt` → `validFeedback` in `firebase/firestore.rules` → `firebase/test/rules.test.mjs`.
+14. **Release a version:** `app/build.gradle.kts` → `docs/context/CHANGELOG.md` → build and test → tag `vX.Y.Z`
     → `gh release create` with both APK names.
-13. **Record a finished feature:** `docs/context/CHANGELOG.md`, `CURRENT_STATE.md`, `OPEN_ISSUES.md`,
+15. **Record a finished feature:** `docs/context/CHANGELOG.md`, `CURRENT_STATE.md`, `OPEN_ISSUES.md`,
     `DECISIONS.md` (only if a choice was made), and `docs/FLOWCHART.md` if screens or navigation changed.

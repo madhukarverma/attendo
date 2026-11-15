@@ -1,5 +1,6 @@
 package com.attendo.feature.splash
 
+import com.attendo.core.designsystem.theme.Space
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -79,7 +80,7 @@ fun LogoSplash(
                 letterSpacing = 3.sp,
                 modifier = Modifier.graphicsLayer { alpha = reveal.value },
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(Space.M))
             if (image != null) {
                 Image(
                     bitmap = image,
@@ -92,7 +93,7 @@ fun LogoSplash(
                             translationY = (1f - reveal.value) * 16.dp.toPx()
                         },
                 )
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(Space.M))
             }
             Text(
                 "ATTENDO",
@@ -116,7 +117,7 @@ fun LogoSplash(
             Modifier
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
-                .padding(bottom = 24.dp)
+                .padding(bottom = Space.L)
                 .graphicsLayer { alpha = wordmark.value },
         )
     }

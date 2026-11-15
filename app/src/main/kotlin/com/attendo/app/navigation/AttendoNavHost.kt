@@ -1,5 +1,7 @@
 package com.attendo.app.navigation
 
+import com.attendo.core.designsystem.theme.Space
+import com.attendo.feature.feedback.FeedbackRoute
 import com.attendo.feature.friends.FriendsScreen
 import com.attendo.feature.friends.StudentScreen
 import com.attendo.feature.calendar.TimetableScreen
@@ -100,6 +102,7 @@ object Routes {
     const val SETTINGS = "settings"
     const val TIMETABLE = "timetable"
     const val FRIENDS = "friends"
+    const val FEEDBACK = "feedback"
     const val STUDENT = "student/{uid}"
     fun student(uid: String) = "student/$uid"
     const val CALENDAR = "calendar/{date}"
@@ -337,6 +340,13 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                         onClose = { navController.back() },
                     )
                 }
+                composable(Routes.FEEDBACK) {
+                    FeedbackRoute(
+                        sender = container.feedback,
+                        diagnostics = container.feedbackDiagnostics,
+                        onClose = { navController.back() },
+                    )
+                }
                 composable(Routes.FRIENDS) {
                     FriendsScreen(
                         social = container.social,
@@ -389,6 +399,7 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                         },
                         googleBackup = container.googleBackup,
                         onOpenFriends = { navController.push(Routes.FRIENDS) },
+                        onOpenFeedback = { navController.push(Routes.FEEDBACK) },
                         onPlanCsvImport = { uris -> data.planCsvImport(CsvImporter.read(context, uris)) },
                         onApplyCsvImport = { plan -> data.applyCsvImport(plan) },
                     )
@@ -425,7 +436,7 @@ fun AttendoNavHost(container: AppContainer, openRequest: String? = null, onOpenH
                     backdrop = backdrop,
                     modifier = Modifier
                         .navigationBarsPadding()
-                        .padding(horizontal = 20.dp, vertical = 12.dp),
+                        .padding(horizontal = Space.L, vertical = Space.S),
                 )
             }
         }

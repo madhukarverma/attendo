@@ -1,5 +1,7 @@
 package com.attendo.feature.subjects
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.attendoFilledFieldColors
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.background
@@ -15,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -109,17 +110,17 @@ fun AddSubjectScreen(
             .safeDrawingPadding()
             .imePadding()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = Space.L),
     ) {
-        Box(Modifier.fillMaxWidth().padding(top = 8.dp)) {
+        Box(Modifier.fillMaxWidth().padding(top = Space.XS)) {
             Text("New subject", style = MaterialTheme.typography.titleMedium, modifier = Modifier.align(Alignment.Center))
             IconButton(onClick = onClose, modifier = Modifier.align(Alignment.CenterEnd)) {
                 Icon(Icons.Filled.Close, contentDescription = "Close")
             }
         }
-        Row(Modifier.fillMaxWidth().padding(vertical = 12.dp), verticalAlignment = Alignment.Bottom) {
+        Row(Modifier.fillMaxWidth().padding(vertical = Space.S), verticalAlignment = Alignment.Bottom) {
             TriangleMascot(Modifier.size(150.dp))
-            SpeechBubble("Which class are we tracking?", tail = TailSide.BottomStart, modifier = Modifier.padding(bottom = 80.dp))
+            SpeechBubble("Which class are we tracking?", tail = TailSide.BottomStart, modifier = Modifier.padding(bottom = Space.XXL + Space.XL))
         }
 
         if (suggestions.isNotEmpty()) {
@@ -128,8 +129,8 @@ fun AddSubjectScreen(
                 Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState())
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    .padding(bottom = Space.M),
+                horizontalArrangement = Arrangement.spacedBy(Space.XS),
             ) {
                 suggestions.forEach { s ->
                     val selected = s.code == code
@@ -140,9 +141,9 @@ fun AddSubjectScreen(
                                 code = s.code
                                 s.lectureHours?.let { hours = it.toString() }
                             }
-                            .clip(RoundedCornerShape(16.dp))
+                            .clip(Corner.Shape)
                             .background(if (selected) AttendoColors.Ink else AttendoColors.CreamCard)
-                            .padding(horizontal = 14.dp, vertical = 10.dp)
+                            .padding(horizontal = Space.M, vertical = Space.S)
                             .widthIn(max = 180.dp),
                     ) {
                         Text(
@@ -163,10 +164,10 @@ fun AddSubjectScreen(
 
         FieldLabel("Subject name")
         RoundedField(name, { name = it.take(40) }, "e.g. Data Structures", KeyboardCapitalization.Words)
-        Spacer(Modifier.height(14.dp))
+        Spacer(Modifier.height(Space.M))
         FieldLabel("Code (optional)")
         RoundedField(code, { code = it.take(12) }, "e.g. CS201", KeyboardCapitalization.Characters)
-        Spacer(Modifier.height(14.dp))
+        Spacer(Modifier.height(Space.M))
         FieldLabel("Lecture hours (optional, 1 lecture = 1 hour)")
         RoundedField(
             hours,
@@ -175,7 +176,7 @@ fun AddSubjectScreen(
             KeyboardCapitalization.None,
             KeyboardType.Number,
         )
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(Space.L))
         FieldLabel("Minimum attendance: ${target.roundToInt()}%")
         Slider(
             value = target,
@@ -188,19 +189,19 @@ fun AddSubjectScreen(
                 inactiveTrackColor = AttendoColors.CreamDeep,
             ),
         )
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(Space.L))
         PrimaryButton(
             text = "Save subject",
             onClick = { onSave(name, code, target.roundToInt(), hours.toIntOrNull()?.takeIf { it > 0 }) },
             enabled = name.isNotBlank(),
         )
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(Space.L))
     }
 }
 
 @Composable
 private fun FieldLabel(text: String) {
-    Text(text, style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(bottom = 6.dp, start = 4.dp))
+    Text(text, style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(bottom = Space.XS, start = Space.XXS))
 }
 
 @Composable
@@ -216,7 +217,7 @@ private fun RoundedField(
         onValueChange = onChange,
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
-        shape = RoundedCornerShape(20.dp),
+        shape = Corner.Shape,
         placeholder = { Text(placeholder) },
         keyboardOptions = KeyboardOptions(capitalization = capitalization, keyboardType = keyboardType),
         colors = attendoFilledFieldColors(AttendoColors.CreamCard),

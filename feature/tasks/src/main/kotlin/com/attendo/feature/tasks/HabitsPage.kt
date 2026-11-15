@@ -1,5 +1,7 @@
 package com.attendo.feature.tasks
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.attendoFilledFieldColors
 import com.attendo.core.designsystem.component.attendoFieldColors
 import androidx.compose.foundation.background
@@ -19,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -87,8 +88,8 @@ internal fun HabitsPage(
 
     BounceContainer(Modifier.fillMaxSize()) {
         LazyColumn(
-            Modifier.fillMaxSize().padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            Modifier.fillMaxSize().padding(horizontal = Space.L),
+            verticalArrangement = Arrangement.spacedBy(Space.XS),
         ) {
             item(key = "week") { WeekCard(state, onSelect, onShiftWeek) }
             item(key = "day") { DayHeader(state) }
@@ -105,7 +106,7 @@ internal fun HabitsPage(
                 )
             }
             item(key = "add") {
-                AddHabitCard(selectedDay = state.selected.dayOfWeek, onAdd = onAdd, modifier = Modifier.padding(top = 8.dp))
+                AddHabitCard(selectedDay = state.selected.dayOfWeek, onAdd = onAdd, modifier = Modifier.padding(top = Space.XS))
             }
             item(key = "bottom") { Spacer(Modifier.height(bottomPadding)) }
         }
@@ -127,9 +128,9 @@ private fun WeekCard(state: HabitsUiState, onSelect: (LocalDate) -> Unit, onShif
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(horizontal = 8.dp, vertical = 8.dp),
+            .padding(horizontal = Space.XS, vertical = Space.XS),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             ArrowButton(Icons.AutoMirrored.Filled.KeyboardArrowLeft, "Previous week") { onShiftWeek(-1) }
@@ -137,14 +138,14 @@ private fun WeekCard(state: HabitsUiState, onSelect: (LocalDate) -> Unit, onShif
                 if (state.today in state.week) "This week" else "${state.week.first().format(ShortDate)} – ${state.week.last().format(ShortDate)}",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
+                modifier = Modifier.weight(1f).padding(horizontal = Space.XXS),
             )
             if (state.selected != state.today) {
                 TextButton(onClick = { onSelect(state.today) }) { Text("Today", color = AttendoColors.Green) }
             }
             ArrowButton(Icons.AutoMirrored.Filled.KeyboardArrowRight, "Next week") { onShiftWeek(1) }
         }
-        Row(Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(Modifier.fillMaxWidth().padding(top = Space.XXS), horizontalArrangement = Arrangement.spacedBy(Space.XXS)) {
             state.week.forEach { day ->
                 DayCell(
                     day = day,
@@ -182,11 +183,11 @@ private fun DayCell(
     val content = if (selected) AttendoColors.Cream else AttendoColors.Ink
     Column(
         modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(Corner.Shape)
             .iosPress(PressStyle.Scale, onClickLabel = day.format(DayTitle), onClick = onClick)
             .background(if (selected) AttendoColors.Ink else AttendoColors.Cream)
-            .then(if (isToday && !selected) Modifier.border(2.dp, AttendoColors.Green, RoundedCornerShape(16.dp)) else Modifier)
-            .padding(vertical = 8.dp),
+            .then(if (isToday && !selected) Modifier.border(2.dp, AttendoColors.Green, Corner.Shape) else Modifier)
+            .padding(vertical = Space.XS),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
@@ -195,7 +196,7 @@ private fun DayCell(
             color = if (selected) content else AttendoColors.Muted,
         )
         Text(day.dayOfMonth.toString(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = content)
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(Space.XXS))
         // Progress for the day: empty track when nothing is planned, full when everything is ticked.
         Box(
             Modifier
@@ -220,7 +221,7 @@ private fun DayCell(
 @Composable
 private fun DayHeader(state: HabitsUiState) {
     val (done, total) = state.selectedProgress
-    Row(Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().padding(top = Space.S, bottom = Space.XXS), verticalAlignment = Alignment.CenterVertically) {
         Text(
             state.selected.format(DayTitle),
             style = MaterialTheme.typography.headlineSmall,
@@ -241,7 +242,7 @@ private fun HabitRowView(row: HabitRow, canTick: Boolean, onToggle: () -> Unit, 
     Row(
         modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
             .iosPress(
                 PressStyle.Highlight,
@@ -249,7 +250,7 @@ private fun HabitRowView(row: HabitRow, canTick: Boolean, onToggle: () -> Unit, 
                 onClickLabel = if (row.checked) "Untick ${row.habit.title}" else "Tick ${row.habit.title}",
                 onClick = onToggle,
             )
-            .padding(start = 14.dp, end = 2.dp, top = 10.dp, bottom = 10.dp),
+            .padding(start = Space.M, end = Space.XXS, top = Space.S, bottom = Space.S),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
@@ -265,7 +266,7 @@ private fun HabitRowView(row: HabitRow, canTick: Boolean, onToggle: () -> Unit, 
         ) {
             if (row.checked) Icon(Icons.Filled.Check, contentDescription = null, tint = AttendoColors.OnAccent, modifier = Modifier.size(17.dp))
         }
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(Space.S))
         Column(Modifier.weight(1f)) {
             Text(
                 row.habit.title,
@@ -275,10 +276,10 @@ private fun HabitRowView(row: HabitRow, canTick: Boolean, onToggle: () -> Unit, 
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-            Spacer(Modifier.height(5.dp))
+            Spacer(Modifier.height(Space.XXS))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 WeekDots(row.week)
-                Spacer(Modifier.width(10.dp))
+                Spacer(Modifier.width(Space.S))
                 Text(
                     when {
                         !canTick -> "Planned"
@@ -306,7 +307,7 @@ private fun HabitRowView(row: HabitRow, canTick: Boolean, onToggle: () -> Unit, 
 /** The habit's week, Monday to Sunday: filled = ticked, ring = planned, pink ring = missed, dot = off. */
 @Composable
 private fun WeekDots(week: List<DayMark>) {
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(horizontalArrangement = Arrangement.spacedBy(Space.XXS), verticalAlignment = Alignment.CenterVertically) {
         week.forEach { mark ->
             Box(Modifier.size(10.dp), contentAlignment = Alignment.Center) {
                 when (mark) {
@@ -322,10 +323,10 @@ private fun WeekDots(week: List<DayMark>) {
 
 @Composable
 private fun EmptyDay(state: HabitsUiState, modifier: Modifier = Modifier) {
-    Column(modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier.fillMaxWidth().padding(vertical = Space.S), horizontalAlignment = Alignment.CenterHorizontally) {
         if (state.totalHabits == 0) {
             TriangleMascot(Modifier.size(110.dp))
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(Space.S))
             Text("No tasks yet.", style = MaterialTheme.typography.titleMedium)
             Text(
                 "Add a task below and pick the days of the week it repeats on.",
@@ -360,11 +361,11 @@ private fun AddHabitCard(selectedDay: DayOfWeek, onAdd: (String, Set<DayOfWeek>)
     Column(
         modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(14.dp),
+            .padding(Space.M),
     ) {
-        Text("New task", style = MaterialTheme.typography.labelLarge, color = AttendoColors.Muted, modifier = Modifier.padding(start = 4.dp, bottom = 8.dp))
+        Text("New task", style = MaterialTheme.typography.labelLarge, color = AttendoColors.Muted, modifier = Modifier.padding(start = Space.XXS, bottom = Space.XS))
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = title,
@@ -372,12 +373,12 @@ private fun AddHabitCard(selectedDay: DayOfWeek, onAdd: (String, Set<DayOfWeek>)
                 modifier = Modifier.weight(1f),
                 singleLine = true,
                 placeholder = { Text("e.g. Revise DSA") },
-                shape = RoundedCornerShape(16.dp),
+                shape = Corner.Shape,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { submit() }),
                 colors = attendoFilledFieldColors(AttendoColors.Cream),
             )
-            Spacer(Modifier.width(10.dp))
+            Spacer(Modifier.width(Space.S))
             Box(
                 Modifier
                     .size(46.dp)
@@ -389,14 +390,14 @@ private fun AddHabitCard(selectedDay: DayOfWeek, onAdd: (String, Set<DayOfWeek>)
                 Icon(Icons.Filled.Add, contentDescription = null, tint = if (canAdd) AttendoColors.OnAccent else AttendoColors.Muted)
             }
         }
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(Space.S))
         WeekdayToggles(days) { picked = it }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 "Repeats on the highlighted days.",
                 style = MaterialTheme.typography.labelSmall,
                 color = AttendoColors.Muted,
-                modifier = Modifier.weight(1f).padding(start = 4.dp),
+                modifier = Modifier.weight(1f).padding(start = Space.XXS),
             )
             TextButton(onClick = { picked = DayOfWeek.entries.toSet() }) { Text("Every day", color = AttendoColors.Green) }
         }
@@ -446,15 +447,15 @@ private fun EditHabitDialog(habit: Habit, onDismiss: () -> Unit, onSave: (Habit)
                     label = { Text("Task") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = Corner.Shape,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     colors = attendoFieldColors(),
                 )
-                Spacer(Modifier.height(14.dp))
+                Spacer(Modifier.height(Space.M))
                 Text("Repeats on", style = MaterialTheme.typography.labelMedium, color = AttendoColors.Muted)
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Space.XS))
                 WeekdayToggles(days) { days = it }
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Space.XS))
                 TextButton(onClick = { if (confirmDelete) onDelete() else confirmDelete = true }) {
                     Text(
                         if (confirmDelete) "Tap again to delete it and its history" else "Delete task",

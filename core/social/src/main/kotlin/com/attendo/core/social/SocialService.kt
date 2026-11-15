@@ -11,15 +11,14 @@ import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
 import com.attendo.core.data.AttendoData
 import com.attendo.core.data.csv.CsvTable
+import com.attendo.core.model.AppException
 import com.attendo.core.model.AttendanceSummary
 import com.attendo.core.model.CourseCatalog
+import com.attendo.core.model.ErrorCode
 import com.attendo.core.model.Grades
-import com.google.android.gms.tasks.Task
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseNetworkException
-import com.google.firebase.FirebaseOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.DocumentSnapshot
@@ -47,13 +46,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 /**
  * Friends, LeetCode-style, on Firebase (free Spark plan): sign in with Google, find classmates by
@@ -70,28 +66,15 @@ import kotlin.coroutines.resumeWithException
  */
 class SocialService(
     context: Context,
-    private val config: FirebaseConfig?,
+    private val project: FirebaseProject,
     private val scope: CoroutineScope,
     private val data: AttendoData,
     private val programme: String,
 ) {
     private val app = context.applicationContext
-    private val firebase: FirebaseApp? by lazy {
-        val cfg = config?.takeIf { it.isComplete } ?: return@lazy null
-        runCatching {
-            FirebaseApp.getApps(app).firstOrNull { it.name == APP_NAME } ?: FirebaseApp.initializeApp(
-                app,
-                FirebaseOptions.Builder()
-                    .setProjectId(cfg.projectId)
-                    .setApplicationId(cfg.appId)
-                    .setApiKey(cfg.apiKey)
-                    .build(),
-                APP_NAME,
-            )
-        }.getOrNull()
-    }
-    private val auth: FirebaseAuth? get() = firebase?.let(FirebaseAuth::getInstance)
-    private val db: FirebaseFirestore? get() = firebase?.let(FirebaseFirestore::getInstance)
+    private val config: FirebaseConfig? = project.config
+    private val auth: FirebaseAuth? get() = project.auth
+    private val db: FirebaseFirestore? get() = project.db
 
     /** Local sharing switches (kept outside the backed-up CSV folder). */
     private val prefs = CsvTable(File(app.filesDir, "social/prefs.csv"), listOf("key", "value"))
@@ -128,20 +111,20 @@ class SocialService(
 
     /** Shows Google's account picker (Credential Manager) and signs in to Firebase with it. */
     suspend fun signIn(activity: Activity) {
-        val cfg = config?.takeIf { it.isComplete } ?: return fail(IllegalStateException(NOT_SET_UP))
-        val firebaseAuth = auth ?: return fail(IllegalStateException(NOT_SET_UP))
+        val cfg = config?.takeIf { it.isComplete } ?: return fail(AppException(ErrorCode.FRIENDS_NOT_SET_UP))
+        val firebaseAuth = auth ?: return fail(AppException(ErrorCode.FRIENDS_NOT_SET_UP))
         working("Signing in…")
         runCatching {
             val request = GetCredentialRequest.Builder()
                 .addCredentialOption(GetSignInWithGoogleOption.Builder(cfg.webClientId).build())
                 .build()
             val credential = CredentialManager.create(activity).getCredential(activity, request).credential
-            check(credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                "Google didn't return an account"
+            if (credential !is CustomCredential || credential.type != GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                throw AppException(ErrorCode.FRIENDS_SIGN_IN_FAILED, "Google didn't return an account")
             }
             val google = GoogleIdTokenCredential.createFrom(credential.data)
             val user = firebaseAuth.signInWithCredential(GoogleAuthProvider.getCredential(google.idToken, null)).await().user
-                ?: error("Sign-in failed")
+                ?: throw AppException(ErrorCode.FRIENDS_SIGN_IN_FAILED, "Firebase returned no account")
             onSignedIn(user.uid, google.displayName)
         }.onSuccess { done("Signed in. Find classmates by name or friend code.") }.onFailure(::fail)
     }
@@ -324,10 +307,10 @@ class SocialService(
 
     /** Another student's page: profile, and (when you're friends) their friends and what they share. */
     suspend fun loadStudent(uid: String): Result<FriendView> = runCatching {
-        val store = db ?: error(NOT_SET_UP)
+        val store = db ?: throw AppException(ErrorCode.FRIENDS_NOT_SET_UP)
         requireMe()
         val user = store.collection(USERS).document(uid).get().await()
-        val profile = user.toProfile() ?: error("This student isn't on Attendo any more")
+        val profile = user.toProfile() ?: throw AppException(ErrorCode.FRIENDS_STUDENT_GONE)
         val isFriend = _state.value.isFriend(uid)
         if (!isFriend) return@runCatching FriendView(profile, false, null, null, emptyList())
         val shared = store.collection(USERS).document(uid).collection(SHARED)
@@ -442,7 +425,7 @@ class SocialService(
 
     // ---- Plumbing ------------------------------------------------------------------------------
 
-    private fun requireMe(): StudentProfile = _state.value.me ?: error("Sign in first")
+    private fun requireMe(): StudentProfile = _state.value.me ?: throw AppException(ErrorCode.FRIENDS_SIGN_IN_FIRST)
 
     private fun action(working: String, success: String?, block: suspend () -> Unit) {
         scope.launch {
@@ -457,17 +440,19 @@ class SocialService(
 
     private fun fail(e: Throwable) = _state.update { it.copy(busy = false, message = describe(e), isError = true) }
 
+    /** A message with its code (docs/ERROR_CODES.md); cancelling isn't an error, so it has none. */
     private fun describe(e: Throwable): String = when (e) {
         is GetCredentialCancellationException -> "Sign-in cancelled."
-        is NoCredentialException -> "No Google account found on this phone. Add one in system settings, then try again."
-        is GetCredentialException -> "Google sign-in failed: ${e.message ?: e.type}"
-        is FirebaseNetworkException -> "No internet connection."
+        is NoCredentialException -> ErrorCode.FRIENDS_NO_ACCOUNT.message()
+        is GetCredentialException -> ErrorCode.FRIENDS_SIGN_IN_FAILED.message(e.message ?: e.type)
+        is FirebaseNetworkException -> ErrorCode.FRIENDS_OFFLINE.message()
         is FirebaseFirestoreException -> when (e.code) {
-            FirebaseFirestoreException.Code.PERMISSION_DENIED -> "Not allowed. Is the Firestore rules file published? (firebase/firestore.rules)"
-            FirebaseFirestoreException.Code.UNAVAILABLE -> "Friends server unreachable. Check your connection."
-            else -> "Friends server error: ${e.code.name.lowercase().replace('_', ' ')}"
+            FirebaseFirestoreException.Code.PERMISSION_DENIED -> ErrorCode.FRIENDS_NOT_ALLOWED.message()
+            FirebaseFirestoreException.Code.UNAVAILABLE -> ErrorCode.FRIENDS_UNAVAILABLE.message()
+            else -> ErrorCode.FRIENDS_UNEXPECTED.message(e.code.name.lowercase().replace('_', ' '))
         }
-        else -> e.message ?: e.javaClass.simpleName
+        is AppException -> e.message.orEmpty()
+        else -> ErrorCode.FRIENDS_UNEXPECTED.message(e.message ?: e.javaClass.simpleName)
     }
 
     private fun DocumentSnapshot.toProfile(): StudentProfile? {
@@ -524,8 +509,6 @@ class SocialService(
     }
 
     private companion object {
-        const val APP_NAME = "attendo-social"
-        const val NOT_SET_UP = "Friends isn't set up in this build yet (no Firebase project). Steps: docs/FRIENDS_SETUP.md."
         const val USERS = "users"
         const val FRIENDS = "friends"
         const val SHARED = "shared"
@@ -549,10 +532,4 @@ private fun Query.snapshots(): Flow<QuerySnapshot> = callbackFlow {
         if (error != null) close(error) else if (snapshot != null) trySend(snapshot)
     }
     awaitClose { registration.remove() }
-}
-
-private suspend fun <T> Task<T>.await(): T = suspendCancellableCoroutine { cont ->
-    addOnSuccessListener { cont.resume(it) }
-    addOnFailureListener { cont.resumeWithException(it) }
-    addOnCanceledListener { cont.cancel() }
 }

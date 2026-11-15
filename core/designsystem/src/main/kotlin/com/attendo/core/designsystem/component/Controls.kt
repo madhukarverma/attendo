@@ -1,5 +1,10 @@
 package com.attendo.core.designsystem.component
 
+import com.attendo.core.designsystem.theme.Space
+import com.attendo.core.designsystem.theme.Corner
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.LaunchedEffect
@@ -18,7 +23,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -64,17 +68,17 @@ fun PillButton(
     Row(
         modifier
             .height(48.dp)
-            .clip(CircleShape)
+            .clip(Corner.Shape)
             .iosPress(PressStyle.Dim, enabled = enabled, onClickLabel = text, onClick = onClick)
             .background(if (enabled) container else AttendoColors.CreamDeep)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = Space.M),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val fg = if (enabled) content else AttendoColors.Muted
         if (icon != null) {
             Icon(icon, contentDescription = null, tint = fg, modifier = Modifier.size(18.dp))
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(Space.XS))
         }
         Text(text, style = MaterialTheme.typography.labelLarge, color = fg, maxLines = 1)
     }
@@ -115,6 +119,31 @@ fun ProgressBar(
             val w = 2.dp.toPx()
             drawRect(markerColor, Offset(size.width * marker.coerceIn(0f, 1f) - w / 2, 0f), Size(w, size.height))
         }
+    }
+}
+
+/**
+ * A row that opens another screen: icon, title, one line of explanation and a chevron. Plain, with
+ * no card around it, so a list of them reads as one group.
+ */
+@Composable
+fun NavigationRow(icon: ImageVector, title: String, subtitle: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier
+            .fillMaxWidth()
+            .clip(Corner.Shape)
+            .iosPress(PressStyle.Dim, onClickLabel = title, onClick = onClick)
+            .padding(vertical = Space.S),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(icon, contentDescription = null, tint = AttendoColors.Ink, modifier = Modifier.size(24.dp))
+        Spacer(Modifier.width(Space.M))
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleMedium, color = AttendoColors.Ink)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = AttendoColors.Muted)
+        }
+        Spacer(Modifier.width(Space.XS))
+        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = AttendoColors.Muted)
     }
 }
 

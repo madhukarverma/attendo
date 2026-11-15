@@ -69,6 +69,12 @@ can open in Excel or Google Sheets.
 - **Animation styles:** smooth, iPhone-like, classic Android, or none at all.
 - **Your own launch picture**, shown when the app opens.
 
+### Tell us what you think
+- **Send feedback** from Settings: rate the app, report a problem or share an idea. You get a
+  reference code, and it still goes out later if you're offline.
+- **Clear error messages.** Every problem the app reports ends with a short code (like `FR-404`)
+  that's easy to quote.
+
 ### Keep your data safe
 - **Automatic Google backup** to a hidden folder in your own Google Drive, and restore on a new
   phone.
@@ -170,10 +176,12 @@ flowchart LR
     phone -->|"optional: automatic backup"| drive["Your Google Drive<br/>a hidden folder<br/>only Attendo can use"]
     phone -->|"optional: only what you share"| friends["Your friends<br/>attendance, and grades<br/>if you turn that on"]
     phone -->|"when you export"| sheets["Excel or Google Sheets"]
+    phone -->|"only feedback you send"| dev["The developer<br/>your message and rating"]
 ```
 
 - **No account needed.** Everything works without signing in.
-- **No ads, no tracking.** Nothing leaves your phone unless you turn on Google backup or Friends.
+- **No ads, no tracking.** Nothing leaves your phone unless you turn on Google backup or Friends,
+  or send feedback. Feedback never includes your attendance, marks or tasks.
 - **You decide what friends see.** Attendance sharing is a switch, and grades are off until you
   turn them on. Turning a switch off deletes the shared copy.
 - **Leave any time.** *Delete profile* in Friends removes everything you shared.
@@ -227,7 +235,7 @@ Only if you turn on grade sharing. It's off by default.
 <summary><b>For developers</b></summary>
 
 ### Built with
-Kotlin and Jetpack Compose, 18 Gradle modules, all data in CSV files. Friends uses Firebase
+Kotlin and Jetpack Compose, 19 Gradle modules, all data in CSV files. Friends uses Firebase
 (Authentication and Cloud Firestore); the backup uses Google Drive's app-data folder.
 
 ### Build
@@ -281,6 +289,9 @@ A file that can't be read is kept as `<name>.unreadable-<time>` before anything 
 - [Security notes and the last audit](docs/SECURITY.md)
 - [Test report](docs/TEST_REPORT.md)
 - [Project context, decisions and open issues](docs/context/)
+- [Error codes](docs/ERROR_CODES.md) and [where feedback goes](docs/FEEDBACK.md)
 - README images are drawn by [docs/images/make_images.py](docs/images/make_images.py)
+- Font: [Plus Jakarta Sans](https://github.com/tokotype/PlusJakartaSans), SIL Open Font License
+  ([licence](core/designsystem/fonts/OFL-PlusJakartaSans.txt))
 
 </details>

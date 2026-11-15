@@ -1,5 +1,7 @@
 package com.attendo.core.designsystem.component
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.runtime.getValue
@@ -20,7 +22,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -77,8 +78,8 @@ fun DayStrip(
     LazyRow(
         modifier = modifier,
         state = state,
-        contentPadding = PaddingValues(horizontal = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        contentPadding = PaddingValues(horizontal = Space.S),
+        horizontalArrangement = Arrangement.spacedBy(Space.XXS),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         items(entries, key = { if (it is LocalDate) it.toEpochDay() else "m$it" }) { entry ->
@@ -96,9 +97,9 @@ fun DayStrip(
             Column(
                 Modifier
                     .iosPress(PressStyle.Scale, onClickLabel = day.toString()) { onSelect(day) }
-                    .clip(RoundedCornerShape(50))
+                    .clip(Corner.Shape)
                     .background(pill)
-                    .padding(horizontal = 6.dp, vertical = 8.dp)
+                    .padding(horizontal = Space.XS, vertical = Space.XS)
                     .width(30.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -111,7 +112,7 @@ fun DayStrip(
                         else -> AttendoColors.Muted
                     },
                 )
-                Spacer(Modifier.height(6.dp))
+                Spacer(Modifier.height(Space.XS))
                 Box(
                     Modifier
                         .size(28.dp)
@@ -132,7 +133,7 @@ fun DayStrip(
                         color = if (isSelected) AttendoColors.Cream else AttendoColors.Ink,
                     )
                 }
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(Space.XXS))
                 Box(
                     Modifier
                         .size(5.dp)
@@ -147,9 +148,9 @@ fun DayStrip(
 /** Thin divider with the month name written vertically, e.g. "SEP". */
 @Composable
 private fun MonthSeparator(month: YearMonth) {
-    Row(Modifier.padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.padding(horizontal = Space.XXS), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.width(1.dp).height(56.dp).background(AttendoColors.CreamDeep))
-        Column(Modifier.padding(horizontal = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(Modifier.padding(horizontal = Space.XS), horizontalAlignment = Alignment.CenterHorizontally) {
             month.month.getDisplayName(TextStyle.SHORT, Locale.getDefault()).uppercase().forEach { ch ->
                 Text(ch.toString(), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = AttendoColors.Green)
             }

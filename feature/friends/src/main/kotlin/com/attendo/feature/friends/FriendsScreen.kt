@@ -1,5 +1,9 @@
 package com.attendo.feature.friends
 
+import androidx.compose.material.icons.filled.Person
+import com.attendo.core.designsystem.component.EmptyState
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.attendoFilledFieldColors
 import android.app.Activity
 import androidx.compose.foundation.background
@@ -19,7 +23,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -103,15 +106,15 @@ fun FriendsScreen(social: SocialService, onOpenStudent: (uid: String) -> Unit, o
         CollapsingTopBar(title = "Friends", collapseFraction = { collapse }, onBack = onClose, backLabel = "Back")
         BounceContainer(Modifier.fillMaxSize()) {
             LazyColumn(
-                Modifier.fillMaxSize().padding(horizontal = 20.dp),
+                Modifier.fillMaxSize().padding(horizontal = Space.L),
                 state = listState,
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(Space.S),
             ) {
                 item { LargeTitle("Friends") }
                 val me = state.me
                 when {
                     !state.configured -> item { NotSetUp() }
-                    !state.loaded -> item { Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = AttendoColors.Green) } }
+                    !state.loaded -> item { Box(Modifier.fillMaxWidth().padding(Space.L), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = AttendoColors.Green) } }
                     me == null -> item {
                         SignInCard(state) { activity?.let { a -> scope.launch { social.signIn(a) } } }
                     }
@@ -129,7 +132,13 @@ fun FriendsScreen(social: SocialService, onOpenStudent: (uid: String) -> Unit, o
                             SearchField(query, searching) { query = it }
                         }
                         if (query.trim().length >= 2 && !searching && results.isEmpty()) {
-                            item { Muted("No students found. Try their first name or their 6-character friend code.") }
+                            item {
+                                EmptyState(
+                                    icon = Icons.Filled.Search,
+                                    title = "No students found",
+                                    message = "Try their first name, or their 6-character friend code.",
+                                )
+                            }
                         }
                         items(results, key = { "result-${it.uid}" }) { student ->
                             StudentRow(student, onClick = { onOpenStudent(student.uid) }) {
@@ -147,7 +156,13 @@ fun FriendsScreen(social: SocialService, onOpenStudent: (uid: String) -> Unit, o
                         }
                         item { Section(if (state.friends.isEmpty()) "Friends" else "Friends (${state.friends.size})") }
                         if (state.friends.isEmpty()) {
-                            item { Muted("No friends yet. Search for classmates above and send them a request.") }
+                            item {
+                                EmptyState(
+                                    icon = Icons.Filled.Person,
+                                    title = "No friends yet",
+                                    message = "Search for classmates above and send them a request. Once they accept, you'll see each other here.",
+                                )
+                            }
                         }
                         items(state.friends, key = { "friend-${it.uid}" }) { friend ->
                             StudentRow(friend, onClick = { onOpenStudent(friend.uid) }) {
@@ -170,11 +185,11 @@ fun FriendsScreen(social: SocialService, onOpenStudent: (uid: String) -> Unit, o
                             msg,
                             style = MaterialTheme.typography.labelSmall,
                             color = if (state.isError) AttendoColors.Pink else AttendoColors.Muted,
-                            modifier = Modifier.padding(top = 4.dp),
+                            modifier = Modifier.padding(top = Space.XXS),
                         )
                     }
                 }
-                item { Spacer(Modifier.height(32.dp)) }
+                item { Spacer(Modifier.height(Space.XL)) }
             }
         }
     }
@@ -204,7 +219,7 @@ fun FriendsScreen(social: SocialService, onOpenStudent: (uid: String) -> Unit, o
 private fun NotSetUp() {
     Card {
         Text("Not set up yet", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(Space.XS))
         Text(
             "Friends needs a free Firebase project for this app (sign-in and the shared friend lists). " +
                 "Once it's created and its settings are added to the build, this screen lets you sign in. " +
@@ -219,7 +234,7 @@ private fun NotSetUp() {
 private fun SignInCard(state: SocialState, onSignIn: () -> Unit) {
     Card {
         Icon(Icons.Filled.AccountCircle, contentDescription = null, tint = AttendoColors.Ink, modifier = Modifier.size(32.dp))
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Space.XS))
         Text("Study with friends", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         Text(
             "Sign in with Google to find classmates, send friend requests and compare attendance. " +
@@ -228,7 +243,7 @@ private fun SignInCard(state: SocialState, onSignIn: () -> Unit) {
             style = MaterialTheme.typography.bodyMedium,
             color = AttendoColors.Muted,
         )
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Space.S))
         SmallPill(if (state.busy) "Signing in…" else "Sign in with Google", primary = true, enabled = !state.busy, onClick = onSignIn)
     }
 }
@@ -238,14 +253,14 @@ private fun ProfileCard(me: StudentProfile, state: SocialState, onSignOut: () ->
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.Hero)
-            .padding(18.dp),
+            .padding(Space.M),
     ) {
         Text(me.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = AttendoColors.OnHero)
-        Spacer(Modifier.height(2.dp))
+        Spacer(Modifier.height(Space.XXS))
         Text(me.programme, style = MaterialTheme.typography.labelMedium, color = AttendoColors.Muted)
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Space.S))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text("YOUR FRIEND CODE", style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
@@ -271,7 +286,7 @@ private fun SharingCard(state: SocialState, onAttendance: (Boolean) -> Unit, onG
 
 @Composable
 private fun ToggleRow(title: String, subtitle: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().padding(top = Space.XS), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.labelLarge)
             Text(subtitle, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
@@ -296,12 +311,12 @@ private fun SearchField(query: String, searching: Boolean, onChange: (String) ->
     OutlinedTextField(
         value = query,
         onValueChange = { onChange(it.take(40)) },
-        modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+        modifier = Modifier.fillMaxWidth().padding(top = Space.XS),
         singleLine = true,
         placeholder = { Text("Find classmates by name or friend code") },
         leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null, tint = AttendoColors.Muted) },
         trailingIcon = { if (searching) CircularProgressIndicator(Modifier.size(18.dp), color = AttendoColors.Green, strokeWidth = 2.dp) },
-        shape = RoundedCornerShape(18.dp),
+        shape = Corner.Shape,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = {}),
         colors = attendoFilledFieldColors(AttendoColors.CreamCard),
@@ -325,10 +340,10 @@ internal fun StudentRow(student: StudentProfile, onClick: (() -> Unit)? = null, 
     Row(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
             .then(if (onClick != null) Modifier.iosPress(PressStyle.Highlight, onClickLabel = "Open ${student.name}", onClick = onClick) else Modifier)
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+            .padding(horizontal = Space.M, vertical = Space.S),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
@@ -341,7 +356,7 @@ internal fun StudentRow(student: StudentProfile, onClick: (() -> Unit)? = null, 
                 fontWeight = FontWeight.Bold,
             )
         }
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(Space.S))
         Column(Modifier.weight(1f)) {
             Text(student.name, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(student.code, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
@@ -361,10 +376,10 @@ internal fun SmallPill(text: String, primary: Boolean, enabled: Boolean = true, 
             else -> AttendoColors.Ink
         },
         modifier = Modifier
-            .clip(CircleShape)
+            .clip(Corner.Shape)
             .iosPress(PressStyle.Scale, enabled = enabled, onClickLabel = text, onClick = onClick)
             .background(if (!enabled) AttendoColors.CreamDeep else if (primary) AttendoColors.GreenFill else AttendoColors.CreamCard)
-            .padding(horizontal = 16.dp, vertical = 9.dp),
+            .padding(horizontal = Space.M, vertical = Space.XS),
     )
 }
 
@@ -373,15 +388,15 @@ internal fun Card(content: @Composable () -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(22.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(16.dp),
+            .padding(Space.M),
     ) { content() }
 }
 
 @Composable
 internal fun Section(text: String) {
-    Text(text, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 12.dp))
+    Text(text, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = Space.S))
 }
 
 @Composable

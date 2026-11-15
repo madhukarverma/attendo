@@ -1,5 +1,7 @@
 package com.attendo.feature.settings
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,7 +9,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -22,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.attendo.core.designsystem.theme.AttendoColors
 import com.attendo.core.model.AnimationMode
 import kotlin.math.roundToInt
@@ -59,9 +59,9 @@ internal fun AnimationModeSlider(mode: AnimationMode, onChange: (AnimationMode) 
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = Space.M, vertical = Space.M),
     ) {
         Text(shown.title(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         Slider(
@@ -97,7 +97,7 @@ internal fun AnimationModeSlider(mode: AnimationMode, onChange: (AnimationMode) 
                 )
             }
         }
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(Space.S))
         Text(shown.description(), style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
     }
 }

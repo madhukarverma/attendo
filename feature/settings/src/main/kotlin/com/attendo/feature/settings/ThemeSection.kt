@@ -1,5 +1,7 @@
 package com.attendo.feature.settings
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.attendoFieldColors
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -69,23 +70,23 @@ internal fun ThemeSection(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(14.dp),
+            .padding(Space.M),
     ) {
         Box {
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(Corner.Shape)
                     .iosPress(PressStyle.Highlight, onClickLabel = "Choose theme") { open = true }
                     .background(AttendoColors.Cream)
-                    .border(1.dp, AttendoColors.CreamDeep, RoundedCornerShape(16.dp))
-                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                    .border(1.dp, AttendoColors.CreamDeep, Corner.Shape)
+                    .padding(horizontal = Space.M, vertical = Space.S),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Swatches(AttendoPalette.forMode(theme, customColors))
-                Spacer(Modifier.width(12.dp))
+                Spacer(Modifier.width(Space.S))
                 Text(label, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = AttendoColors.Muted)
             }
@@ -106,7 +107,7 @@ internal fun ThemeSection(
                 }
             }
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Space.XS))
         Text(
             preset?.third ?: CUSTOM_DESCRIPTION,
             style = MaterialTheme.typography.labelSmall,
@@ -114,7 +115,7 @@ internal fun ThemeSection(
         )
 
         if (theme == ThemeMode.CUSTOM) {
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(Space.S))
             Row(
                 Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                 verticalAlignment = Alignment.CenterVertically,
@@ -175,7 +176,7 @@ private fun HexColorRow(label: String, hex: String, onValid: (String) -> Unit) {
     // Follow external changes (presets) unless the user is mid-edit on an invalid value.
     LaunchedEffect(hex) { if (parseHexColor(text)?.toHex() != hex) text = hex }
     val parsed = parseHexColor(text)
-    Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().padding(top = Space.XS), verticalAlignment = Alignment.CenterVertically) {
         Box(
             Modifier
                 .size(30.dp)
@@ -183,7 +184,7 @@ private fun HexColorRow(label: String, hex: String, onValid: (String) -> Unit) {
                 .background(parsed ?: AttendoColors.CreamDeep)
                 .border(1.dp, AttendoColors.CreamDeep, CircleShape),
         )
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(Space.S))
         Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
         OutlinedTextField(
             value = text,
@@ -195,7 +196,7 @@ private fun HexColorRow(label: String, hex: String, onValid: (String) -> Unit) {
             isError = parsed == null,
             textStyle = MaterialTheme.typography.labelLarge,
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters),
-            shape = RoundedCornerShape(12.dp),
+            shape = Corner.Shape,
             colors = attendoFieldColors(),
             modifier = Modifier.width(118.dp),
         )

@@ -1,5 +1,6 @@
 package com.attendo.core.designsystem.motion
 
+import com.attendo.core.designsystem.theme.Space
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -92,9 +93,9 @@ fun CollapsingTopBar(
         if (onBack != null) Row(
             Modifier
                 .align(Alignment.CenterStart)
-                .padding(start = 4.dp)
+                .padding(start = Space.XXS)
                 .iosPress(PressStyle.Dim, onClickLabel = backLabel, onClick = onBack)
-                .padding(end = 12.dp, top = 8.dp, bottom = 8.dp),
+                .padding(end = Space.S, top = Space.XS, bottom = Space.XS),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = null, tint = AttendoColors.Green, modifier = Modifier.size(30.dp))
@@ -108,7 +109,7 @@ fun CollapsingTopBar(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(horizontal = 96.dp)
+                .padding(horizontal = Space.XXL * 2)
                 .graphicsLayer {
                     val f = collapseFraction()
                     alpha = ((f - 0.5f) * 2f).coerceIn(0f, 1f)

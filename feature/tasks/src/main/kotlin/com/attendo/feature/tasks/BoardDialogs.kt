@@ -1,5 +1,7 @@
 package com.attendo.feature.tasks
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.AttendoDatePicker
 import com.attendo.core.designsystem.component.attendoFieldColors
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -18,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -86,11 +87,11 @@ internal fun CardEditorDialog(
                     label = { Text("Title") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = Corner.Shape,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     colors = attendoFieldColors(),
                 )
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(Space.S))
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it.take(MAX_NOTES) },
@@ -98,7 +99,7 @@ internal fun CardEditorDialog(
                     minLines = 2,
                     maxLines = 5,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = Corner.Shape,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     colors = attendoFieldColors(),
                 )
@@ -111,7 +112,7 @@ internal fun CardEditorDialog(
                         icon = Icons.Filled.DateRange,
                     ) { pickDate = true }
                     if (due != null) {
-                        Spacer(Modifier.width(4.dp))
+                        Spacer(Modifier.width(Space.XXS))
                         Box(
                             Modifier
                                 .size(36.dp)
@@ -127,7 +128,7 @@ internal fun CardEditorDialog(
                 FieldLabel("Priority")
                 Row(
                     Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(Space.XS),
                 ) {
                     CardPriority.entries.forEach { p ->
                         Choice(
@@ -142,7 +143,7 @@ internal fun CardEditorDialog(
                     FieldLabel("Column")
                     Row(
                         Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(Space.XS),
                     ) {
                         columns.forEach { column ->
                             Choice(label = column.title, selected = columnId == column.id) { columnId = column.id }
@@ -151,7 +152,7 @@ internal fun CardEditorDialog(
                 }
 
                 if (onDelete != null) {
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(Space.XS))
                     TextButton(onClick = { if (confirmDelete) onDelete() else confirmDelete = true }) {
                         Text(
                             if (confirmDelete) "Tap again to delete this card" else "Delete card",
@@ -182,7 +183,7 @@ private fun FieldLabel(text: String) {
         text,
         style = MaterialTheme.typography.labelMedium,
         color = AttendoColors.Muted,
-        modifier = Modifier.padding(top = 14.dp, bottom = 6.dp),
+        modifier = Modifier.padding(top = Space.M, bottom = Space.XS),
     )
 }
 
@@ -198,20 +199,20 @@ private fun Choice(
     val content = if (selected) AttendoColors.Cream else AttendoColors.Ink
     Row(
         Modifier
-            .clip(CircleShape)
+            .clip(Corner.Shape)
             .iosPress(PressStyle.Dim, onClickLabel = label, onClick = onClick)
             .background(if (selected) AttendoColors.Ink else AttendoColors.CreamCard)
-            .border(1.dp, if (selected) AttendoColors.Ink else AttendoColors.CreamDeep, CircleShape)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .border(1.dp, if (selected) AttendoColors.Ink else AttendoColors.CreamDeep, Corner.Shape)
+            .padding(horizontal = Space.S, vertical = Space.XS),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (icon != null) {
             Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(16.dp))
-            Spacer(Modifier.width(6.dp))
+            Spacer(Modifier.width(Space.XS))
         }
         if (dot != null) {
             Box(Modifier.size(9.dp).clip(CircleShape).background(dot))
-            Spacer(Modifier.width(6.dp))
+            Spacer(Modifier.width(Space.XS))
         }
         Text(label, style = MaterialTheme.typography.labelMedium, color = content, maxLines = 1)
     }
@@ -259,7 +260,7 @@ internal fun ColumnDialog(
                 onValueChange = { title = it.take(MAX_COLUMN_TITLE) },
                 label = { Text("Name") },
                 singleLine = true,
-                shape = RoundedCornerShape(14.dp),
+                shape = Corner.Shape,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                 colors = attendoFieldColors(),
             )

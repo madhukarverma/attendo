@@ -1,5 +1,8 @@
 package com.attendo.feature.settings
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
+import com.attendo.core.model.ErrorCode
 import com.attendo.core.designsystem.component.PillButton
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -16,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
@@ -63,8 +65,8 @@ internal fun CsvBackupSection(
             val planned = runCatching { onPlanImport(uris) }.getOrNull()
             busy = false
             when {
-                planned == null -> result = "Couldn't read those files." to true
-                planned.isEmpty -> result = "Those files don't look like Attendo CSV exports." to true
+                planned == null -> result = ErrorCode.IMPORT_UNREADABLE.message() to true
+                planned.isEmpty -> result = ErrorCode.IMPORT_NOT_ATTENDO.message() to true
                 else -> plan = planned
             }
         }
@@ -73,21 +75,21 @@ internal fun CsvBackupSection(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(16.dp),
+            .padding(Space.M),
     ) {
         Row(verticalAlignment = Alignment.Top) {
             Icon(Icons.Filled.Info, contentDescription = null, tint = AttendoColors.Ink, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(Space.S))
             Text(
                 "Everything is stored on this phone as CSV files: subjects, attendance, grades, pomodoro, tasks, " +
                     "the board and settings. Export them to open in Excel or Google Sheets, and restore them here.",
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
-        Spacer(Modifier.height(14.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Spacer(Modifier.height(Space.M))
+        Row(horizontalArrangement = Arrangement.spacedBy(Space.S)) {
             PillButton("Export", Icons.Filled.Share, AttendoColors.GreenFill, AttendoColors.OnAccent, Modifier.weight(1f), onClick = onExport)
             PillButton(
                 if (busy) "Reading…" else "Restore",
@@ -100,7 +102,7 @@ internal fun CsvBackupSection(
                 picker.launch(CSV_TYPES)
             }
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Space.XS))
         Text(
             result?.first ?: "Restore: pick one or more exported files. Each file replaces that part of your data.",
             style = MaterialTheme.typography.labelSmall,
@@ -123,7 +125,7 @@ internal fun CsvBackupSection(
                         onSuccess = { kept ->
                             "Restored " + p.tables.joinToString(", ") { "${kept[it.file] ?: 0} ${it.label.lowercase()}" } + "." to false
                         },
-                        onFailure = { "Restore failed: ${it.message ?: "unknown error"}" to true },
+                        onFailure = { ErrorCode.IMPORT_FAILED.message(it.message) to true },
                     )
                 }
             },
@@ -149,11 +151,11 @@ private fun ConfirmRestoreDialog(plan: CsvImportPlan, onDismiss: () -> Unit, onC
         text = {
             Column {
                 Text("This replaces these parts of your data on this phone:", style = MaterialTheme.typography.bodyMedium)
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(Space.S))
                 plan.tables.forEach { t ->
-                    Row(Modifier.padding(vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Row(Modifier.padding(vertical = Space.XXS), verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.size(8.dp).clip(CircleShape).background(AttendoColors.Green))
-                        Spacer(Modifier.width(10.dp))
+                        Spacer(Modifier.width(Space.S))
                         Column {
                             Text("${t.label}: ${t.rowCount} row${if (t.rowCount == 1) "" else "s"}", style = MaterialTheme.typography.labelLarge)
                             Text("from ${t.source}", style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
@@ -161,14 +163,14 @@ private fun ConfirmRestoreDialog(plan: CsvImportPlan, onDismiss: () -> Unit, onC
                     }
                 }
                 if (plan.unrecognised.isNotEmpty()) {
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(Space.XS))
                     Text(
                         "Skipped (not an Attendo file, or a second copy): " + plan.unrecognised.joinToString(", "),
                         style = MaterialTheme.typography.labelSmall,
                         color = AttendoColors.Pink,
                     )
                 }
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(Space.S))
                 Text(
                     "Anything not listed stays as it is. Export first if you want a copy of the current data.",
                     style = MaterialTheme.typography.labelSmall,

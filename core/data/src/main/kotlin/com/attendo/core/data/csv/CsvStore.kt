@@ -1,5 +1,6 @@
 package com.attendo.core.data.csv
 
+import com.attendo.core.model.ErrorCode
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -63,7 +64,7 @@ internal class CsvStore<T>(
     private suspend fun save(transform: (List<T>) -> List<T>): Boolean = mutex.withLock {
         val current = _items.value ?: withContext(io) { load() }.also { _items.value = it }
         if (!writable) {
-            StorageProblems.report("Changes to ${table.file.name} can't be saved because the file couldn't be read. Restart the app.")
+            StorageProblems.report(ErrorCode.SAVE_BLOCKED.message(table.file.name))
             return@withLock false
         }
         val next = transform(current)
@@ -72,7 +73,7 @@ internal class CsvStore<T>(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            StorageProblems.report("Couldn't save your change to ${table.file.name}. Your phone may be out of storage space.")
+            StorageProblems.report(ErrorCode.SAVE_FAILED.message(table.file.name))
             return@withLock false
         }
         _items.value = next
@@ -88,9 +89,9 @@ internal class CsvStore<T>(
         val copy = kept.getOrNull()
         StorageProblems.report(
             when {
-                kept.isFailure -> "${table.file.name} couldn't be read. Changes to it won't be saved until the app is restarted."
-                copy == null -> "${table.file.name} couldn't be read, so it starts empty."
-                else -> "${table.file.name} couldn't be read, so it starts empty. The old file was kept as ${copy.name}."
+                kept.isFailure -> ErrorCode.FILE_LOCKED.message(table.file.name)
+                copy == null -> ErrorCode.FILE_UNREADABLE.message(table.file.name)
+                else -> ErrorCode.FILE_UNREADABLE_KEPT.message(table.file.name, copy.name)
             },
         )
         emptyList()

@@ -9,7 +9,7 @@
 - ISSUE-009 — Pomodoro: notification/alarm when a run ends while the app is in the background, and
   restoring a running timer after the system kills the app (needs a foreground service or AlarmManager).
 - ISSUE-010 — Pomodoro: remember the chosen focus length and allow custom break lengths.
-- ISSUE-008 — Bundle a grotesk + handwritten font (current: system sans / cursive).
+- ~~ISSUE-008 — Bundle a grotesk + handwritten font.~~ Plus Jakarta Sans bundled in v0.35.0 (speech bubbles keep the system cursive).
 - ISSUE-011 — Lab hours and syllabus (CA701, CA703) aren't in the curriculum PDF; add them when available.
 - ISSUE-012 — Reminders: snooze, repeating reminders, and editing a to-do (today: add / tick / delete).
 - ISSUE-013 — Reminders on Google Play would need SCHEDULE_EXACT_ALARM + a permission prompt (DEC-009).
@@ -27,6 +27,9 @@
 - ISSUE-023 — Upgrade the build tools (AGP 8.5.2 → 9.x, Kotlin 2.0.20 → 2.4, compileSdk 36) to
   reach the newest Firebase BoM (35.x), Credential Manager 1.6, Google ID 1.2, AndroidX and
   Compose. Needs a phone to check nothing changed at runtime.
+- ISSUE-025 — Publish the v0.35.0 Firestore rules (adds `feedback`); until then feedback fails with FB-505.
+- ISSUE-026 — "Fewer cards, more room" beyond Settings: Home, Classes and the subject page still
+  stack many cards. Needs screenshots to judge; do it with the next visual pass (DEC-024).
 - ISSUE-024 — Console steps for v0.34.0 (only the account owner can do them): publish the new
   Firestore rules, add the release SHA-1, check the API key's limits (`docs/FRIENDS_SETUP.md` step 7), and
   ~~decide whether the GitHub repo should be private~~ (made private 2026-11-15; APK links now

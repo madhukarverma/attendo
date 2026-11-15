@@ -233,3 +233,45 @@ describe('delete profile', () => {
     await assertSucceeds(deleteDoc(doc(db, `users/${ALICE}`)));
   });
 });
+
+describe('feedback', () => {
+  const feedback = (extra = {}) => ({
+    rating: 4, category: 'idea', message: 'Please add a widget for today', contact: 'student@example.com',
+    app: '0.35.0', versionCode: 37, android: 35, device: 'Google Pixel 7', createdAt: serverTimestamp(), ...extra,
+  });
+  test('app: send feedback without signing in', async () => {
+    await assertSucceeds(setDoc(doc(nobody(), 'feedback/abc123'), feedback()));
+  });
+  test('app: a star rating alone, no details', async () => {
+    await assertSucceeds(setDoc(doc(nobody(), 'feedback/abc124'), { rating: 5, category: 'praise', message: '', createdAt: serverTimestamp() }));
+  });
+  test('app: signed-in students can send it too', async () => {
+    await assertSucceeds(setDoc(doc(google(ALICE), 'feedback/abc125'), feedback()));
+  });
+  test("attack: read anyone's feedback", async () => {
+    await seed((db) => setDoc(doc(db, 'feedback/f1'), { ...feedback(), createdAt: new Date() }));
+    await assertFails(getDoc(doc(nobody(), 'feedback/f1')));
+    await assertFails(getDoc(doc(google(ALICE), 'feedback/f1')));
+    await assertFails(getDocs(query(collection(google(ALICE), 'feedback'), limit(1))));
+  });
+  test('attack: change or delete feedback', async () => {
+    await seed((db) => setDoc(doc(db, 'feedback/f1'), { ...feedback(), createdAt: new Date() }));
+    await assertFails(setDoc(doc(nobody(), 'feedback/f1'), feedback({ message: 'changed message here' })));
+    await assertFails(deleteDoc(doc(google(ALICE), 'feedback/f1')));
+  });
+  test('attack: junk fields, oversized text or a fake timestamp', async () => {
+    const db = nobody();
+    await assertFails(setDoc(doc(db, 'feedback/x1'), feedback({ uid: ALICE })));
+    await assertFails(setDoc(doc(db, 'feedback/x2'), feedback({ message: 'x'.repeat(2001) })));
+    await assertFails(setDoc(doc(db, 'feedback/x3'), feedback({ contact: 'x'.repeat(101) })));
+    await assertFails(setDoc(doc(db, 'feedback/x4'), feedback({ createdAt: 'x'.repeat(500_000) })));
+    await assertFails(setDoc(doc(db, 'feedback/x5'), feedback({ device: 'x'.repeat(61) })));
+  });
+  test('attack: invalid rating, category or an empty message', async () => {
+    const db = nobody();
+    await assertFails(setDoc(doc(db, 'feedback/y1'), feedback({ rating: 6 })));
+    await assertFails(setDoc(doc(db, 'feedback/y2'), feedback({ rating: 4.5 })));
+    await assertFails(setDoc(doc(db, 'feedback/y3'), feedback({ category: 'spam' })));
+    await assertFails(setDoc(doc(db, 'feedback/y4'), feedback({ rating: 0, message: 'short' })));
+  });
+});

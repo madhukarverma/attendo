@@ -1,5 +1,7 @@
 package com.attendo.feature.tasks
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.AttendoTimePicker
 import com.attendo.core.designsystem.component.AttendoDatePicker
 import com.attendo.core.designsystem.component.attendoFilledFieldColors
@@ -28,7 +30,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -148,8 +149,8 @@ internal fun TodoPage(
     Box(Modifier.fillMaxSize()) {
         BounceContainer(Modifier.fillMaxSize()) {
             LazyColumn(
-                Modifier.fillMaxSize().padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                Modifier.fillMaxSize().padding(horizontal = Space.L),
+                verticalArrangement = Arrangement.spacedBy(Space.XS),
             ) {
                 item(key = "add") { AddTodoCard(today = state.today, now = state.now, onAdd = onAdd) }
                 if (notificationsOff && hasReminders) {
@@ -163,7 +164,7 @@ internal fun TodoPage(
                 section("Upcoming", groups.upcoming, AttendoColors.Ink, showDate = true, state, onToggle, onDelete)
                 if (groups.done.isNotEmpty()) {
                     item(key = "header-done") {
-                        Row(Modifier.animateItem().padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Row(Modifier.animateItem().padding(top = Space.M), verticalAlignment = Alignment.CenterVertically) {
                             SectionTitle("Done", AttendoColors.Muted, Modifier.weight(1f))
                             TextButton(onClick = onClearDone) { Text("Clear", color = AttendoColors.Pink) }
                         }
@@ -190,7 +191,7 @@ private fun LazyListScope.section(
     onDelete: (Todo) -> Unit,
 ) {
     if (todos.isEmpty()) return
-    item(key = "header-$title") { SectionTitle(title, color, Modifier.animateItem().padding(top = 16.dp)) }
+    item(key = "header-$title") { SectionTitle(title, color, Modifier.animateItem().padding(top = Space.M)) }
     items(todos, key = { "todo-${it.id}" }) { todo ->
         TodoRow(todo, showDate, state, onToggle, onDelete, Modifier.animateItem())
     }
@@ -232,9 +233,9 @@ private fun AddTodoCard(today: LocalDate, now: LocalDateTime, onAdd: (String, Lo
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(14.dp),
+            .padding(Space.M),
     ) {
         OutlinedTextField(
             value = title,
@@ -242,13 +243,13 @@ private fun AddTodoCard(today: LocalDate, now: LocalDateTime, onAdd: (String, Lo
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             placeholder = { Text("Remind me to…") },
-            shape = RoundedCornerShape(16.dp),
+            shape = Corner.Shape,
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { submit() }),
             colors = attendoFilledFieldColors(AttendoColors.Cream),
         )
-        Spacer(Modifier.height(10.dp))
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Spacer(Modifier.height(Space.S))
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.XS)) {
             OptionChip(Icons.Filled.DateRange, dayLabel(date, today), selected = false) { pickDate = true }
             OptionChip(
                 Icons.Filled.Notifications,
@@ -273,7 +274,7 @@ private fun AddTodoCard(today: LocalDate, now: LocalDateTime, onAdd: (String, Lo
                 "Pick a time for the reminder.",
                 style = MaterialTheme.typography.labelSmall,
                 color = AttendoColors.Muted,
-                modifier = Modifier.padding(top = 8.dp, start = 4.dp),
+                modifier = Modifier.padding(top = Space.XS, start = Space.XXS),
             )
         }
         if (timePassed) {
@@ -281,7 +282,7 @@ private fun AddTodoCard(today: LocalDate, now: LocalDateTime, onAdd: (String, Lo
                 "That time has already passed. Pick a later time or another day.",
                 style = MaterialTheme.typography.labelSmall,
                 color = AttendoColors.Pink,
-                modifier = Modifier.padding(top = 8.dp, start = 4.dp),
+                modifier = Modifier.padding(top = Space.XS, start = Space.XXS),
             )
         }
     }
@@ -310,18 +311,18 @@ private fun OptionChip(
 ) {
     Row(
         Modifier
-            .clip(CircleShape)
+            .clip(Corner.Shape)
             .iosPress(PressStyle.Dim, onClickLabel = label, onClick = onClick)
             .background(if (selected) AttendoColors.Green else AttendoColors.Cream)
-            .padding(start = 12.dp, end = if (onClear != null) 6.dp else 12.dp, top = 8.dp, bottom = 8.dp),
+            .padding(start = Space.S, end = if (onClear != null) Space.XS else Space.S, top = Space.XS, bottom = Space.XS),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val fg = if (selected) AttendoColors.Cream else AttendoColors.Ink
         Icon(icon, contentDescription = null, tint = fg, modifier = Modifier.size(16.dp))
-        Spacer(Modifier.width(6.dp))
+        Spacer(Modifier.width(Space.XS))
         Text(label, style = MaterialTheme.typography.labelLarge, color = fg)
         if (onClear != null) {
-            Spacer(Modifier.width(4.dp))
+            Spacer(Modifier.width(Space.XXS))
             Icon(
                 Icons.Filled.Close,
                 contentDescription = "Remove reminder",
@@ -330,7 +331,7 @@ private fun OptionChip(
                     .size(20.dp)
                     .clip(CircleShape)
                     .iosPress(PressStyle.Dim, onClickLabel = "Remove reminder", onClick = onClear)
-                    .padding(3.dp),
+                    .padding(Space.XXS),
             )
         }
     }
@@ -349,14 +350,14 @@ private fun TodoRow(
     Row(
         modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
             .iosPress(PressStyle.Highlight, onClickLabel = if (todo.done) "Mark not done" else "Mark done") { onToggle(todo) }
-            .padding(start = 14.dp, end = 4.dp, top = 10.dp, bottom = 10.dp),
+            .padding(start = Space.M, end = Space.XXS, top = Space.S, bottom = Space.S),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         CheckCircle(todo.done)
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(Space.S))
         Column(Modifier.weight(1f)) {
             Text(
                 todo.title,
@@ -380,7 +381,7 @@ private fun TodoRow(
                             tint = if (overdue) AttendoColors.Pink else AttendoColors.Muted,
                             modifier = Modifier.size(12.dp),
                         )
-                        Spacer(Modifier.width(4.dp))
+                        Spacer(Modifier.width(Space.XXS))
                     }
                     Text(
                         parts.joinToString(" · "),
@@ -417,13 +418,13 @@ private fun NotificationsBanner(onEnable: () -> Unit, modifier: Modifier = Modif
     Row(
         modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.Pink.copy(alpha = 0.14f))
-            .padding(start = 14.dp, end = 4.dp, top = 6.dp, bottom = 6.dp),
+            .padding(start = Space.M, end = Space.XXS, top = Space.XS, bottom = Space.XS),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(Icons.Filled.Notifications, contentDescription = null, tint = AttendoColors.Pink, modifier = Modifier.size(18.dp))
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(Space.S))
         Text(
             "Notifications are off, so reminders won't pop up.",
             style = MaterialTheme.typography.labelLarge,
@@ -435,9 +436,9 @@ private fun NotificationsBanner(onEnable: () -> Unit, modifier: Modifier = Modif
 
 @Composable
 private fun EmptyState(modifier: Modifier = Modifier) {
-    Column(modifier.fillMaxWidth().padding(top = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier.fillMaxWidth().padding(top = Space.L), horizontalAlignment = Alignment.CenterHorizontally) {
         TriangleMascot(Modifier.size(120.dp))
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Space.S))
         Text("No reminders yet.", style = MaterialTheme.typography.titleMedium)
         Text(
             "Add something above, pick a day and a time, and you'll get a notification.",

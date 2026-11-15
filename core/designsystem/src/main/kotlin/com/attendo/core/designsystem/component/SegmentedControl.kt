@@ -1,5 +1,7 @@
 package com.attendo.core.designsystem.component
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -14,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,9 +40,9 @@ fun SegmentedControl(items: List<String>, selected: Int, onSelect: (Int) -> Unit
         modifier
             .fillMaxWidth()
             .height(40.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamDeep)
-            .padding(3.dp),
+            .padding(Space.XXS),
     ) {
         val segment = maxWidth / items.size.coerceAtLeast(1)
         val x by animateDpAsState(segment * selected, Motion.snappy(), label = "thumb")
@@ -50,7 +51,7 @@ fun SegmentedControl(items: List<String>, selected: Int, onSelect: (Int) -> Unit
                 .offset { IntOffset(x.roundToPx(), 0) }
                 .width(segment)
                 .fillMaxHeight()
-                .clip(RoundedCornerShape(10.dp))
+                .clip(Corner.Shape)
                 .background(AttendoColors.Ink),
         )
         Row(Modifier.fillMaxSize()) {

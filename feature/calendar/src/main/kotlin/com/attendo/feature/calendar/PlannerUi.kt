@@ -1,5 +1,7 @@
 package com.attendo.feature.calendar
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.PillButton
 import com.attendo.core.designsystem.component.AttendoTimePicker
 import com.attendo.core.designsystem.component.AttendoDatePicker
@@ -25,7 +27,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -130,9 +131,9 @@ internal fun DayAgendaSheet(
             Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = Space.L)
                 .navigationBarsPadding()
-                .padding(bottom = 16.dp),
+                .padding(bottom = Space.M),
         ) {
             Text(day.format(AgendaTitle), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             Text(
@@ -185,8 +186,8 @@ internal fun DayAgendaSheet(
                 }
             }
 
-            Spacer(Modifier.height(18.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Spacer(Modifier.height(Space.M))
+            Row(horizontalArrangement = Arrangement.spacedBy(Space.S)) {
                 PillButton("Add event", Icons.Filled.Add, AttendoColors.CreamCard, AttendoColors.Ink, Modifier.weight(1f), onClick = onAddEvent)
                 PillButton(
                     "Mark attendance",
@@ -207,7 +208,7 @@ private fun AgendaHeader(text: String) {
         text.uppercase(),
         style = MaterialTheme.typography.labelMedium,
         color = AttendoColors.Muted,
-        modifier = Modifier.padding(top = 18.dp, bottom = 6.dp),
+        modifier = Modifier.padding(top = Space.M, bottom = Space.XS),
     )
 }
 
@@ -228,9 +229,9 @@ private fun AgendaLink(text: String, onClick: () -> Unit) {
 
 @Composable
 private fun AgendaRow(dot: Color, title: String, detail: String, onEdit: (() -> Unit)? = null) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().padding(vertical = Space.XXS), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(10.dp).clip(CircleShape).background(dot))
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(Space.S))
         Column(Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
             if (detail.isNotBlank()) Text(detail, style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
@@ -280,28 +281,28 @@ internal fun EventDialog(
                     placeholder = { Text("e.g. DSA class test") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = Corner.Shape,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     colors = attendoFieldColors(),
                 )
-                Spacer(Modifier.height(10.dp))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Spacer(Modifier.height(Space.S))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(Space.XS), verticalArrangement = Arrangement.spacedBy(Space.XS)) {
                     EVENT_KINDS.forEach { k -> Chip(k.userLabel(), selected = kind == k, dot = k.color()) { kind = k } }
                 }
-                Spacer(Modifier.height(12.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Spacer(Modifier.height(Space.S))
+                Row(horizontalArrangement = Arrangement.spacedBy(Space.XS), verticalAlignment = Alignment.CenterVertically) {
                     Chip(start.format(ShortDay), selected = false) { picking = "start" }
                     Text("to", style = MaterialTheme.typography.labelMedium, color = AttendoColors.Muted)
                     Chip(end.format(ShortDay), selected = false) { picking = "end" }
                 }
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(Space.S))
                 OutlinedTextField(
                     value = note,
                     onValueChange = { note = it.take(200) },
                     label = { Text("Note (optional)") },
                     maxLines = 3,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = Corner.Shape,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     colors = attendoFieldColors(),
                 )
@@ -361,9 +362,9 @@ fun TimetableScreen(
         CollapsingTopBar(title = "Timetable", collapseFraction = { collapse }, onBack = onClose, backLabel = "Back")
         BounceContainer(Modifier.fillMaxSize()) {
             LazyColumn(
-                Modifier.fillMaxSize().padding(horizontal = 20.dp),
+                Modifier.fillMaxSize().padding(horizontal = Space.L),
                 state = listState,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(Space.S),
             ) {
                 item { LargeTitle("Timetable") }
                 if (subjects.isEmpty()) {
@@ -390,7 +391,7 @@ fun TimetableScreen(
                 }
                 if (hiddenWeekend.isNotEmpty() && subjects.isNotEmpty()) {
                     item {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(Space.XS)) {
                             hiddenWeekend.forEach { day ->
                                 PillButton(
                                     "Add ${day.getDisplayName(TextStyle.SHORT, Locale.getDefault())} class",
@@ -408,7 +409,7 @@ fun TimetableScreen(
                         "The Classes tab lists each day's subjects in timetable order, and the calendar's day view shows them.",
                         style = MaterialTheme.typography.labelSmall,
                         color = AttendoColors.Muted,
-                        modifier = Modifier.padding(top = 4.dp, bottom = 32.dp),
+                        modifier = Modifier.padding(top = Space.XXS, bottom = Space.XL),
                     )
                 }
             }
@@ -447,11 +448,11 @@ private fun DayCard(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(22.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(vertical = 6.dp),
+            .padding(vertical = Space.XS),
     ) {
-        Row(Modifier.padding(start = 16.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(start = Space.M, end = Space.XXS), verticalAlignment = Alignment.CenterVertically) {
             Text(
                 day.getDisplayName(TextStyle.FULL, Locale.getDefault()),
                 style = MaterialTheme.typography.titleMedium,
@@ -465,7 +466,7 @@ private fun DayCard(
                 "No classes",
                 style = MaterialTheme.typography.bodyMedium,
                 color = AttendoColors.Muted,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                modifier = Modifier.padding(horizontal = Space.M, vertical = Space.XS),
             )
         }
         slots.forEach { slot ->
@@ -473,11 +474,11 @@ private fun DayCard(
                 Modifier
                     .fillMaxWidth()
                     .iosPress(PressStyle.Highlight, onClickLabel = "Edit ${names[slot.subjectId]}") { onEdit(slot) }
-                    .padding(horizontal = 16.dp, vertical = 9.dp),
+                    .padding(horizontal = Space.M, vertical = Space.XS),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(Modifier.size(10.dp).clip(CircleShape).background(colorOf(slot.subjectId)))
-                Spacer(Modifier.width(10.dp))
+                Spacer(Modifier.width(Space.S))
                 Text(slot.timeRange(), style = MaterialTheme.typography.labelLarge, modifier = Modifier.width(96.dp))
                 Text(
                     names[slot.subjectId] ?: "Deleted subject",
@@ -519,17 +520,17 @@ private fun SlotDialog(
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
                 Label("Subject")
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(Space.XS), verticalArrangement = Arrangement.spacedBy(Space.XS)) {
                     subjects.forEach { s -> Chip(CourseCatalog.shortName(s), selected = s.id == subjectId) { subjectId = s.id } }
                 }
                 Label("Day")
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(Space.XS), verticalArrangement = Arrangement.spacedBy(Space.XS)) {
                     DayOfWeek.entries.forEach { d ->
                         Chip(d.getDisplayName(TextStyle.SHORT, Locale.getDefault()), selected = d == day) { day = d }
                     }
                 }
                 Label("Time")
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Space.XS), verticalAlignment = Alignment.CenterVertically) {
                     Chip(start.format(SlotTime), selected = false) { picking = "start" }
                     Text("to", style = MaterialTheme.typography.labelMedium, color = AttendoColors.Muted)
                     Chip(end.format(SlotTime), selected = false) { picking = "end" }
@@ -544,14 +545,14 @@ private fun SlotDialog(
                         color = AttendoColors.Yellow,
                     )
                 }
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(Space.S))
                 OutlinedTextField(
                     value = room,
                     onValueChange = { room = it.take(20) },
                     label = { Text("Room (optional)") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = Corner.Shape,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters),
                     colors = attendoFieldColors(),
                 )
@@ -585,7 +586,7 @@ private fun SlotDialog(
 
 @Composable
 private fun Label(text: String) {
-    Text(text, style = MaterialTheme.typography.labelMedium, color = AttendoColors.Muted, modifier = Modifier.padding(top = 12.dp, bottom = 6.dp))
+    Text(text, style = MaterialTheme.typography.labelMedium, color = AttendoColors.Muted, modifier = Modifier.padding(top = Space.S, bottom = Space.XS))
 }
 
 @Composable
@@ -593,16 +594,16 @@ private fun Chip(text: String, selected: Boolean, dot: Color? = null, onClick: (
     val content = if (selected) AttendoColors.Cream else AttendoColors.Ink
     Row(
         Modifier
-            .clip(CircleShape)
+            .clip(Corner.Shape)
             .iosPress(PressStyle.Dim, onClickLabel = text, onClick = onClick)
             .background(if (selected) AttendoColors.Ink else AttendoColors.CreamCard)
-            .border(1.dp, if (selected) AttendoColors.Ink else AttendoColors.CreamDeep, CircleShape)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .border(1.dp, if (selected) AttendoColors.Ink else AttendoColors.CreamDeep, Corner.Shape)
+            .padding(horizontal = Space.S, vertical = Space.XS),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (dot != null) {
             Box(Modifier.size(9.dp).clip(CircleShape).background(dot))
-            Spacer(Modifier.width(6.dp))
+            Spacer(Modifier.width(Space.XS))
         }
         Text(text, style = MaterialTheme.typography.labelMedium, color = content, maxLines = 1)
     }

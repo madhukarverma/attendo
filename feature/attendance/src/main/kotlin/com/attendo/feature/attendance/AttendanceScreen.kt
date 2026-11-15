@@ -1,5 +1,9 @@
 package com.attendo.feature.attendance
 
+import com.attendo.core.designsystem.component.AttendoIcons
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.data.PlannerRepository
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -29,7 +33,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.runtime.LaunchedEffect
@@ -141,7 +144,7 @@ fun AttendanceScreen(
         BounceContainer(Modifier.fillMaxSize()) {
         LazyColumn(
             Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(Space.XS),
         ) {
             item { Header(state.selectedDate) { onOpenCalendar(state.selectedDate) } }
             item {
@@ -164,7 +167,7 @@ fun AttendanceScreen(
             if (state.items.isEmpty()) {
                 item(key = "course") {
                     AttendoCard(
-                        modifier = Modifier.animateItem().padding(horizontal = 20.dp),
+                        modifier = Modifier.animateItem().padding(horizontal = Space.L),
                         onClick = onAddCourseSubjects,
                     ) {
                         Column(Modifier.weight(1f)) {
@@ -181,7 +184,7 @@ fun AttendanceScreen(
             }
             if (state.items.isNotEmpty()) {
                 item(key = "tinderSwitch") {
-                    TinderModeSwitch(state.tinderMode, onTinderModeChange, Modifier.animateItem().padding(horizontal = 20.dp))
+                    TinderModeSwitch(state.tinderMode, onTinderModeChange, Modifier.animateItem().padding(horizontal = Space.L))
                 }
             }
             if (state.tinderMode && state.items.isNotEmpty()) {
@@ -203,7 +206,7 @@ fun AttendanceScreen(
                             "No classes on your timetable this day.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = AttendoColors.Muted,
-                            modifier = Modifier.animateItem().padding(horizontal = 24.dp, vertical = 4.dp),
+                            modifier = Modifier.animateItem().padding(horizontal = Space.L, vertical = Space.XXS),
                         )
                     }
                 }
@@ -213,7 +216,7 @@ fun AttendanceScreen(
                         onMark = { status -> onMark(item.summary.subject.id, status) },
                         onToggleDouble = { onToggleDouble(item.summary.subject.id) },
                         onClick = { onOpenSubject(item.summary.subject.id) },
-                        modifier = Modifier.animateItem().padding(horizontal = 20.dp),
+                        modifier = Modifier.animateItem().padding(horizontal = Space.L),
                     )
                 }
                 if (state.others.isNotEmpty()) {
@@ -225,7 +228,7 @@ fun AttendanceScreen(
                                 .iosPress(PressStyle.Dim, onClickLabel = if (showOthers) "Hide other subjects" else "Show other subjects") {
                                     showOthers = !showOthers
                                 }
-                                .padding(horizontal = 24.dp, vertical = 10.dp),
+                                .padding(horizontal = Space.L, vertical = Space.S),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
@@ -244,7 +247,7 @@ fun AttendanceScreen(
                                 onMark = { status -> onMark(item.summary.subject.id, status) },
                                 onToggleDouble = { onToggleDouble(item.summary.subject.id) },
                                 onClick = { onOpenSubject(item.summary.subject.id) },
-                                modifier = Modifier.animateItem().padding(horizontal = 20.dp),
+                                modifier = Modifier.animateItem().padding(horizontal = Space.L),
                             )
                         }
                     }
@@ -252,11 +255,11 @@ fun AttendanceScreen(
                 // "New subject" used to be the bar's main button; it now lives under the list.
                 item(key = "addSubject") {
                     AttendoCard(
-                        modifier = Modifier.animateItem().padding(horizontal = 20.dp),
+                        modifier = Modifier.animateItem().padding(horizontal = Space.L),
                         onClick = onAddSubject,
                     ) {
                         Icon(Icons.Filled.Add, contentDescription = null, tint = AttendoColors.Green, modifier = Modifier.size(20.dp))
-                        Spacer(Modifier.width(12.dp))
+                        Spacer(Modifier.width(Space.S))
                         Text("Add a subject", style = MaterialTheme.typography.titleMedium, color = AttendoColors.Green)
                     }
                 }
@@ -305,7 +308,7 @@ private val HeaderDate = java.time.format.DateTimeFormatter.ofPattern("EEE, d MM
 @Composable
 internal fun Header(selectedDate: LocalDate, onOpenCalendar: () -> Unit = {}) {
     Row(
-        Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = HeaderTopPadding),
+        Modifier.fillMaxWidth().padding(start = Space.L, end = Space.L, top = HeaderTopPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -326,15 +329,15 @@ internal fun Header(selectedDate: LocalDate, onOpenCalendar: () -> Unit = {}) {
         ) {
             Icon(Icons.Filled.DateRange, contentDescription = null, tint = AttendoColors.Ink, modifier = Modifier.size(18.dp))
         }
-        Spacer(Modifier.width(8.dp))
+        Spacer(Modifier.width(Space.XS))
         Text(
             selectedDate.format(HeaderDate),
             style = MaterialTheme.typography.labelLarge,
             color = if (selectedDate == LocalDate.now()) AttendoColors.OnAccent else AttendoColors.Ink,
             modifier = Modifier
-                .clip(CircleShape)
+                .clip(Corner.Shape)
                 .background(if (selectedDate == LocalDate.now()) AttendoColors.GreenFill else AttendoColors.CreamDeep)
-                .padding(horizontal = 12.dp, vertical = 6.dp),
+                .padding(horizontal = Space.S, vertical = Space.XS),
         )
     }
 }
@@ -350,7 +353,7 @@ internal fun MascotHeader(messages: List<String>, mood: Mood, modifier: Modifier
         }
     }
     val message = messages.getOrElse(phase % messages.size.coerceAtLeast(1)) { "" }
-    Column(modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+    Column(modifier.fillMaxWidth().padding(horizontal = Space.L)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             AnimatedContent(
                 targetState = message,
@@ -405,7 +408,7 @@ internal fun SubjectBadge(subject: Subject) {
     Box(
         Modifier
             .size(36.dp)
-            .clip(RoundedCornerShape(10.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamDeep),
         contentAlignment = Alignment.Center,
     ) {
@@ -417,11 +420,11 @@ internal fun SubjectBadge(subject: Subject) {
     }
 }
 
-private fun AttendanceStatus?.label(): Triple<String, Color, String> = when (this) {
-    AttendanceStatus.PRESENT -> Triple("Present", AttendoColors.Green, "✓")
-    AttendanceStatus.ABSENT -> Triple("Absent", AttendoColors.Pink, "✕")
-    AttendanceStatus.CANCELLED -> Triple("Cancelled", AttendoColors.Blue, "↷")
-    null -> Triple("Not marked", AttendoColors.Muted, "✱")
+private fun AttendanceStatus?.label(): Triple<String, Color, ImageVector> = when (this) {
+    AttendanceStatus.PRESENT -> Triple("Present", AttendoColors.Green, AttendoIcons.Check)
+    AttendanceStatus.ABSENT -> Triple("Absent", AttendoColors.Pink, AttendoIcons.Cross)
+    AttendanceStatus.CANCELLED -> Triple("Cancelled", AttendoColors.Blue, AttendoIcons.NoClass)
+    null -> Triple("Not marked", AttendoColors.Muted, AttendoIcons.NotMarked)
 }
 
 private val SlotTime = java.time.format.DateTimeFormatter.ofPattern("H:mm")
@@ -438,14 +441,14 @@ internal fun SubjectDayRow(
     Column(
         modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
             .iosPress(PressStyle.Highlight, onClickLabel = "Open ${subject.name}", onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = Space.M, vertical = Space.M),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             SubjectBadge(subject)
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(Space.S))
             Column(Modifier.weight(1f)) {
                 Text(
                     subject.name,
@@ -462,14 +465,14 @@ internal fun SubjectDayRow(
                         color = AttendoColors.Muted,
                     )
                 }
-                val (text, color, symbol) = item.statusOnDay.label()
-                StatusLabel(text = if (item.countOnDay > 1) "$text ×${item.countOnDay}" else text, color = color, symbol = symbol)
+                val (text, color, icon) = item.statusOnDay.label()
+                StatusLabel(text = if (item.countOnDay > 1) "$text ×${item.countOnDay}" else text, color = color, icon = icon)
             }
             Box(Modifier.width(1.dp).height(40.dp).background(AttendoColors.CreamDeep))
             PercentColumn(item.summary)
         }
-        Spacer(Modifier.height(12.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Spacer(Modifier.height(Space.S))
+        Row(horizontalArrangement = Arrangement.spacedBy(Space.XS)) {
             MarkChip("Present", AttendoColors.Green, item.statusOnDay == AttendanceStatus.PRESENT, Modifier.weight(1f), AttendoColors.GreenFill) {
                 onMark(AttendanceStatus.PRESENT)
             }
@@ -545,9 +548,9 @@ private fun MarkChip(
                 haptics.tick()
                 onClick()
             }
-            .clip(CircleShape)
+            .clip(Corner.Shape)
             .background(background)
-            .padding(vertical = 9.dp)
+            .padding(vertical = Space.XS)
             .fillMaxHeight(),
         contentAlignment = Alignment.Center,
     ) {

@@ -1,5 +1,6 @@
 package com.attendo.feature.tasks
 
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.data.HabitRepository
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -76,13 +77,13 @@ fun TasksRoute(
             "Tasks",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 14.dp),
+            modifier = Modifier.padding(start = Space.L, end = Space.L, top = Space.M),
         )
         SegmentedControl(
             items = TasksPage.entries.map { it.label },
             selected = page.ordinal,
             onSelect = { page = TasksPage.entries[it] },
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+            modifier = Modifier.padding(horizontal = Space.L, vertical = Space.S),
         )
         Box(Modifier.weight(1f)) {
             when (page) {

@@ -177,3 +177,23 @@
   work that needs a phone to test on (ISSUE-023).
 - Consequence: the test suite adds Node tooling under `firebase/test/` (not part of the Android
   build). No server-side rate limiting: the free Firebase plan can't do it (`docs/SECURITY.md`).
+
+## DEC-024 — One spacing scale, one radius, one font, icons, coded errors
+- Date: 2026-11-15 · Status: Active
+- Decision: paddings and gaps use only `Space` (4, 8, 12, 16, 24, 32, 48 dp; old values were
+  rounded to the nearest step, ties up). Every rounded shape is `Corner.Shape` (16 dp), buttons
+  and chips included; `CircleShape` is kept only for circles (dots, avatars, round buttons, the
+  dial). The app font is Plus Jakarta Sans, bundled as one variable font (Ledger and VS Code
+  themes keep their monospace faces). Marks use icons, never text symbols or emoji. Empty lists
+  use `EmptyState`. Every error the user sees comes from `ErrorCode` and ends with its code.
+- Consequence: the look changed (rounded rectangles instead of pills, a little more space) without
+  being checked on a phone; review screenshots before the next visual change. Chart marks keep
+  their own small radii (data, not chrome).
+
+## DEC-025 — Feedback goes to Firestore, write-only, no sign-in
+- Date: 2026-11-15 · Status: Active
+- Decision: feedback is a document in the existing Firestore project, sent without sign-in so
+  anyone can report a problem. The rules allow create only, with fixed fields and limits; the
+  developer reads it in the Firebase console. No email or ticket service, and no user id stored.
+- Consequence: no new account or cost. The trade-off is that unauthenticated writes could be
+  scripted (docs/FEEDBACK.md); requiring sign-in is a one-line rules change if needed.

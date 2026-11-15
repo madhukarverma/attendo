@@ -1,5 +1,7 @@
 package com.attendo.feature.settings
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.PillButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Refresh
@@ -68,13 +69,13 @@ internal fun GoogleBackupSection(backup: GoogleDriveBackup) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(16.dp),
+            .padding(Space.M),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Filled.AccountCircle, contentDescription = null, tint = AttendoColors.Ink, modifier = Modifier.size(28.dp))
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(Space.S))
             Column(Modifier.weight(1f)) {
                 Text("Google account", style = MaterialTheme.typography.titleMedium)
                 Text(
@@ -85,7 +86,7 @@ internal fun GoogleBackupSection(backup: GoogleDriveBackup) {
             }
             if (state.busy) CircularProgressIndicator(Modifier.size(20.dp), color = AttendoColors.Green, strokeWidth = 2.dp)
         }
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(Space.S))
 
         if (state.account == null) {
             Text(
@@ -93,7 +94,7 @@ internal fun GoogleBackupSection(backup: GoogleDriveBackup) {
                     "Attendo can see. After reinstalling, sign in again and everything comes back.",
                 style = MaterialTheme.typography.bodyMedium,
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(Space.S))
             PillButton(
                 "Sign in with Google",
                 Icons.Filled.AccountCircle,
@@ -109,7 +110,7 @@ internal fun GoogleBackupSection(backup: GoogleDriveBackup) {
                 style = MaterialTheme.typography.bodyMedium,
             )
             Row(
-                Modifier.fillMaxWidth().padding(top = 4.dp),
+                Modifier.fillMaxWidth().padding(top = Space.XXS),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(Modifier.weight(1f)) {
@@ -129,8 +130,8 @@ internal fun GoogleBackupSection(backup: GoogleDriveBackup) {
                     ),
                 )
             }
-            Spacer(Modifier.height(10.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Spacer(Modifier.height(Space.S))
+            Row(horizontalArrangement = Arrangement.spacedBy(Space.S)) {
                 PillButton(
                     "Back up now",
                     Icons.Filled.Share,
@@ -159,7 +160,7 @@ internal fun GoogleBackupSection(backup: GoogleDriveBackup) {
                 it,
                 style = MaterialTheme.typography.labelSmall,
                 color = if (state.isError) AttendoColors.Pink else AttendoColors.Muted,
-                modifier = Modifier.padding(top = 6.dp),
+                modifier = Modifier.padding(top = Space.XS),
             )
         }
     }

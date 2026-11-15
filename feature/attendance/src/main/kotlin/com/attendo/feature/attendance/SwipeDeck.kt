@@ -1,5 +1,10 @@
 package com.attendo.feature.attendance
 
+import androidx.compose.material3.Icon
+import com.attendo.core.designsystem.component.AttendoIcons
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,9 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -270,23 +273,23 @@ internal fun SwipeDeck(
         }
 
         Text(
-            if (cards.isEmpty()) " " else "${cards.size} of $totalToday left  ·  ← absent  ↓ no class  ↑ ×2  present →",
+            if (cards.isEmpty()) " " else "${cards.size} of $totalToday left · swipe left absent, right present, down no class, up ×2",
             style = MaterialTheme.typography.labelSmall,
             color = AttendoColors.Muted,
-            modifier = Modifier.padding(top = 10.dp, bottom = 12.dp),
+            modifier = Modifier.padding(top = Space.S, bottom = Space.S),
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            RoundAction("↺", AttendoColors.Yellow, 46.dp, enabled = canUndo, label = "Undo last swipe", onClick = onUndo)
-            RoundAction("✕", AttendoColors.Pink, 62.dp, enabled = cards.isNotEmpty(), label = "Absent") {
+        Row(horizontalArrangement = Arrangement.spacedBy(Space.S), verticalAlignment = Alignment.CenterVertically) {
+            RoundAction(AttendoIcons.Undo, AttendoColors.Yellow, 46.dp, enabled = canUndo, label = "Undo last swipe", onClick = onUndo)
+            RoundAction(AttendoIcons.Cross, AttendoColors.Pink, 62.dp, enabled = cards.isNotEmpty(), label = "Absent") {
                 requested = SwipeAction.ABSENT
             }
-            RoundAction("↓", AttendoColors.Blue, 50.dp, enabled = cards.isNotEmpty(), label = "No class") {
+            RoundAction(AttendoIcons.ArrowDown, AttendoColors.Blue, 50.dp, enabled = cards.isNotEmpty(), label = "No class") {
                 requested = SwipeAction.NO_CLASS
             }
-            RoundAction("✓", AttendoColors.Green, 62.dp, enabled = cards.isNotEmpty(), label = "Present") {
+            RoundAction(AttendoIcons.Check, AttendoColors.Green, 62.dp, enabled = cards.isNotEmpty(), label = "Present") {
                 requested = SwipeAction.PRESENT
             }
-            RoundAction("×2", AttendoColors.Green, 50.dp, enabled = cards.isNotEmpty(), label = "Present for a double class") {
+            RoundAction(null, AttendoColors.Green, 50.dp, text = "×2", enabled = cards.isNotEmpty(), label = "Present for a double class") {
                 requested = SwipeAction.PRESENT_DOUBLE
             }
         }
@@ -308,8 +311,8 @@ private fun SubjectProfileCard(
         modifier
             .fillMaxWidth(0.88f)
             .height(410.dp)
-            .shadow(14.dp, RoundedCornerShape(28.dp))
-            .clip(RoundedCornerShape(28.dp))
+            .shadow(14.dp, Corner.Shape)
+            .clip(Corner.Shape)
             .background(color),
     ) {
         // Big abbreviation as the card's "face".
@@ -320,9 +323,9 @@ private fun SubjectProfileCard(
             fontWeight = FontWeight.Black,
             color = onCard,
             textAlign = TextAlign.Center,
-            modifier = Modifier.align(Alignment.Center).padding(horizontal = 20.dp).padding(bottom = 90.dp),
+            modifier = Modifier.align(Alignment.Center).padding(horizontal = Space.L).padding(bottom = Space.XXL * 2),
         )
-        Column(Modifier.align(Alignment.BottomStart).padding(22.dp)) {
+        Column(Modifier.align(Alignment.BottomStart).padding(Space.L)) {
             Text(
                 subject.name,
                 style = MaterialTheme.typography.titleMedium,
@@ -338,7 +341,7 @@ private fun SubjectProfileCard(
                 style = MaterialTheme.typography.labelLarge,
                 color = onCard.copy(alpha = 0.8f),
             )
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(Space.XS))
             Text(
                 when {
                     summary.held == 0 -> "No classes marked yet. Swipe to start the streak!"
@@ -365,7 +368,7 @@ private fun contentColorFor(background: Color): Color =
 /** Ten clearly different colours; shuffled once with a fixed seed so they look random but stay stable. */
 private val CardPalette: List<Color> = listOf(
     Color(0xFFF2542D), Color(0xFF2B5CE6), Color(0xFF50A65C), Color(0xFFE0399A), Color(0xFFF2C84B),
-    Color(0xFF7B2CBF), Color(0xFF2A9D8F), Color(0xFF00B4D8), Color(0xFF8C5E3C), Color(0xFF3D405B),
+    Color(0xFF232323), Color(0xFF2A9D8F), Color(0xFF00B4D8), Color(0xFF8C5E3C), Color(0xFF3D405B),
 ).shuffled(kotlin.random.Random(2026))
 
 /** Colour for the subject at [index] in the subject list: distinct for the first ten subjects. */
@@ -389,23 +392,25 @@ private fun androidx.compose.foundation.layout.BoxScope.Stamp(
         letterSpacing = 2.sp,
         modifier = Modifier
             .align(alignment)
-            .padding(28.dp)
+            .padding(Space.XL)
             .graphicsLayer {
                 this.alpha = alpha()
                 rotationZ = angle
             }
-            .border(4.dp, color, RoundedCornerShape(10.dp))
-            .padding(horizontal = 12.dp, vertical = 4.dp),
+            .border(4.dp, color, Corner.Shape)
+            .padding(horizontal = Space.S, vertical = Space.XXS),
     )
 }
 
 @Composable
 private fun RoundAction(
-    glyph: String,
+    icon: ImageVector?,
     color: Color,
     size: androidx.compose.ui.unit.Dp,
     enabled: Boolean,
     label: String,
+    /** Shown instead of an icon ("×2"). */
+    text: String? = null,
     onClick: () -> Unit,
 ) {
     Box(
@@ -418,12 +423,12 @@ private fun RoundAction(
             .border(2.dp, if (enabled) color else AttendoColors.CreamDeep, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            glyph,
-            color = if (enabled) color else AttendoColors.CreamDeep,
-            fontSize = (size.value * 0.42f).sp,
-            fontWeight = FontWeight.Bold,
-        )
+        val tint = if (enabled) color else AttendoColors.CreamDeep
+        if (icon != null) {
+            Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(size * 0.45f))
+        } else {
+            Text(text.orEmpty(), color = tint, fontSize = (size.value * 0.36f).sp, fontWeight = FontWeight.Bold)
+        }
     }
 }
 
@@ -437,6 +442,5 @@ private fun AllCaughtUp(total: Int) {
             style = MaterialTheme.typography.bodyMedium,
             color = AttendoColors.Muted,
         )
-        Spacer(Modifier.width(1.dp))
     }
 }

@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-11-15 — v0.35.0 Feedback, design system, error codes
+- **Settings › Support › Send feedback** (new `:feature:feedback`): 1–5 star rating, category
+  (Problem / Idea / Praise / Other), message (2,000 characters), optional reply email, optional phone
+  details, a designed thank-you state with a reference code, and a "saved, sends when online" state.
+  Feedback goes to the `feedback` collection in Firestore, readable only in the Firebase console
+  (docs/FEEDBACK.md). Rules: anyone can create, nobody can read, change or delete; known fields
+  and limits only. One send a minute per phone. **Publish the updated rules.**
+- Design rules applied everywhere (DEC-024): one spacing scale (`Space`, 493 values moved onto it),
+  one 16 dp corner radius (`Corner`, 74 radii and 26 pill shapes), bundled Plus Jakarta Sans font,
+  real icons instead of text symbols (✓ ✕ ↺ ↓ ↷ ✱), designed empty states (Stats, focus stats,
+  Friends search and list), no purple (one swipe-card colour replaced; there were no gradients),
+  and Settings rows without cards.
+- Every error message ends with a stable code (`ST-`, `IM-`, `BK-`, `FR-`, `FB-`), listed in
+  docs/ERROR_CODES.md; errors in forms show in place with an icon.
+- Firebase setup shared by Friends and feedback (`FirebaseProject`).
+- Tests: 76 unit tests (6 new) and 39 Firestore rules tests (7 new), all passing.
+
 ## 2026-11-15 — v0.34.0 Security audit
 - Firestore rules: only Google accounts count as signed in, and every timestamp must be the
   server's time (no junk-stuffed fields). New test suite `firebase/test/` (32 checks on the local

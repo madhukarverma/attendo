@@ -21,6 +21,7 @@ Last full audit: 2026-11-15 (v0.34.0). Earlier reviews: v0.27.0, v0.32.0.
 | Google sign-in | Play services `AuthorizationClient`, smallest Drive scope (`drive.appdata`: a hidden folder only Attendo can see). No client secret in the APK; access tokens are kept in memory only, cleared on 401, revoked on sign-out. |
 | Notifications | Reminder titles are hidden on the lock screen (private visibility with a generic public version). |
 | Components | Attendo exports only its launcher activity, which accepts nothing but the `attendo://todo` link (it can only open the Tasks tab). The reminder receiver isn't exported; every `PendingIntent` is explicit and `FLAG_IMMUTABLE`. The other exported entries in the merged manifest come from Firebase Auth and Play services, and are either sign-in callbacks or guarded by system permissions. |
+| Feedback | Sent to Firestore `feedback` without sign-in; the rules allow create only (no read, change or delete from any app), fixed fields with size limits, server timestamp. Includes phone details only if the switch is on; never attendance, marks or tasks. One send a minute per phone. |
 | Input | Compose shows all text as plain text (no WebView, no HTML), so there is nothing for cross-site scripting to hit. Names sent to Firebase are capped at 40 characters; search waits 350 ms after typing and asks for 20 results at most. |
 | Release build | R8 minification and resource shrinking; not debuggable; signed with the release key (`docs/RELEASE_SIGNING.md`). No logging calls in the code. |
 | Build | The Gradle download is checked against its published SHA-256 (`distributionSha256Sum`); the wrapper jar matches Gradle's published checksum. |
@@ -57,6 +58,8 @@ Last full audit: 2026-11-15 (v0.34.0). Earlier reviews: v0.27.0, v0.32.0.
   before then (code, docs, APKs, the programme and college, a real name in old nickname examples)
   may already have been copied. Nothing secret was ever in it. Release downloads now need a
   GitHub login with access to the repo.
+- **Feedback can be sent without signing in**, so a script using the app's public Firebase
+  settings could write junk feedback and use up the free daily write quota (docs/FEEDBACK.md).
 - **Profiles can be listed page by page.** Each search returns at most 20 profiles, but a signed-in
   student who keeps paging can still collect every profile's name, programme and friend code.
   Nothing else is visible to non-friends.

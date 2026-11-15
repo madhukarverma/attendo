@@ -1,5 +1,9 @@
 package com.attendo.app
 
+import android.os.Build
+import com.attendo.core.model.FeedbackDiagnostics
+import com.attendo.core.social.FirestoreFeedbackSender
+import com.attendo.core.social.FirebaseProject
 import com.attendo.core.social.FirebaseConfig
 import com.attendo.core.social.SocialService
 import com.attendo.core.data.curriculum.CurriculumLoader
@@ -40,8 +44,8 @@ class AppContainer(application: Application) {
         extraFiles = mapOf(LaunchImageStore.FILE_NAME to LaunchImageStore.file(application)),
     )
 
-    /** Friends (Firebase); "not set up" until firebase.properties is filled in at build time. */
-    val social = SocialService(
+    /** The Firebase project (Friends and feedback); none until firebase.properties is filled in at build time. */
+    private val firebase = FirebaseProject(
         context = application,
         config = FirebaseConfig(
             projectId = BuildConfig.FIREBASE_PROJECT_ID,
@@ -49,9 +53,27 @@ class AppContainer(application: Application) {
             apiKey = BuildConfig.FIREBASE_API_KEY,
             webClientId = BuildConfig.FIREBASE_WEB_CLIENT_ID,
         ),
+    )
+
+    /** Friends; shows "not set up" when the build has no Firebase project. */
+    val social = SocialService(
+        context = application,
+        project = firebase,
         scope = appScope,
         data = data,
         programme = "MCA 2026-29",
+    )
+
+    /** Settings › Feedback, read by the developer in the Firebase console (docs/FEEDBACK.md). */
+    val feedback = FirestoreFeedbackSender(application, firebase, appScope)
+
+    /** What "Include phone details" attaches to feedback. */
+    val feedbackDiagnostics = FeedbackDiagnostics(
+        appVersion = BuildConfig.VERSION_NAME,
+        versionCode = BuildConfig.VERSION_CODE,
+        androidSdk = Build.VERSION.SDK_INT,
+        device = listOf(Build.MANUFACTURER.replaceFirstChar(Char::uppercaseChar), Build.MODEL)
+            .distinct().joinToString(" ").take(60),
     )
 
     /** One alarm per pending reminder in todos.csv. */

@@ -1,7 +1,6 @@
 package com.attendo.core.designsystem.theme
 
 import android.graphics.Typeface
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
@@ -21,15 +20,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.attendo.core.model.ThemeMode
 
-/** The typefaces a theme uses. All are fonts that ship with Android, so nothing is bundled. */
+/** The typefaces a theme uses: the bundled [AttendoSans], or a font that ships with Android. */
 @Immutable
 data class AttendoFonts(
-    val body: FontFamily = FontFamily.SansSerif,
+    val body: FontFamily = AttendoSans,
     /** Speech bubbles. */
     val hand: FontFamily = FontFamily.Cursive,
     val handItalic: Boolean = true,
@@ -40,8 +38,8 @@ data class AttendoFonts(
         /** System sans with handwritten bubbles (Light, Dark, Custom). */
         val Default = AttendoFonts()
 
-        /** System sans everywhere. */
-        val Sans = AttendoFonts(hand = FontFamily.SansSerif, handItalic = false)
+        /** The app font everywhere, speech bubbles included. */
+        val Sans = AttendoFonts(hand = AttendoSans, handItalic = false)
 
         /** The system's code font. */
         val Mono = AttendoFonts(body = FontFamily.Monospace, hand = FontFamily.Monospace, handItalic = false, scale = 0.92f)
@@ -363,10 +361,13 @@ val HandTextStyle: TextStyle
         )
     }
 
+/** Every Material surface (fields, menus, dialogs, sheets) uses the one corner radius. */
 private val AttendoShapes = Shapes(
-    small = RoundedCornerShape(12.dp),
-    medium = RoundedCornerShape(20.dp),
-    large = RoundedCornerShape(28.dp),
+    extraSmall = Corner.Shape,
+    small = Corner.Shape,
+    medium = Corner.Shape,
+    large = Corner.Shape,
+    extraLarge = Corner.Shape,
 )
 
 @Composable

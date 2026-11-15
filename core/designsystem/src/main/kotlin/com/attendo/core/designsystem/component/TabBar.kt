@@ -1,5 +1,7 @@
 package com.attendo.core.designsystem.component
 
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.expandHorizontally
@@ -13,7 +15,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,7 +64,7 @@ fun AttendoTabBar(
     Row(
         modifier
             .fillMaxWidth()
-            .clip(CircleShape)
+            .clip(Corner.Shape)
             .then(
                 if (backdrop != null) Modifier.glass(backdrop, AttendoColors.Hero.copy(alpha = 0.72f))
                 else Modifier.background(AttendoColors.Hero),
@@ -71,9 +72,9 @@ fun AttendoTabBar(
             .border(
                 0.75.dp,
                 Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.22f), Color.White.copy(alpha = 0.04f))),
-                CircleShape,
+                Corner.Shape,
             )
-            .padding(6.dp),
+            .padding(Space.XS),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -95,9 +96,9 @@ private fun TabButton(tab: TabItem, selected: Boolean, onClick: () -> Unit) {
                 role = Role.Tab
                 this.selected = selected
             }
-            .clip(CircleShape)
+            .clip(Corner.Shape)
             .background(background)
-            .padding(horizontal = 12.dp),
+            .padding(horizontal = Space.S),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         tab.icon(content)
@@ -111,7 +112,7 @@ private fun TabButton(tab: TabItem, selected: Boolean, onClick: () -> Unit) {
                 color = content,
                 style = MaterialTheme.typography.labelLarge,
                 maxLines = 1,
-                modifier = Modifier.padding(start = 8.dp),
+                modifier = Modifier.padding(start = Space.XS),
             )
         }
     }

@@ -1,5 +1,9 @@
 package com.attendo.feature.stats
 
+import androidx.compose.material.icons.filled.DateRange
+import com.attendo.core.designsystem.component.EmptyState
+import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.ProgressBar
 import com.attendo.core.data.GradeRepository
 import com.attendo.core.model.Grades
@@ -28,8 +32,6 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -105,21 +107,27 @@ fun StatsScreen(state: StatsUiState, onClose: (() -> Unit)?) {
     CollapsingTopBar(title = "Statistics", collapseFraction = { collapse }, onBack = onClose, backLabel = "Home")
     BounceContainer(Modifier.fillMaxSize()) {
     LazyColumn(
-        Modifier.fillMaxSize().padding(horizontal = 20.dp),
+        Modifier.fillMaxSize().padding(horizontal = Space.L),
         state = listState,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(Space.S),
     ) {
         item { LargeTitle("Statistics") }
         item { OverallCard(state) }
         item {
-            Text("By subject", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 8.dp))
+            Text("By subject", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = Space.XS))
         }
         if (state.summaries.isEmpty()) {
-            item { Text("Add a subject to see statistics.", color = AttendoColors.Muted) }
+            item {
+                EmptyState(
+                    icon = Icons.Filled.DateRange,
+                    title = "No statistics yet",
+                    message = "Add your subjects and mark a few classes. Each subject's attendance shows up here.",
+                )
+            }
         }
         items(state.summaries, key = { it.subject.id }) { SubjectBar(it, Modifier.animateItem()) }
         if (state.grades.isNotEmpty()) {
-            item(key = "grades") { GradesCard(state.grades, Modifier.animateItem().padding(top = 8.dp)) }
+            item(key = "grades") { GradesCard(state.grades, Modifier.animateItem().padding(top = Space.XS)) }
         }
         item { Spacer(Modifier.height(TabBarClearance)) }
     }
@@ -132,9 +140,9 @@ private fun OverallCard(state: StatsUiState) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.Hero)
-            .padding(24.dp),
+            .padding(Space.L),
     ) {
         Text("OVERALL", style = MaterialTheme.typography.labelMedium, color = AttendoColors.Muted)
         val overall = state.overallPercent
@@ -143,7 +151,7 @@ private fun OverallCard(state: StatsUiState) {
         } else {
             AnimatedNumber(overall.roundToInt(), "%", MaterialTheme.typography.displayLarge, AttendoColors.Green)
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Space.S))
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
             Stat("Present", state.present)
             Stat("Absent", state.absent)
@@ -169,9 +177,9 @@ private fun SubjectBar(summary: AttendanceSummary, modifier: Modifier = Modifier
     Column(
         modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(16.dp),
+            .padding(Space.M),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(summary.subject.name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
@@ -182,7 +190,7 @@ private fun SubjectBar(summary: AttendanceSummary, modifier: Modifier = Modifier
                 color = if (summary.isOnTrack) AttendoColors.Green else AttendoColors.Pink,
             )
         }
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(Space.S))
         ProgressBar(
             fraction = target,
             fill = if (summary.isOnTrack) AttendoColors.Green else AttendoColors.Pink,
@@ -190,7 +198,7 @@ private fun SubjectBar(summary: AttendanceSummary, modifier: Modifier = Modifier
             modifier = Modifier.fillMaxWidth().height(12.dp),
             marker = summary.subject.targetPercent / 100f,
         )
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(Space.XS))
         Text(
             "${summary.present} present · ${summary.absent} absent · target ${summary.subject.targetPercent}%",
             style = MaterialTheme.typography.labelSmall,
@@ -205,21 +213,21 @@ private fun GradesCard(grades: List<SubjectGrades>, modifier: Modifier = Modifie
     Column(
         modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(Corner.Shape)
             .background(AttendoColors.CreamCard)
-            .padding(18.dp),
+            .padding(Space.M),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Grades", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
             Row(
                 Modifier
-                    .clip(CircleShape)
+                    .clip(Corner.Shape)
                     .background(AttendoColors.CreamDeep)
-                    .padding(horizontal = 8.dp, vertical = 3.dp),
+                    .padding(horizontal = Space.XS, vertical = Space.XXS),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(Icons.Filled.Lock, contentDescription = null, tint = AttendoColors.Muted, modifier = Modifier.size(11.dp))
-                Spacer(Modifier.width(4.dp))
+                Spacer(Modifier.width(Space.XXS))
                 Text("Only you", style = MaterialTheme.typography.labelSmall, color = AttendoColors.Muted)
             }
         }
@@ -228,12 +236,12 @@ private fun GradesCard(grades: List<SubjectGrades>, modifier: Modifier = Modifie
                 "${overall.roundToInt()}% overall · grade ${Grades.letter(overall)}",
                 style = MaterialTheme.typography.labelLarge,
                 color = AttendoColors.Muted,
-                modifier = Modifier.padding(top = 2.dp, bottom = 8.dp),
+                modifier = Modifier.padding(top = Space.XXS, bottom = Space.XS),
             )
         }
         grades.forEach { g ->
             val percent = g.percent ?: return@forEach
-            Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.fillMaxWidth().padding(vertical = Space.XS), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(CourseCatalog.shortName(g.subject), style = MaterialTheme.typography.titleSmall)
                     Text(
@@ -243,15 +251,15 @@ private fun GradesCard(grades: List<SubjectGrades>, modifier: Modifier = Modifie
                     )
                 }
                 Text("${percent.roundToInt()}%", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.width(10.dp))
+                Spacer(Modifier.width(Space.S))
                 Text(
                     g.grade.orEmpty(),
                     style = MaterialTheme.typography.labelLarge,
                     color = AttendoColors.OnAccent,
                     modifier = Modifier
-                        .clip(CircleShape)
+                        .clip(Corner.Shape)
                         .background(AttendoColors.GreenFill)
-                        .padding(horizontal = 9.dp, vertical = 3.dp),
+                        .padding(horizontal = Space.XS, vertical = Space.XXS),
                 )
             }
         }

@@ -30,7 +30,9 @@ designs (dark onboarding, cream home, green geometric mascots, handwritten speec
 
 ## Design tokens
 Ink `#232323`, Green `#50A65C`, Cream `#F8FAED` (from the reference), accents Pink `#E0399A`,
-Blue `#2B8FE0`, Yellow `#E2D646`. Reference font Founders Grotesk is commercial, so system sans is used.
+Blue `#2B8FE0`, Yellow `#E2D646`. Font: Plus Jakarta Sans (bundled, open licence; the reference
+Founders Grotesk is commercial). Spacing scale 4/8/12/16/24/32/48 dp, one 16 dp corner radius,
+icons not symbols, designed empty states, error messages with codes (DEC-024).
 Motion and materials follow Apple's design talks (DEC-021): critically damped springs, velocity
 handoff, flick projection, rubber banding, frosted glass for floating chrome, size-specific tracking.
 
