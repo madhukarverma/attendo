@@ -1,6 +1,5 @@
 package com.attendo.core.designsystem.theme
 
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -19,14 +18,4 @@ object Space {
 
     /** Side margin of every screen. */
     val Screen: Dp = L
-}
-
-/**
- * The corner radius for every rounded surface: cards, fields, sheets and dialogs (DEC-024).
- * Buttons, chips and the tab bar are capsules and round things are circles (`CircleShape`), as in
- * Apple's design (DEC-026).
- */
-object Corner {
-    val Radius: Dp = 16.dp
-    val Shape: RoundedCornerShape = RoundedCornerShape(Radius)
 }

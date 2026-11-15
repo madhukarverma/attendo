@@ -1,8 +1,8 @@
 package com.attendo.core.designsystem.component
 
+import com.attendo.core.designsystem.theme.ContinuousShape
 import androidx.compose.foundation.shape.CircleShape
 import com.attendo.core.designsystem.theme.Space
-import com.attendo.core.designsystem.theme.Corner
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -132,7 +132,7 @@ fun NavigationRow(icon: ImageVector, title: String, subtitle: String, onClick: (
     Row(
         modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(14.dp))
             .iosPress(PressStyle.Dim, onClickLabel = title, onClick = onClick)
             .padding(vertical = Space.S),
         verticalAlignment = Alignment.CenterVertically,

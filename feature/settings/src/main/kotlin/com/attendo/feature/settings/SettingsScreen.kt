@@ -1,7 +1,8 @@
 package com.attendo.feature.settings
 
+import com.attendo.core.designsystem.theme.ContinuousShape
+import androidx.compose.ui.unit.dp
 import com.attendo.core.model.FontChoice
-import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.Icons
@@ -189,7 +190,7 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     label = { Text("Your name") },
-                    shape = Corner.Shape,
+                    shape = ContinuousShape(20.dp),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                     colors = attendoFilledFieldColors(AttendoColors.CreamCard),
                 )

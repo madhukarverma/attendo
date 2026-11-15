@@ -1,6 +1,6 @@
 package com.attendo.feature.tasks
 
-import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.AttendoDatePicker
 import com.attendo.core.designsystem.component.attendoFieldColors
@@ -87,7 +87,7 @@ internal fun CardEditorDialog(
                     label = { Text("Title") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = Corner.Shape,
+                    shape = ContinuousShape(14.dp),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     colors = attendoFieldColors(),
                 )
@@ -99,7 +99,7 @@ internal fun CardEditorDialog(
                     minLines = 2,
                     maxLines = 5,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = Corner.Shape,
+                    shape = ContinuousShape(14.dp),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     colors = attendoFieldColors(),
                 )
@@ -260,7 +260,7 @@ internal fun ColumnDialog(
                 onValueChange = { title = it.take(MAX_COLUMN_TITLE) },
                 label = { Text("Name") },
                 singleLine = true,
-                shape = Corner.Shape,
+                shape = ContinuousShape(14.dp),
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                 colors = attendoFieldColors(),
             )

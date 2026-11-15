@@ -1,7 +1,7 @@
 package com.attendo.feature.tasks
 
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.component.RectangleMascot
-import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.attendoFilledFieldColors
 import com.attendo.core.designsystem.component.attendoFieldColors
@@ -128,7 +128,7 @@ private fun WeekCard(state: HabitsUiState, onSelect: (LocalDate) -> Unit, onShif
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(24.dp))
             .background(AttendoColors.CreamCard)
             .padding(horizontal = Space.XS, vertical = Space.XS),
     ) {
@@ -183,10 +183,10 @@ private fun DayCell(
     val content = if (selected) AttendoColors.Cream else AttendoColors.Ink
     Column(
         modifier
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(16.dp))
             .iosPress(PressStyle.Scale, onClickLabel = day.format(DayTitle), onClick = onClick)
             .background(if (selected) AttendoColors.Ink else AttendoColors.Cream)
-            .then(if (isToday && !selected) Modifier.border(2.dp, AttendoColors.Green, Corner.Shape) else Modifier)
+            .then(if (isToday && !selected) Modifier.border(2.dp, AttendoColors.Green, ContinuousShape(16.dp)) else Modifier)
             .padding(vertical = Space.XS),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -242,7 +242,7 @@ private fun HabitRowView(row: HabitRow, canTick: Boolean, onToggle: () -> Unit, 
     Row(
         modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(20.dp))
             .background(AttendoColors.CreamCard)
             .iosPress(
                 PressStyle.Highlight,
@@ -361,7 +361,7 @@ private fun AddHabitCard(selectedDay: DayOfWeek, onAdd: (String, Set<DayOfWeek>)
     Column(
         modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(24.dp))
             .background(AttendoColors.CreamCard)
             .padding(Space.M),
     ) {
@@ -373,7 +373,7 @@ private fun AddHabitCard(selectedDay: DayOfWeek, onAdd: (String, Set<DayOfWeek>)
                 modifier = Modifier.weight(1f),
                 singleLine = true,
                 placeholder = { Text("e.g. Revise DSA") },
-                shape = Corner.Shape,
+                shape = ContinuousShape(16.dp),
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { submit() }),
                 colors = attendoFilledFieldColors(AttendoColors.Cream),
@@ -447,7 +447,7 @@ private fun EditHabitDialog(habit: Habit, onDismiss: () -> Unit, onSave: (Habit)
                     label = { Text("Task") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = Corner.Shape,
+                    shape = ContinuousShape(14.dp),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     colors = attendoFieldColors(),
                 )

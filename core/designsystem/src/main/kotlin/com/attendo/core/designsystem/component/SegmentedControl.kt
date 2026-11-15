@@ -1,6 +1,6 @@
 package com.attendo.core.designsystem.component
 
-import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.theme.Space
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.animation.animateColorAsState
@@ -40,7 +40,7 @@ fun SegmentedControl(items: List<String>, selected: Int, onSelect: (Int) -> Unit
         modifier
             .fillMaxWidth()
             .height(40.dp)
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(12.dp))
             .background(AttendoColors.CreamDeep)
             .padding(Space.XXS),
     ) {
@@ -51,7 +51,7 @@ fun SegmentedControl(items: List<String>, selected: Int, onSelect: (Int) -> Unit
                 .offset { IntOffset(x.roundToPx(), 0) }
                 .width(segment)
                 .fillMaxHeight()
-                .clip(Corner.Shape)
+                .clip(ContinuousShape(10.dp))
                 .background(AttendoColors.Ink),
         )
         Row(Modifier.fillMaxSize()) {

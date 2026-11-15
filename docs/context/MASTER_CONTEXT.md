@@ -32,7 +32,8 @@ designs (dark onboarding, cream home, green geometric mascots, handwritten speec
 Ink `#232323`, Green `#50A65C`, Cream `#F8FAED` (from the reference), accents Pink `#E0399A`,
 Blue `#2B8FE0`, Yellow `#E2D646`. Font: the phone's own by default (Apple: system font first);
 Settings › Font offers Roboto, Open Sans, Montserrat, Lato, Poppins, Plus Jakarta Sans and the theme
-fonts. Spacing scale 4/8/12/16/24/32/48 dp, 16 dp corners on cards, capsule buttons, icons not
+fonts. Spacing scale 4/8/12/16/24/32/48 dp, Apple continuous corners (each box its own radius),
+capsule buttons, icons not
 symbols, designed empty states, error messages with codes (DEC-024, DEC-026). Mascots follow a DNA
 nucleotide: pentagon (sugar) on Home, circle (phosphate) on Classes, rectangle (base) on Tasks.
 Motion and materials follow Apple's design talks (DEC-021): critically damped springs, velocity

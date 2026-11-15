@@ -1,6 +1,6 @@
 package com.attendo.feature.friends
 
-import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.theme.Space
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -222,7 +222,7 @@ private fun Bar(fraction: Float, color: androidx.compose.ui.graphics.Color) {
             Modifier
                 .fillMaxHeight()
                 .fillMaxWidth(fraction.coerceIn(0f, 1f))
-                .clip(Corner.Shape)
+                .clip(ContinuousShape(3.dp))
                 .background(color),
         )
     }

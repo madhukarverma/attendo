@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-15 — v0.37.0 Original corners back, with Apple's continuous curve
+- The single app-wide corner radius from v0.35.0 is gone. Every box has its original radius again,
+  restored line by line from v0.34.0, and v0.36.0's mix-ups are fixed too (some cards had turned
+  into capsules and some chips had square-ish corners, because identical lines were swapped).
+- Rounded boxes now use Apple's continuous corners (`ContinuousShape`): the curve eases into the
+  edge like on iOS. Capsules and circles are unchanged.
+- The newer pieces (Feedback, Settings › Font, settings rows, error notes) use radii that match
+  their neighbours. DEC-027.
+
 ## 2026-11-15 — v0.36.0 Apple look back, aligned titles, font picker, DNA mascots
 - Back to the Apple design: the phone's own font by default, and capsule buttons, chips, tab bar
   and day strip again (cards keep their 16 dp corners). DEC-026.

@@ -1,7 +1,7 @@
 package com.attendo.feature.subjects
 
+import com.attendo.core.designsystem.theme.ContinuousShape
 import androidx.compose.foundation.shape.CircleShape
-import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.AttendoDatePicker
 import com.attendo.core.designsystem.component.attendoFieldColors
@@ -92,7 +92,7 @@ internal fun GradesSection(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(20.dp))
             .background(AttendoColors.CreamCard)
             .padding(vertical = Space.XS),
     ) {
@@ -194,7 +194,7 @@ private fun AssessmentDialog(
                     label = { Text("Assessment") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = Corner.Shape,
+                    shape = ContinuousShape(14.dp),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     colors = attendoFieldColors(),
                 )
@@ -224,7 +224,7 @@ private fun AssessmentDialog(
                         singleLine = true,
                         isError = scored.isNotEmpty() && (scoredValue == null || tooHigh),
                         modifier = Modifier.weight(1f),
-                        shape = Corner.Shape,
+                        shape = ContinuousShape(14.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         colors = attendoFieldColors(),
                     )
@@ -236,7 +236,7 @@ private fun AssessmentDialog(
                         singleLine = true,
                         isError = max.isNotEmpty() && maxValue == null,
                         modifier = Modifier.weight(1f),
-                        shape = Corner.Shape,
+                        shape = ContinuousShape(14.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         colors = attendoFieldColors(),
                     )

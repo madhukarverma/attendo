@@ -73,8 +73,8 @@ and `core/model/src/test/…/X.kt` is the same path under `src/test`.
    → `app/build.gradle.kts` (dependency) → `app/…/navigation/AttendoNavHost.kt` (`Routes` and the composable).
 5. **Add or change a theme:** `core/designsystem/…/theme/Theme.kt` → `core/model/…/AppSettings.kt`
    → `feature/settings/…/ThemeSection.kt`.
-6. **Change spacing, corners, fonts or icons:** `core/designsystem/…/theme/Tokens.kt` (`Space`, `Corner`)
-   → `theme/Fonts.kt` (Settings › Font) → `component/AttendoIcons.kt` → `component/EmptyState.kt`. DEC-024, DEC-026.
+6. **Change spacing, corners, fonts or icons:** `core/designsystem/…/theme/Tokens.kt` (`Space`)
+   → `theme/ContinuousShape.kt` → `theme/Fonts.kt` (Settings › Font) → `component/AttendoIcons.kt`. DEC-024, DEC-026, DEC-027.
 7. **Change animations or gestures:** `core/designsystem/…/motion/Motion.kt` → `core/model/…/Physics.kt` (flick projection,
    rubber band) → `motion/IosPress.kt`, `motion/BounceScroll.kt` or `motion/Haptics.kt`
    → `app/…/navigation/Transitions.kt`.

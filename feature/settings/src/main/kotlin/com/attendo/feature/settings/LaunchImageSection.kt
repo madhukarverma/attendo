@@ -1,6 +1,6 @@
 package com.attendo.feature.settings
 
-import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.theme.Space
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -48,7 +48,7 @@ internal fun LaunchImageSection(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(20.dp))
             .background(AttendoColors.CreamCard)
             .padding(horizontal = Space.M, vertical = Space.S),
     ) {

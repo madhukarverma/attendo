@@ -1,5 +1,7 @@
 package com.attendo.core.designsystem.theme
 
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
@@ -363,13 +365,10 @@ val HandTextStyle: TextStyle
         )
     }
 
-/** Every Material surface (fields, menus, dialogs, sheets) uses the one corner radius. */
 private val AttendoShapes = Shapes(
-    extraSmall = Corner.Shape,
-    small = Corner.Shape,
-    medium = Corner.Shape,
-    large = Corner.Shape,
-    extraLarge = Corner.Shape,
+    small = RoundedCornerShape(12.dp),
+    medium = RoundedCornerShape(20.dp),
+    large = RoundedCornerShape(28.dp),
 )
 
 @Composable

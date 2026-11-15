@@ -1,5 +1,6 @@
 package com.attendo.feature.attendance
 
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.component.CircleMascot
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
@@ -10,7 +11,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import com.attendo.core.designsystem.motion.PageHeader
 import com.attendo.core.designsystem.component.AttendoIcons
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.data.PlannerRepository
 import androidx.compose.runtime.mutableStateOf
@@ -418,7 +418,7 @@ internal fun SubjectBadge(subject: Subject) {
     Box(
         Modifier
             .size(36.dp)
-            .clip(CircleShape)
+            .clip(ContinuousShape(10.dp))
             .background(AttendoColors.CreamDeep),
         contentAlignment = Alignment.Center,
     ) {
@@ -451,7 +451,7 @@ internal fun SubjectDayRow(
     Column(
         modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(20.dp))
             .background(AttendoColors.CreamCard)
             .iosPress(PressStyle.Highlight, onClickLabel = "Open ${subject.name}", onClick = onClick)
             .padding(horizontal = Space.M, vertical = Space.M),
@@ -558,7 +558,7 @@ private fun MarkChip(
                 haptics.tick()
                 onClick()
             }
-            .clip(Corner.Shape)
+            .clip(CircleShape)
             .background(background)
             .padding(vertical = Space.XS)
             .fillMaxHeight(),

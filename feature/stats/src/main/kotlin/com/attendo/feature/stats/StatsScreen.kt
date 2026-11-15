@@ -1,10 +1,10 @@
 package com.attendo.feature.stats
 
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.motion.PageHeader
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.DateRange
 import com.attendo.core.designsystem.component.EmptyState
-import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.ProgressBar
 import com.attendo.core.data.GradeRepository
@@ -143,7 +143,7 @@ private fun OverallCard(state: StatsUiState) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(28.dp))
             .background(AttendoColors.Hero)
             .padding(Space.L),
     ) {
@@ -180,7 +180,7 @@ private fun SubjectBar(summary: AttendanceSummary, modifier: Modifier = Modifier
     Column(
         modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(20.dp))
             .background(AttendoColors.CreamCard)
             .padding(Space.M),
     ) {
@@ -216,7 +216,7 @@ private fun GradesCard(grades: List<SubjectGrades>, modifier: Modifier = Modifie
     Column(
         modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(24.dp))
             .background(AttendoColors.CreamCard)
             .padding(Space.M),
     ) {

@@ -1,6 +1,7 @@
 package com.attendo.feature.settings
 
-import com.attendo.core.designsystem.theme.Corner
+import com.attendo.core.designsystem.theme.ContinuousShape
+import androidx.compose.ui.unit.dp
 import com.attendo.core.designsystem.theme.Space
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -59,7 +60,7 @@ internal fun AnimationModeSlider(mode: AnimationMode, onChange: (AnimationMode) 
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(Corner.Shape)
+            .clip(ContinuousShape(20.dp))
             .background(AttendoColors.CreamCard)
             .padding(horizontal = Space.M, vertical = Space.M),
     ) {

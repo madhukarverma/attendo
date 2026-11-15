@@ -1,7 +1,7 @@
 package com.attendo.feature.subjects
 
+import com.attendo.core.designsystem.theme.ContinuousShape
 import com.attendo.core.designsystem.component.CircleMascot
-import com.attendo.core.designsystem.theme.Corner
 import com.attendo.core.designsystem.theme.Space
 import com.attendo.core.designsystem.component.attendoFilledFieldColors
 import androidx.compose.ui.text.input.KeyboardType
@@ -141,7 +141,7 @@ fun AddSubjectScreen(
                                 code = s.code
                                 s.lectureHours?.let { hours = it.toString() }
                             }
-                            .clip(Corner.Shape)
+                            .clip(ContinuousShape(16.dp))
                             .background(if (selected) AttendoColors.Ink else AttendoColors.CreamCard)
                             .padding(horizontal = Space.M, vertical = Space.S)
                             .widthIn(max = 180.dp),
@@ -217,7 +217,7 @@ private fun RoundedField(
         onValueChange = onChange,
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
-        shape = Corner.Shape,
+        shape = ContinuousShape(20.dp),
         placeholder = { Text(placeholder) },
         keyboardOptions = KeyboardOptions(capitalization = capitalization, keyboardType = keyboardType),
         colors = attendoFilledFieldColors(AttendoColors.CreamCard),
