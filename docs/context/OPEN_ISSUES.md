@@ -28,8 +28,9 @@
   reach the newest Firebase BoM (35.x), Credential Manager 1.6, Google ID 1.2, AndroidX and
   Compose. Needs a phone to check nothing changed at runtime.
 - ISSUE-024 — Console steps for v0.34.0 (only the account owner can do them): publish the new
-  Firestore rules, add the release SHA-1, limit the API key (`docs/FRIENDS_SETUP.md` step 7), and
-  decide whether the GitHub repo should be private (private stops the public APK links working).
+  Firestore rules, add the release SHA-1, check the API key's limits (`docs/FRIENDS_SETUP.md` step 7), and
+  ~~decide whether the GitHub repo should be private~~ (made private 2026-11-15; APK links now
+  need a GitHub login, so friends get the APK file directly or as collaborators).
 
 ## Needs to be done (requested, deferred on purpose — 2026-11-11)
 - ISSUE-015 — Google account backup: built in v0.21; needs the shared Firebase/Google Cloud project

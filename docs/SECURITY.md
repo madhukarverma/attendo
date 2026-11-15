@@ -53,9 +53,10 @@ Last full audit: 2026-11-15 (v0.34.0). Earlier reviews: v0.27.0, v0.32.0.
 
 ## Known limitations
 
-- **The GitHub repository is public.** Code, docs and APKs can be read by anyone. Nothing secret
-  is in it, but it shows the programme and college. Earlier commits still contain the developer's
-  name as an example in the nickname code.
+- **The GitHub repository was public until 2026-11-15** and is private now. Anything committed
+  before then (code, docs, APKs, the programme and college, a real name in old nickname examples)
+  may already have been copied. Nothing secret was ever in it. Release downloads now need a
+  GitHub login with access to the repo.
 - **Profiles can be listed page by page.** Each search returns at most 20 profiles, but a signed-in
   student who keeps paging can still collect every profile's name, programme and friend code.
   Nothing else is visible to non-friends.

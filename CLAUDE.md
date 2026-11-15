@@ -1,7 +1,7 @@
 # Attendo
 
 Kotlin + Jetpack Compose Android app for one MCA student: attendance, tasks, focus timer, grades,
-calendar and friends. All data is CSV. Repo `madhukarverma/attendo` (public on GitHub), branch `master`.
+calendar and friends. All data is CSV. Private repo `madhukarverma/attendo`, branch `master`.
 
 ## Map: where things live
 
@@ -45,7 +45,8 @@ calendar and friends. All data is CSV. Repo `madhukarverma/attendo` (public on G
   `master`, push.
 - After every feature: bump `versionCode` and `versionName`, build, publish a GitHub release with
   `Attendo-vX.Y.Z.apk` and `Attendo.apk`, and give the user the links. Latest download:
-  https://github.com/madhukarverma/attendo/releases/latest/download/Attendo.apk
+  https://github.com/madhukarverma/attendo/releases/latest/download/Attendo.apk (needs a GitHub
+  login with access to the repo).
 - Update `docs/context/` with each feature (see `docs/CLAUDE.md`).
 - PowerShell 5.1: pass commit messages with `git commit -F <file>`. Never round-trip Kotlin files
   through `Get-Content`/`Set-Content` (it breaks UTF-8).

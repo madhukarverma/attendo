@@ -3,8 +3,8 @@
 ## Update 2026-11-15 (v0.34.0)
 Security audit done (`docs/SECURITY.md`). Hardened Firestore rules with an emulator test suite
 (`firebase/test/`), backup exclusions, newer Firebase and sign-in libraries, verified Gradle
-download. Waiting on the user: publish the new rules, add the release SHA-1 in Firebase, limit
-the API key, and decide whether the GitHub repo stays public. 70 unit tests and 32 rules tests
+download. Waiting on the user: publish the new rules, add the release SHA-1 in Firebase, and check
+the API key's limits. The GitHub repo is private since 2026-11-15, so release links need a login. 70 unit tests and 32 rules tests
 pass; still nothing tested on a phone.
 
 ## Update 2026-11-15 (v0.33.1)

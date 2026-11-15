@@ -35,4 +35,4 @@ Motion and materials follow Apple's design talks (DEC-021): critically damped sp
 handoff, flick projection, rubber banding, frosted glass for floating chrome, size-specific tracking.
 
 ## Repository
-GitHub `madhukarverma/attendo` (public, so never commit anything personal or secret). `master` = always-buildable trunk; one branch per feature.
+GitHub `madhukarverma/attendo` (private since 2026-11-15; it was public before, so treat earlier commits as already seen, and still never commit anything personal or secret). `master` = always-buildable trunk; one branch per feature.
